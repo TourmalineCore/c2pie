@@ -17,13 +17,13 @@ class ManifestStore(SuperBox):
         return self.get_length() + 2 + (10 * (self.get_length() // JPEG_SEGMENT_MAX_PAYLOAD_LENGTH + 1))
     
     
-    def set_hash_data_length(self):
+    def sync_payload(self):
         for manifest_id in range(len(self.manifests)):
             self.manifests[manifest_id].set_hash_data_length(self.get_serialized_length())              
-        self.sync_payload()
+        super().sync_payload()
         
     
     def serialize(self):
-        self.set_hash_data_length()
+        self.sync_payload()
         return super().serialize()
     
