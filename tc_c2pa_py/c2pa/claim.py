@@ -1,6 +1,7 @@
 
 import hashlib
 
+from uuid import uuid4
 from tc_c2pa_py.jumbf_boxes.super_box import SuperBox
 from tc_c2pa_py.jumbf_boxes.content_box import ContentBox
 from tc_c2pa_py.utils.content_types import c2pa_content_types, jumbf_content_types
@@ -35,7 +36,7 @@ class Claim(SuperBox):
         claim_schema = {}
         claim_schema["dc:format"] = self.image_format
         claim_schema["alg"] = "sha256"
-        claim_schema['instanceID'] = 'xmp:fakeid:4124fae1-1da7-4a3f-95c8-d8ae071bd059'
+        claim_schema['instanceID'] = f'xmp:urn:uuid:{uuid4()}'
         claim_schema["claim_generator"] = self.claim_generator
         claim_schema["signature"] = f"self#jumbf=c2pa/{self.manifest_label}/c2pa.signature"
         claim_schema["assertions"] = [
@@ -54,5 +55,5 @@ class Claim(SuperBox):
         
         content_boxes = self.generate_payload()
 
-        super().__init__(label="c2pa.claim", content_type=c2pa_content_types["claim"], content_boxes=content_boxes)
+        super().__init__(label="c2pa.claim.v2", content_type=c2pa_content_types["claim"], content_boxes=content_boxes)
 
