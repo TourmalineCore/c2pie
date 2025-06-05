@@ -24,7 +24,7 @@ It is recommended to work with existing modules using [Dev containers](https://c
 
 ### How to run project
 
-To run project unit tests and test application please call the following command:
-```
-./scripts/run_unit_tests.sh
-```
+There are VSCode tasks provided to interact with code. Please use `Ctrl + Shift + B` to open the context menu:
+- `Run unit tests` task runs all unit tests that provided in `tests` folder.
+- `Run test application` task runs the usage example of library that provided in `test_application` folder.
+- `Build package` task builds the Python library package that configured in `setup.py` file.
