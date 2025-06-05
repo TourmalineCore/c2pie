@@ -1,7 +1,7 @@
 
 from tc_c2pa_py.utils.assertion_schemas import C2PA_AssertionTypes
 from tc_c2pa_py.utils.content_types import C2PA_ContentTypes
-from tc_c2pa_py.c2pa.assertion import Assertion
+from tc_c2pa_py.c2pa.assertion import Assertion, HashDataAssertion
 from tc_c2pa_py.c2pa.assertion_store import AssertionStore
 from tc_c2pa_py.c2pa.claim import Claim
 from tc_c2pa_py.c2pa.claim_signature import ClaimSignature
@@ -10,9 +10,14 @@ from tc_c2pa_py.c2pa.manifest_store import ManifestStore
 from tc_c2pa_py.c2pa_injection.jpeg_injection import JpgSegmentApp11Storage
 
 
-# Function for asserion creation.
+# Function for assertion creation.
 def TC_C2PA_GenerateAssertion(assertion_type: C2PA_AssertionTypes, assertion_schema) -> Assertion:
     return Assertion(assertion_type, assertion_schema)
+
+
+# Function for hash data assertion creation.
+def TC_C2PA_GenerateHashDataAssertion(cai_offset, hashed_data, additional_exclusions=[]) -> Assertion:
+    return HashDataAssertion(cai_offset, hashed_data)
 
 
 # Function for manifest store generation.
@@ -32,14 +37,14 @@ def TC_C2PA_GenerateManifest(assertions: list, private_key: str, certificate_cha
 
  
 # Function for emplacing manifest to source data
-def TC_C2PA_EmplaceManifest(format_type: C2PA_ContentTypes, content_bytes: bytes, c2pa_offset: int, manifest: ManifestStore) -> bytes:
+def TC_C2PA_EmplaceManifest(format_type: C2PA_ContentTypes, content_bytes: bytes, c2pa_offset: int, manifests: ManifestStore) -> bytes:
     
-    manifest.set_hash_data_length()
+    manifests.sync_payload()
     
     if format_type == C2PA_ContentTypes.jpg:
-        c2pa_jpg_app11_storage = JpgSegmentApp11Storage(app11_segment_box_length=manifest.get_length(),
-                                                    app11_segment_box_type=manifest.get_type(),
-                                                    payload=manifest.serialize())
+        c2pa_jpg_app11_storage = JpgSegmentApp11Storage(app11_segment_box_length=manifests.get_length(),
+                                                    app11_segment_box_type=manifests.get_type(),
+                                                    payload=manifests.serialize())
         
         return content_bytes[:c2pa_offset] + c2pa_jpg_app11_storage.serialize() + content_bytes[c2pa_offset:]
     else:

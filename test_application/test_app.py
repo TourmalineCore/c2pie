@@ -1,6 +1,6 @@
 import hashlib
 
-from tc_c2pa_py.interface import TC_C2PA_GenerateAssertion, TC_C2PA_GenerateManifest, TC_C2PA_EmplaceManifest, C2PA_AssertionTypes, C2PA_ContentTypes
+from tc_c2pa_py.interface import TC_C2PA_GenerateAssertion, TC_C2PA_GenerateHashDataAssertion, TC_C2PA_GenerateManifest, TC_C2PA_EmplaceManifest, C2PA_AssertionTypes, C2PA_ContentTypes
 
 
 key_filepath = 'tests/fixtures/crypto/ps256.pem'
@@ -37,14 +37,7 @@ creative_work_schema = {
 }
 creative_work_assertion = TC_C2PA_GenerateAssertion(C2PA_AssertionTypes.creative_work, creative_work_schema)
 
-hash_data_schema = {
-    "exclusions": [{"start": cai_offset, "length": 65535}], # set length to 65535, library will calculate length by itself
-    "name": "jumbf manifest",
-    "alg": "sha256",
-    "hash": hashlib.sha256(raw_bytes).digest(),
-    "pad": []
-}
-hash_data_assertion = TC_C2PA_GenerateAssertion(C2PA_AssertionTypes.data_hash, hash_data_schema)
+hash_data_assertion = TC_C2PA_GenerateHashDataAssertion(cai_offset=cai_offset, hashed_data=hashlib.sha256(raw_bytes).digest())
 
 assertions = [creative_work_assertion, hash_data_assertion]
 
