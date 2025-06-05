@@ -37,14 +37,14 @@ def TC_C2PA_GenerateManifest(assertions: list, private_key: str, certificate_cha
 
  
 # Function for emplacing manifest to source data
-def TC_C2PA_EmplaceManifest(format_type: C2PA_ContentTypes, content_bytes: bytes, c2pa_offset: int, manifest: ManifestStore) -> bytes:
+def TC_C2PA_EmplaceManifest(format_type: C2PA_ContentTypes, content_bytes: bytes, c2pa_offset: int, manifests: ManifestStore) -> bytes:
     
-    manifest.sync_payload()
+    manifests.sync_payload()
     
     if format_type == C2PA_ContentTypes.jpg:
-        c2pa_jpg_app11_storage = JpgSegmentApp11Storage(app11_segment_box_length=manifest.get_length(),
-                                                    app11_segment_box_type=manifest.get_type(),
-                                                    payload=manifest.serialize())
+        c2pa_jpg_app11_storage = JpgSegmentApp11Storage(app11_segment_box_length=manifests.get_length(),
+                                                    app11_segment_box_type=manifests.get_type(),
+                                                    payload=manifests.serialize())
         
         return content_bytes[:c2pa_offset] + c2pa_jpg_app11_storage.serialize() + content_bytes[c2pa_offset:]
     else:
