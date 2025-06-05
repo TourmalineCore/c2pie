@@ -1,0 +1,32 @@
+name: Build Image
+on: [push]
+jobs:
+  Check-Dockerfile-Changes:
+    runs-on: ubuntu-latest
+    outputs:
+      dockerfile-changed: ${{ steps.check-dockerfile.outputs.changed }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Check for Dockerfile changes
+        id: check-dockerfile
+        run: |
+          echo "Checking for Dockerfile changes.."
+          changes=$(git diff --name-only HEAD^ HEAD | grep -E 'Dockerfile' || true)
+          if [ -n "$changes" ]; then
+            echo "Dockerfile has been changed"
+            echo "changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "No changes in Dockerfile"
+            echo "changed=false" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Changed
+        if: steps.check-dockerfile.outputs.changed == 'true'
+        run: echo "DOCKERFILE CHANGED"
+
+      - name: Not Changed
+        if: steps.check-dockerfile.outputs.changed != 'true'
+        run: echo "DOCKERFILE NOT CHANGED"
