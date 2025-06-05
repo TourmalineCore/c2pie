@@ -1,7 +1,7 @@
 
 from tc_c2pa_py.utils.assertion_schemas import C2PA_AssertionTypes
 from tc_c2pa_py.utils.content_types import C2PA_ContentTypes
-from tc_c2pa_py.c2pa.assertion import Assertion
+from tc_c2pa_py.c2pa.assertion import Assertion, HashDataAssertion
 from tc_c2pa_py.c2pa.assertion_store import AssertionStore
 from tc_c2pa_py.c2pa.claim import Claim
 from tc_c2pa_py.c2pa.claim_signature import ClaimSignature
@@ -10,9 +10,14 @@ from tc_c2pa_py.c2pa.manifest_store import ManifestStore
 from tc_c2pa_py.c2pa_injection.jpeg_injection import JpgSegmentApp11Storage
 
 
-# Function for asserion creation.
+# Function for assertion creation.
 def TC_C2PA_GenerateAssertion(assertion_type: C2PA_AssertionTypes, assertion_schema) -> Assertion:
     return Assertion(assertion_type, assertion_schema)
+
+
+# Function for hash data assertion creation.
+def TC_C2PA_GenerateHashDataAssertion(cai_offset, hashed_data, additional_exclusions=[]) -> Assertion:
+    return HashDataAssertion(cai_offset, hashed_data)
 
 
 # Function for manifest store generation.
