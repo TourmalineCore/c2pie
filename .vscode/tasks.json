@@ -14,7 +14,17 @@
         {
             "label": "Run unit tests",
             "type": "shell",
-            "command": "./scripts/run_unit_tests.sh",
+            "command": "pytest",
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
+        },
+        {
+            "label": "Build package",
+            "type": "shell",
+            "command": "./scripts/build_package.sh",
             "problemMatcher": [],
             "group": {
                 "kind": "build",
