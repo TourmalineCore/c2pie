@@ -1,5 +1,12 @@
 name: Build Image
-on: [push]
+
+on:
+  push:
+    branches:
+      - master
+  # to allow to wait for a docker image to be published to proceed in another workflow
+  workflow_call:
+
 jobs:
   build-push-image:
     runs-on: ubuntu-latest
@@ -10,6 +17,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 2
+          
       - name: Check for Dockerfile changes
         id: check-dockerfile
         run: |
@@ -22,6 +30,7 @@ jobs:
             echo "No changes in Dockerfile"
             echo "changed=false" >> $GITHUB_OUTPUT
           fi
+
       - name: Log in to GitHub Container Registry
         if: steps.check-dockerfile.outputs.changed == 'true'
         uses: docker/login-action@v2
@@ -29,6 +38,7 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Build and Push Image
         if: steps.check-dockerfile.outputs.changed == 'true'
         uses: docker/build-push-action@v4
