@@ -17,8 +17,8 @@ class AssertionStore(SuperBox):
     
     
     def set_hash_data_length(self, length):
-        for assertion_id in range(len(self.assertions)):
-            if self.assertions[assertion_id].type == C2PA_AssertionTypes.data_hash:
-                self.assertions[assertion_id].set_hash_data_length(length)
+        for assertion in self.assertions:
+            if assertion.type == C2PA_AssertionTypes.data_hash:
+                assertion.set_hash_data_length(length)
         
         super().__init__(content_type=c2pa_content_types['assertions'], label='c2pa.assertions', content_boxes=self.assertions)
