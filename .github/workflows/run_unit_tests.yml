@@ -1,0 +1,23 @@
+name: 'Run unit-tests'
+
+on:
+  pull_request:
+
+jobs:
+  run-unit-tests:
+    name: Run unit tests
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/tourmalinecore/${{ github.event.repository.name }}:latest
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run unit tests
+        run: |
+          chmod +x ./scripts/*.sh
+          ./scripts/build_package.sh
+          pytest --ignore=test_application
