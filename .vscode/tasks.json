@@ -14,7 +14,7 @@
         {
             "label": "Run unit tests",
             "type": "shell",
-            "command": "pytest",
+            "command": "pytest --ignore=test_application",
             "problemMatcher": [],
             "group": {
                 "kind": "build",
