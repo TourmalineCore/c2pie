@@ -1,7 +1,7 @@
 name: Build Image
 on: [push]
 jobs:
-  Check-Dockerfile-Changes:
+  build-push-image:
     runs-on: ubuntu-latest
     outputs:
       dockerfile-changed: ${{ steps.check-dockerfile.outputs.changed }}
@@ -22,11 +22,20 @@ jobs:
             echo "No changes in Dockerfile"
             echo "changed=false" >> $GITHUB_OUTPUT
           fi
-      
-      - name: Changed
+      - name: Log in to GitHub Container Registry
         if: steps.check-dockerfile.outputs.changed == 'true'
-        run: echo "DOCKERFILE CHANGED"
-
-      - name: Not Changed
-        if: steps.check-dockerfile.outputs.changed != 'true'
-        run: echo "DOCKERFILE NOT CHANGED"
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and Push Image
+        if: steps.check-dockerfile.outputs.changed == 'true'
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/tourmalinecore/${{ github.event.repository.name }}:latest
+            ghcr.io/tourmalinecore/${{ github.event.repository.name }}:${{ github.sha }}
+  
