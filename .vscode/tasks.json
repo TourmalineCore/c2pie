@@ -14,7 +14,7 @@
         {
             "label": "Run unit tests",
             "type": "shell",
-            "command": "pytest --ignore=test_application",
+            "command": "./scripts/build_package.sh && pytest --ignore=test_application",
             "problemMatcher": [],
             "group": {
                 "kind": "build",
