@@ -30,8 +30,7 @@ class JpgSegmentApp11(JpgSegment):
         self.ci = bytes.fromhex('JP'.encode('utf-8').hex()) # 2 bytes
         self.en = segment_id                                # 2 bytes
         self.z = sequence_number                            # 4 bytes
-        # self.l_box = full_payload_length                    # 4 bytes
-        # self.t_box = payload_type                           # 4 bytes
+
         self.app11_payload = payload
         
         super().__init__(payload_length = self.get_payload_length(payload_length))
@@ -44,12 +43,8 @@ class JpgSegmentApp11(JpgSegment):
     def serialize(self):
         _en = self.en.to_bytes(2, 'big')
         _z = self.z.to_bytes(4, 'big')
-        # _l_box = self.l_box.to_bytes(4, 'big')
-        # _t_box = bytes.fromhex(self.t_box)
         
         app11_payload = self.ci + _en + _z + self.app11_payload
-        
-        # super().set_payload(app11_payload)
         
         return super().serialize(app11_payload)
     
@@ -65,7 +60,7 @@ class JpgSegmentApp11Storage():
     
     
     def get_payload_length(self):
-        return self.l_box - 4 - 4
+        return self.l_box - 4 - 4   # - t_box_length - l_box_length
     
     
     def get_serialized_length(self):
