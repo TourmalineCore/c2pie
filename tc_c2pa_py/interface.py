@@ -17,7 +17,7 @@ def TC_C2PA_GenerateAssertion(assertion_type: C2PA_AssertionTypes, assertion_sch
 
 # Function for hash data assertion creation.
 def TC_C2PA_GenerateHashDataAssertion(cai_offset, hashed_data, additional_exclusions=[]) -> Assertion:
-    return HashDataAssertion(cai_offset, hashed_data)
+    return HashDataAssertion(cai_offset, hashed_data, additional_exclusions)
 
 
 # Function for manifest store generation.
