@@ -36,7 +36,7 @@ class Assertion(SuperBox):
                         
 class HashDataAssertion(Assertion):
 
-    def __init__(self, cai_offset, hashed_data, additional_exclusions=[]):
+    def __init__(self, cai_offset, hashed_data, additional_exclusions):
         hash_data_schema = {
             "exclusions": [{"start": cai_offset, "length": -1}] + additional_exclusions, # set length to 65535, library will calculate length by itself
             "name": "jumbf manifest",
