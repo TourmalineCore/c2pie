@@ -20,7 +20,7 @@ class Claim(SuperBox):
 
         content_boxes = self.generate_payload()
         
-        super().__init__(label="c2pa.claim", content_type=c2pa_content_types["claim"], content_boxes=content_boxes)
+        super().__init__(label="c2pa.claim.v2", content_type=c2pa_content_types["claim"], content_boxes=content_boxes)
     
     
     def generate_payload(self):
