@@ -1,7 +1,7 @@
 # TC-C2PA-PY
 
-[![CI — Build & Tests](https://github.com/TourmalineCore/tc-c2pa-py/actions/workflows/ci.yml/badge.svg)](https://github.com/TourmalineCore/tc-c2pa-py/actions/workflows/ci.yml)
-[![Unit Tests](https://github.com/TourmalineCore/tc-c2pa-py/actions/workflows/run-unit-tests.yml/badge.svg)](https://github.com/TourmalineCore/tc-c2pa-py/actions/workflows/run-unit-tests.yml)
+[![Build](https://github.com/TourmalineCore/tc-c2pa-py/actions/workflows/build_image.yml/badge.svg)](https://github.com/TourmalineCore/tc-c2pa-py/actions/workflows/build_image.yml)
+[![Unit Tests](https://github.com/TourmalineCore/tc-c2pa-py/actions/workflows/run_unit_tests.yml/badge.svg)](https://github.com/TourmalineCore/tc-c2pa-py/actions/workflows/run_unit_tests.yml)
 [![Lint](https://github.com/TourmalineCore/tc-c2pa-py/actions/workflows/lint.yml/badge.svg)](https://github.com/TourmalineCore/tc-c2pa-py/actions/workflows/lint.yml)
 
 ---
