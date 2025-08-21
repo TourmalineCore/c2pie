@@ -8,9 +8,9 @@ from tc_c2pa_py.utils.content_types import c2pa_content_types
 class AssertionStore(SuperBox):
     def __init__(self, assertions=None):
         self.assertions = [] if assertions is None else assertions
-        super().__init__(content_type=c2pa_content_types['assertions'],
-                         label='c2pa.assertions',
-                         content_boxes=self.assertions)
+        super().__init__(
+            content_type=c2pa_content_types["assertions"], label="c2pa.assertions", content_boxes=self.assertions
+        )
 
     def get_assertions(self):
         return self.assertions
