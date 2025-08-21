@@ -2,9 +2,19 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Run test application",
+            "label": "Run JPEG test application",
             "type": "shell",
-            "command": "python ./test_application/test_app.py",
+            "command": "python ./test_application/jpeg_test_app.py",
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
+        },
+        {
+            "label": "Run PDF test application",
+            "type": "shell",
+            "command": "python ./test_application/pdf_test_app.py",
             "problemMatcher": [],
             "group": {
                 "kind": "build",

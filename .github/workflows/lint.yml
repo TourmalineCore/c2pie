@@ -1,0 +1,41 @@
+name: Lint
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    branches:
+      - '**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lint-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ruff:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install ruff
+        run: python -m pip install ruff
+
+      - name: Ruff version
+        run: ruff --version
+
+      - name: Check formatting
+        run: ruff format --check .
+
+      - name: Lint (GitHub Annotations)
+        run: ruff check --output-format=github .

@@ -3,6 +3,7 @@ import enum
 
 class C2PA_ContentTypes(enum.Enum):
     jpg = 0
+    pdf = 1
 
 
 jumbf_content_types = {
@@ -23,4 +24,3 @@ c2pa_content_types = {
     'credentials': b'\x63\x32\x76\x63\x00\x11\x00\x10\x80\x00\x00\xAA\x00\x38\x9B\x71',
     'databoxes': b'\x63\x32\x76\x63\x00\x11\x00\x10\x80\x00\x00\xAA\x00\x38\x9B\x71',
 }
-
