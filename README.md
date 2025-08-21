@@ -235,4 +235,4 @@ Validate with `c2patool` to diagnose structure and trust.
 
 ## License
 
-MIT (or your project’s license).
+MIT
