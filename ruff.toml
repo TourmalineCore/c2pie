@@ -1,0 +1,11 @@
+line-length = 120
+target-version = "py38"  
+
+[lint]
+select = ["E", "F", "I", "B", "UP"]
+ignore = []
+
+[format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "lf"

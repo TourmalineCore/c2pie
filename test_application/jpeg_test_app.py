@@ -1,19 +1,25 @@
 import hashlib
 
-from tc_c2pa_py.interface import TC_C2PA_GenerateAssertion, TC_C2PA_GenerateHashDataAssertion, TC_C2PA_GenerateManifest, TC_C2PA_EmplaceManifest, C2PA_AssertionTypes, C2PA_ContentTypes
+from tc_c2pa_py.interface import (
+    C2PA_AssertionTypes,
+    C2PA_ContentTypes,
+    TC_C2PA_EmplaceManifest,
+    TC_C2PA_GenerateAssertion,
+    TC_C2PA_GenerateHashDataAssertion,
+    TC_C2PA_GenerateManifest,
+)
 
+key_filepath = "tests/fixtures/crypto/ps256.pem"
+cert_filepath = "tests/fixtures/crypto/ps256.pub"
 
-key_filepath = 'tests/fixtures/crypto/ps256.pem'
-cert_filepath = 'tests/fixtures/crypto/ps256.pub'
-
-if key_filepath != '':
-    with open(key_filepath, 'rb') as f:
+if key_filepath != "":
+    with open(key_filepath, "rb") as f:
         key = f.read()
 else:
     key = []
 
-if cert_filepath != '':
-    with open(cert_filepath, 'rb') as f:
+if cert_filepath != "":
+    with open(cert_filepath, "rb") as f:
         certificate = f.read()
 else:
     key = []
@@ -26,18 +32,15 @@ with open("tests/fixtures/test_image.jpg", "rb") as binary_image:
 creative_work_schema = {
     "@context": "https://schema.org",
     "@type": "CreativeWork",
-    "author": [
-        {
-            "@type": "Person",
-            "name": "Tourmaline Core"
-        }
-    ],
+    "author": [{"@type": "Person", "name": "Tourmaline Core"}],
     "copyrightYear": "2024",
-    "copyrightHolder": "tc-c2pa-py"
+    "copyrightHolder": "tc-c2pa-py",
 }
 creative_work_assertion = TC_C2PA_GenerateAssertion(C2PA_AssertionTypes.creative_work, creative_work_schema)
 
-hash_data_assertion = TC_C2PA_GenerateHashDataAssertion(cai_offset=cai_offset, hashed_data=hashlib.sha256(raw_bytes).digest())
+hash_data_assertion = TC_C2PA_GenerateHashDataAssertion(
+    cai_offset=cai_offset, hashed_data=hashlib.sha256(raw_bytes).digest()
+)
 
 assertions = [creative_work_assertion, hash_data_assertion]
 

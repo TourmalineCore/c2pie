@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import re
-from typing import NamedTuple, Optional
+from typing import NamedTuple
 
 from tc_c2pa_py.c2pa.manifest_store import ManifestStore
 
@@ -14,7 +14,7 @@ class PdfInfo(NamedTuple):
 
 
 def _find_startxref(b: bytes) -> int:
-    m = list(re.finditer(br"startxref\s+(\d+)\s*%%EOF\s*$", b, re.DOTALL))
+    m = list(re.finditer(rb"startxref\s+(\d+)\s*%%EOF\s*$", b, re.DOTALL))
     if not m:
         raise ValueError("startxref not found")
     return int(m[-1].group(1))
@@ -30,7 +30,7 @@ def _extract_pages_ref(b: bytes) -> str:
     if not mcat:
         raise ValueError("Catalog not found")
     end = b.find(b"endobj", mcat.start())
-    segment = b[mcat.start(): end]
+    segment = b[mcat.start() : end]
     mp = re.search(rb"/Pages\s+(\d+)\s+0\s+R", segment)
     if not mp:
         mp = re.search(rb"/Pages\s+(\d+)\s+0\s+R", b)
@@ -52,7 +52,7 @@ def _xref_entry(off: int) -> bytes:
     return f"{off:010d} 00000 n \n".encode("ascii")
 
 
-def emplace_manifest_into_pdf(base: bytes, manifests: ManifestStore, *, author: Optional[str] = None) -> bytes:
+def emplace_manifest_into_pdf(base: bytes, manifests: ManifestStore, *, author: str | None = None) -> bytes:
     """
     Инкрементально добавляет C2PA Manifest Store в PDF.
     - Исключение c2pa.hash.data: start == len(base), length == длина всего хвоста (см. C2PA 2.2).
@@ -78,10 +78,12 @@ def emplace_manifest_into_pdf(base: bytes, manifests: ManifestStore, *, author: 
         objN = (
             f"{n0} 0 obj\n".encode("ascii")
             + f"<< /Type /EmbeddedFile /Subtype {subtype} /Length {L} >>\n".encode("ascii")
-            + b"stream\n" + store + b"\nendstream\nendobj\n"
+            + b"stream\n"
+            + store
+            + b"\nendstream\nendobj\n"
         )
         objN1 = (
-            f"{n0+1} 0 obj\n".encode("ascii")
+            f"{n0 + 1} 0 obj\n".encode("ascii")
             + (
                 f"<< /Type /Filespec /AFRelationship /C2PA_Manifest "
                 f"/F ({fname}) /UF ({fname}) /Desc (C2PA Manifest Store) "
@@ -89,22 +91,27 @@ def emplace_manifest_into_pdf(base: bytes, manifests: ManifestStore, *, author: 
             ).encode("ascii")
             + b"endobj\n"
         )
-        objN2 = (f"{n0+2} 0 obj\n".encode("ascii")
-                 + f"<< /Type /Names /Names [ ({fname}) {n0+1} 0 R ] >>\n".encode("ascii")
-                 + b"endobj\n")
-        objN3 = (f"{n0+3} 0 obj\n".encode("ascii")
-                 + f"<< /Type /Names /EmbeddedFiles {n0+2} 0 R >>\n".encode("ascii")
-                 + b"endobj\n")
-        objN4 = (f"{n0+4} 0 obj\n".encode("ascii")
-                 + (f"<< /Type /Catalog /Pages {info.pages_ref} "
-                    f"/Names {n0+3} 0 R /AF [ {n0+1} 0 R ] >>\n").encode("ascii")
-                 + b"endobj\n")
+        objN2 = (
+            f"{n0 + 2} 0 obj\n".encode("ascii")
+            + f"<< /Type /Names /Names [ ({fname}) {n0 + 1} 0 R ] >>\n".encode("ascii")
+            + b"endobj\n"
+        )
+        objN3 = (
+            f"{n0 + 3} 0 obj\n".encode("ascii")
+            + f"<< /Type /Names /EmbeddedFiles {n0 + 2} 0 R >>\n".encode("ascii")
+            + b"endobj\n"
+        )
+        objN4 = (
+            f"{n0 + 4} 0 obj\n".encode("ascii")
+            + (f"<< /Type /Catalog /Pages {info.pages_ref} /Names {n0 + 3} 0 R /AF [ {n0 + 1} 0 R ] >>\n").encode(
+                "ascii"
+            )
+            + b"endobj\n"
+        )
 
         if want_info:
             author_s = author.replace(")", r"\)") if author else ""
-            objN5 = (f"{n0+5} 0 obj\n".encode("ascii")
-                     + f"<< /Author ({author_s}) >>\n".encode("ascii")
-                     + b"endobj\n")
+            objN5 = f"{n0 + 5} 0 obj\n".encode("ascii") + f"<< /Author ({author_s}) >>\n".encode("ascii") + b"endobj\n"
         else:
             objN5 = b""
 
@@ -122,25 +129,39 @@ def emplace_manifest_into_pdf(base: bytes, manifests: ManifestStore, *, author: 
 
         count = 5 + (1 if want_info else 0)
         xref = b"xref\n" + f"{n0} {count}\n".encode("ascii")
-        xref += (_xref_entry(offN) + _xref_entry(offN1) + _xref_entry(offN2)
-                 + _xref_entry(offN3) + _xref_entry(offN4))
+        xref += _xref_entry(offN) + _xref_entry(offN1) + _xref_entry(offN2) + _xref_entry(offN3) + _xref_entry(offN4)
         if want_info:
             xref += _xref_entry(offN5)
 
         size_val = n0 + count
-        trailer = (b"trailer\n<< " + f"/Size {size_val} ".encode("ascii")
-                   + f"/Root {n0+4} 0 R ".encode("ascii")
-                   + f"/Prev {prev} ".encode("ascii"))
+        trailer = (
+            b"trailer\n<< "
+            + f"/Size {size_val} ".encode("ascii")
+            + f"/Root {n0 + 4} 0 R ".encode("ascii")
+            + f"/Prev {prev} ".encode("ascii")
+        )
         if want_info:
-            trailer += f"/Info {n0+5} 0 R ".encode("ascii")
+            trailer += f"/Info {n0 + 5} 0 R ".encode("ascii")
         trailer += b">>\n"
 
-        tail = (sep + objN + objN1 + objN2 + objN3 + objN4 + objN5
-                + xref + trailer + b"startxref\n" + str(xref_pos).encode("ascii") + b"\n%%EOF\n")
+        tail = (
+            sep
+            + objN
+            + objN1
+            + objN2
+            + objN3
+            + objN4
+            + objN5
+            + xref
+            + trailer
+            + b"startxref\n"
+            + str(xref_pos).encode("ascii")
+            + b"\n%%EOF\n"
+        )
 
         total_len = len(tail)
         if total_len == last:
-            return base + tail  
+            return base + tail
         last = total_len
         guess = total_len
 

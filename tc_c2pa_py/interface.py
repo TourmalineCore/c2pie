@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from tc_c2pa_py.utils.assertion_schemas import C2PA_AssertionTypes
-from tc_c2pa_py.utils.content_types import C2PA_ContentTypes
 from tc_c2pa_py.c2pa.assertion import Assertion, HashDataAssertion
 from tc_c2pa_py.c2pa.assertion_store import AssertionStore
 from tc_c2pa_py.c2pa.claim import Claim
@@ -10,6 +8,8 @@ from tc_c2pa_py.c2pa.manifest import Manifest
 from tc_c2pa_py.c2pa.manifest_store import ManifestStore
 from tc_c2pa_py.c2pa_injection.jpeg_injection import JpgSegmentApp11Storage
 from tc_c2pa_py.c2pa_injection.pdf_injection import emplace_manifest_into_pdf
+from tc_c2pa_py.utils.assertion_schemas import C2PA_AssertionTypes
+from tc_c2pa_py.utils.content_types import C2PA_ContentTypes
 
 
 def TC_C2PA_GenerateAssertion(assertion_type: C2PA_AssertionTypes, assertion_schema) -> Assertion:

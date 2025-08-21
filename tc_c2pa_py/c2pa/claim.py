@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-import uuid
-import cbor2
 import hashlib
-from typing import Optional, Dict, Any, List
+import uuid
+from typing import Any
 
-from tc_c2pa_py.jumbf_boxes.super_box import SuperBox
+import cbor2
+
 from tc_c2pa_py.jumbf_boxes.content_box import ContentBox
+from tc_c2pa_py.jumbf_boxes.super_box import SuperBox
 from tc_c2pa_py.utils.content_types import c2pa_content_types
 
 
@@ -28,9 +29,9 @@ class Claim(SuperBox):
     def __init__(
         self,
         claim_generator: str = "tc_c2pa_py",
-        manifest_label: Optional[str] = None,
+        manifest_label: str | None = None,
         assertion_store=None,
-        dc_format: Optional[str] = None,
+        dc_format: str | None = None,
     ):
         self.claim_generator = claim_generator
         self.manifest_label = manifest_label or f"urn:c2pa:{uuid.uuid4().hex}"
@@ -44,7 +45,7 @@ class Claim(SuperBox):
         cbor_payload = self._build_cbor_payload()
 
         content_box = ContentBox(
-            box_type='cbor'.encode('utf-8').hex(),
+            box_type=b"cbor".hex(),
             payload=cbor_payload,
         )
         super().__init__(
@@ -68,18 +69,18 @@ class Claim(SuperBox):
         self.assertion_store = assertion_store
         self._rebuild_payload()
 
-    def set_format(self, dc_format: Optional[str]) -> None:
+    def set_format(self, dc_format: str | None) -> None:
         self.dc_format = dc_format
         self._rebuild_payload()
 
-    def _build_assertions_array(self) -> List[Dict[str, Any]]:
+    def _build_assertions_array(self) -> list[dict[str, Any]]:
         """
         Строим массив claim['assertions'] из текущего AssertionStore:
           - url:  self#jumbf=/c2pa/<manifest_label>/c2pa.assertions/<label>
           - alg:  sha256
           - hash: sha256( JUMBF-superbox-content = description + content_boxes ) для этого assertion
         """
-        out: List[Dict[str, Any]] = []
+        out: list[dict[str, Any]] = []
         if not self.assertion_store:
             return out
 
@@ -118,11 +119,11 @@ class Claim(SuperBox):
           - опционально dc:format
           - опционально assertions (если есть assertion_store)
         """
-        m: Dict[str, Any] = {
+        m: dict[str, Any] = {
             "claim_generator": self.claim_generator,
             "instanceID": self._instance_id,
             "signature": self.claim_signature_label,
-             "alg": "sha256",
+            "alg": "sha256",
         }
         if self.dc_format:
             m["dc:format"] = self.dc_format
@@ -136,7 +137,7 @@ class Claim(SuperBox):
     def _rebuild_payload(self) -> None:
         new_payload = self._build_cbor_payload()
         self.content_boxes[0] = ContentBox(
-            box_type='cbor'.encode('utf-8').hex(),
+            box_type=b"cbor".hex(),
             payload=new_payload,
         )
         self.sync_payload()

@@ -1,24 +1,24 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
+from typing import Any
 
-from tc_c2pa_py.jumbf_boxes.super_box import SuperBox
 from tc_c2pa_py.jumbf_boxes.content_box import ContentBox
-from tc_c2pa_py.utils.content_types import jumbf_content_types
+from tc_c2pa_py.jumbf_boxes.super_box import SuperBox
 from tc_c2pa_py.utils.assertion_schemas import (
     C2PA_AssertionTypes,
-    get_assertion_label,
-    get_assertion_content_type,     
-    get_assertion_content_box_type, 
-    json_to_bytes,
     cbor_to_bytes,
+    get_assertion_content_box_type,
+    get_assertion_content_type,
+    get_assertion_label,
+    json_to_bytes,
 )
+from tc_c2pa_py.utils.content_types import jumbf_content_types
 
 
 class Assertion(SuperBox):
     """Универсальный assertion superbox (один content box)."""
 
-    def __init__(self, assertion_type: C2PA_AssertionTypes, schema: Dict[str, Any]):
+    def __init__(self, assertion_type: C2PA_AssertionTypes, schema: dict[str, Any]):
         self.type = assertion_type
         self.schema = schema
 
@@ -53,13 +53,13 @@ class HashDataAssertion(Assertion):
         self,
         cai_offset: int,
         hashed_data: bytes,
-        additional_exclusions: Optional[List[Dict[str, int]]] = None,
+        additional_exclusions: list[dict[str, int]] | None = None,
     ):
-        exclusions: List[Dict[str, int]] = [{"start": cai_offset, "length": 65535}]  
+        exclusions: list[dict[str, int]] = [{"start": cai_offset, "length": 65535}]
         if additional_exclusions:
             exclusions.extend(additional_exclusions)
 
-        schema: Dict[str, Any] = {
+        schema: dict[str, Any] = {
             "name": "jumbf manifest",
             "exclusions": exclusions,
             "alg": "sha256",
@@ -83,8 +83,10 @@ class HashDataAssertion(Assertion):
                 payload=payload,
             )
         else:
-            self.content_boxes = [ContentBox(
-                box_type=get_assertion_content_box_type(self.type),
-                payload=payload,
-            )]
+            self.content_boxes = [
+                ContentBox(
+                    box_type=get_assertion_content_box_type(self.type),
+                    payload=payload,
+                )
+            ]
         self.sync_payload()
