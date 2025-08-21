@@ -1,3 +1,4 @@
+from __future__ import annotations
 
 from tc_c2pa_py.utils.assertion_schemas import C2PA_AssertionTypes
 from tc_c2pa_py.utils.content_types import C2PA_ContentTypes
@@ -8,46 +9,81 @@ from tc_c2pa_py.c2pa.claim_signature import ClaimSignature
 from tc_c2pa_py.c2pa.manifest import Manifest
 from tc_c2pa_py.c2pa.manifest_store import ManifestStore
 from tc_c2pa_py.c2pa_injection.jpeg_injection import JpgSegmentApp11Storage
+from tc_c2pa_py.c2pa_injection.pdf_injection import emplace_manifest_into_pdf
 
 
-# Function for assertion creation.
 def TC_C2PA_GenerateAssertion(assertion_type: C2PA_AssertionTypes, assertion_schema) -> Assertion:
     return Assertion(assertion_type, assertion_schema)
 
 
-# Function for hash data assertion creation.
-def TC_C2PA_GenerateHashDataAssertion(cai_offset, hashed_data, additional_exclusions=[]) -> Assertion:
-    return HashDataAssertion(cai_offset, hashed_data, additional_exclusions)
+def TC_C2PA_GenerateHashDataAssertion(cai_offset: int, hashed_data: bytes) -> HashDataAssertion:
+    return HashDataAssertion(cai_offset, hashed_data)
 
 
-# Function for manifest store generation.
-def TC_C2PA_GenerateManifest(assertions: list, private_key: str, certificate_chain: str) -> ManifestStore:
+def TC_C2PA_GenerateManifest(assertions, private_key: bytes, certificate_chain: bytes) -> ManifestStore:
+    """
+    private_key: PKCS#8 PEM (RSA) bytes
+    certificate_chain: PEM bundle (leaf + intermediates, NO root) bytes
+    """
     manifest = Manifest()
-    
+
     assertion_store = AssertionStore(assertions=assertions)
     manifest.set_assertion_store(assertion_store)
-    
-    claim = Claim(claim_generator='tc_c2pa_py', manifest_label=manifest.get_manifest_label(), assertion_store=assertion_store)
+
+    claim = Claim(
+        claim_generator="tc_c2pa_py",
+        manifest_label=manifest.get_manifest_label(),
+        assertion_store=assertion_store,
+    )
     manifest.set_claim(claim)
-    
-    claim_signature = ClaimSignature(claim, private_key=private_key, certificate=certificate_chain)
+
+    claim_signature = ClaimSignature(
+        claim,
+        private_key=private_key,
+        certificate_pem_bundle=certificate_chain,
+    )
     manifest.set_claim_signature(claim_signature)
-    
+
     return ManifestStore([manifest])
 
- 
-# Function for emplacing manifest to source data
-def TC_C2PA_EmplaceManifest(format_type: C2PA_ContentTypes, content_bytes: bytes, c2pa_offset: int, manifests: ManifestStore) -> bytes:
-    
-    manifests.sync_payload()
-    
+
+def TC_C2PA_EmplaceManifest(
+    format_type: C2PA_ContentTypes,
+    content_bytes: bytes,
+    c2pa_offset: int,
+    manifests: ManifestStore,
+) -> bytes:
+    if hasattr(manifests, "manifests"):
+        for m in manifests.manifests:
+            claim = getattr(m, "claim", None)
+            if claim is not None and hasattr(claim, "set_format"):
+                if format_type == C2PA_ContentTypes.jpg:
+                    claim.set_format("image/jpeg")
+                elif format_type == C2PA_ContentTypes.pdf:
+                    claim.set_format("application/pdf")
+
     if format_type == C2PA_ContentTypes.jpg:
-        c2pa_jpg_app11_storage = JpgSegmentApp11Storage(app11_segment_box_length=manifests.get_length(),
-                                                    app11_segment_box_type=manifests.get_type(),
-                                                    payload=manifests.serialize())
-        
-        return content_bytes[:c2pa_offset] + c2pa_jpg_app11_storage.serialize() + content_bytes[c2pa_offset:]
-    else:
-        print(f'Unsupported content type {format_type}!')
-        return b''
-    
+        guess = 0
+        last = -1
+        tail = b""
+        for _ in range(8):
+            manifests.set_hash_data_length_for_all(guess)
+            payload = manifests.serialize()
+            storage = JpgSegmentApp11Storage(
+                app11_segment_box_length=manifests.get_length(),
+                app11_segment_box_type=manifests.get_type(),
+                payload=payload,
+            )
+            tail = storage.serialize()
+            total_len = len(tail)
+            if total_len == last:
+                break
+            last = total_len
+            guess = total_len
+        return content_bytes[:c2pa_offset] + tail + content_bytes[c2pa_offset:]
+
+    if format_type == C2PA_ContentTypes.pdf:
+        return emplace_manifest_into_pdf(content_bytes, manifests)
+
+    print(f"Unsupported content type {format_type}!")
+    return b""
