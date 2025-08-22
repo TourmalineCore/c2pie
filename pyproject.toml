@@ -1,15 +1,29 @@
 [tool.poetry]
 name = "tc_c2pa_py"
-version = "0.1.0"
+version = "0.2.0"
 description = "The TC-C2PA-Py is python library which provide C2PA standard functionality."
-authors = ["Starodubtcev Dmitriy"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+authors = ["Olga Kuzmicheva <contact@tourmalinecore.com>", "Vladimir Gubin <contact@tourmalinecore.com>",
+
+[project]
+name = "tc_c2pa_py"
+authors = [ 
+]
+
+[project.urls]
+Homepage = "https://github.com/TourmalineCore/tc-c2pa-py"
+Issues = "https://github.com/TourmalineCore/tc-c2pa-py/issues"
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.9"
 pytest = "^7.4.0"
 cbor2 = "^5.6.3"
 cryptography = "^42.0.5"
 pytz = "^2024.1"
+twine = "^6.1.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.4.0"

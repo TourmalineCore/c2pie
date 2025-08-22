@@ -1,15 +1,30 @@
-FROM python:3.8
+FROM python:3.9
 
 ENV PIP_NO_CACHE_DIR=off \
   PIP_DISABLE_PIP_VERSION_CHECK=on \
   PIP_DEFAULT_TIMEOUT=100 \
   POETRY_VERSION=1.0.0
 
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git curl ca-certificates \
+    build-essential pkg-config \
+    libssl-dev openssl \
+    qpdf libqpdf-dev \
+    libjpeg62-turbo-dev zlib1g-dev \
+    jq bash \
+    && rm -rf /var/lib/apt/lists/*
+
 RUN pip install "poetry>=$POETRY_VERSION"
 
-COPY poetry.lock pyproject.toml /tc-c2pa-py/
+ENV RUSTUP_HOME=/home/vscode/.rustup \
+    CARGO_HOME=/home/vscode/.cargo \
+    PATH=/home/vscode/.cargo/bin:/home/vscode/.local/bin:$PATH
+RUN curl -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable && \
+    cargo install c2patool --locked
+
+COPY . /tc-c2pa-py/
 
 WORKDIR tc-c2pa-py
 
 RUN poetry config virtualenvs.create false \
-  && poetry install --no-interaction --no-ansi
+  && poetry lock && poetry install --no-interaction --no-ansi
