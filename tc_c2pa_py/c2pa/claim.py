@@ -82,15 +82,15 @@ class Claim(SuperBox):
         if not assertions:
             return out
 
-        for a in assertions:
-            label = getattr(a, "label", None)
-            if label is None and hasattr(a, "get_label"):
-                label = a.get_label()
+        for assetion in assertions:
+            label = getattr(assetion, "label", None)
+            if label is None and hasattr(assetion, "get_label"):
+                label = assetion.get_label()
 
-            if hasattr(a, "get_data_for_signing"):
-                data = a.get_data_for_signing()
+            if hasattr(assetion, "get_data_for_signing"):
+                data = assetion.get_data_for_signing()
             else:
-                data = a.description_box.serialize() + a.serialize_content_boxes()
+                data = assetion.description_box.serialize() + assetion.serialize_content_boxes()
 
             out.append(
                 {
@@ -111,20 +111,20 @@ class Claim(SuperBox):
           - optional dc:format
           - optional assertions (if there is an assertion_store)
         """
-        m: dict[str, Any] = {
+        claim: dict[str, Any] = {
             "claim_generator": self.claim_generator,
             "instanceID": self._instance_id,
             "signature": self.claim_signature_label,
             "alg": "sha256",
         }
         if self.dc_format:
-            m["dc:format"] = self.dc_format
+            claim["dc:format"] = self.dc_format
 
         assertions_arr = self._build_assertions_array()
         if assertions_arr:
-            m["assertions"] = assertions_arr
+            claim["assertions"] = assertions_arr
 
-        return cbor2.dumps(m, canonical=True)
+        return cbor2.dumps(claim, canonical=True)
 
     def _rebuild_payload(self) -> None:
         new_payload = self._build_cbor_payload()

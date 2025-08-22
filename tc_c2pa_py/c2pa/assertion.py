@@ -70,11 +70,11 @@ class HashDataAssertion(Assertion):
 
     def set_hash_data_length(self, length: int) -> None:
         if self.schema.get("name") != "jumbf manifest":
-            return
-        ex = self.schema.get("exclusions", [])
-        if not ex:
+            raise ValueError("c2pa.hash.data: jumbf manifest is missing")
+        exclusions = self.schema.get("exclusions", [])
+        if not exclusions:
             raise ValueError("c2pa.hash.data: exclusions are missing")
-        ex[0]["length"] = int(length)
+        exclusions[0]["length"] = int(length)
 
         payload = self.get_payload_from_schema()
         if self.content_boxes:

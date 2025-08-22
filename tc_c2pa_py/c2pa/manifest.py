@@ -6,7 +6,7 @@ from tc_c2pa_py.utils.content_types import c2pa_content_types
 
 class Manifest(SuperBox):
     """
-    One C2PA Manifest: Assertion Store + Claim + Claim Signature.
+    C2PA Manifest: Assertion Store + Claim + Claim Signature.
     The manifest label is compatible with c2patool: urn:c2pa:<uuid-hex>
     """
 
