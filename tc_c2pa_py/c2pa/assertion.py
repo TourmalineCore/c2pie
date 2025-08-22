@@ -16,7 +16,7 @@ from tc_c2pa_py.utils.content_types import jumbf_content_types
 
 
 class Assertion(SuperBox):
-    """Универсальный assertion superbox (один content box)."""
+    """Universal assertion superbox (one content box)."""
 
     def __init__(self, assertion_type: C2PA_AssertionTypes, schema: dict[str, Any]):
         self.type = assertion_type

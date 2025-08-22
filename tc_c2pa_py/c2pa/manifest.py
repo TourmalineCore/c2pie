@@ -6,8 +6,8 @@ from tc_c2pa_py.utils.content_types import c2pa_content_types
 
 class Manifest(SuperBox):
     """
-    Один C2PA Manifest: Assertion Store + Claim + Claim Signature.
-    Лейбл манифеста совместим со c2patool: urn:c2pa:<uuid-hex>
+    One C2PA Manifest: Assertion Store + Claim + Claim Signature.
+    The manifest label is compatible with c2patool: urn:c2pa:<uuid-hex>
     """
 
     def __init__(self, claim=None, claim_signature=None, assertion_store=None):
@@ -38,8 +38,8 @@ class Manifest(SuperBox):
 
     def set_hash_data_length(self, length: int):
         """
-        Обновляет длину исключений в HashData, пересобирает Claim (хэши assertion-ов)
-        и ClaimSignature (COSE Sign1 detatched over Claim CBOR).
+        Updates the length of exceptions in HashData, reassembles Claim (assertion hashes)
+        and ClaimSignature (COSE Sign1 detached over Claim CBOR).
         """
         self.assertion_store.set_hash_data_length(length)
 

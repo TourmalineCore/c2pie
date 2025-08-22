@@ -54,9 +54,9 @@ def _xref_entry(off: int) -> bytes:
 
 def emplace_manifest_into_pdf(base: bytes, manifests: ManifestStore, *, author: str | None = None) -> bytes:
     """
-    Инкрементально добавляет C2PA Manifest Store в PDF.
-    - Исключение c2pa.hash.data: start == len(base), length == длина всего хвоста (см. C2PA 2.2).
-    - Подписываем claim, строим jumbf store, помещаем как EmbeddedFile, корректно пишем xref/trailer.
+    Incrementally adds C2PA Manifest Store to PDF.
+    - Exception c2pa.hash.data: start == len(base), length == length of the entire tail (see C2PA 2.2).
+    - Sign the claim, build the jumbf store, place it as EmbeddedFile, write xref/trailer correctly.
     """
     info = _scan(base)
     base_len = len(base)
