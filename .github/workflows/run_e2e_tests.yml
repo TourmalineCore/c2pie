@@ -42,4 +42,5 @@ jobs:
       - name: Run unit tests
         run: |
           mkdir -p reports
-          cd tc_c2pa_py && pytest ./tests/c2pa/e2e_test.py --ignore=test_application -q --junitxml=reports/junit.xml --maxfail=1
+          echo pwd
+          pytest tests/c2pa/e2e_test.py
