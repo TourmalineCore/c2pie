@@ -6,9 +6,9 @@ from tc_c2pa_py.utils.content_types import c2pa_content_types
 
 class ManifestStore(SuperBox):
     """
-    C2PA Manifest Store (JUMBF superbox) с одним или несколькими Manifest.
-    ВАЖНО: здесь мы НЕ «угадываем» транспортные накладные байты (JPEG/PDF и т.п.).
-    Для PDF длину исключения выставляет инжектор; для JPEG — свой инжектор.
+    C2PA Manifest Store (JUMBF superbox) with one or more Manifest.
+    IMPORTANT: here we do NOT “guess” transport manifest bytes (JPEG/PDF, etc.).
+    For PDF, the length of the exception is set by the injector; for JPEG, by its own injector.
     """
 
     def __init__(self, manifests: list | None = None):

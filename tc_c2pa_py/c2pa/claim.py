@@ -16,15 +16,7 @@ def _sha256(b: bytes) -> bytes:
 
 
 class Claim(SuperBox):
-    """
-    Claim (c2pa.claim) как JUMBF superbox с одним CBOR content box.
-
-    Совместимость с тестами:
-      - есть поле `claim_signature_label` ровно в формате:
-        'self#jumbf=c2pa/<manifest_label>/c2pa.signature'  (без ведущего '/')
-    В бою (для c2patool) мы кладём hashed-URI assertion'ов в виде:
-        'self#jumbf=/c2pa/<manifest_label>/c2pa.assertions/<assertion-label>'
-    """
+    """Claim (c2pa.claim) as a JUMBF superbox with one CBOR content box."""
 
     def __init__(
         self,
@@ -55,7 +47,7 @@ class Claim(SuperBox):
         )
 
     def get_cbor_payload(self) -> bytes:
-        """Байты CBOR, поверх которых подписывается COSE (detached)."""
+        """CBOR bytes, on top of which COSE (detached) is signed."""
         return self.content_boxes[0].get_payload()
 
     def get_manifest_label(self) -> str:
@@ -63,8 +55,8 @@ class Claim(SuperBox):
 
     def set_assertion_store(self, assertion_store) -> None:
         """
-        Вызывается из Manifest при изменении assertion'ов (в т.ч. когда обновили length в c2pa.hash.data).
-        Пересобираем CBOR payload клейма с корректными hashed-URI.
+        Called from Manifest when assertions are changed (including when length is updated in c2pa.hash.data).
+        Reassemble the CBOR payload of the stamp with the correct hashed URIs.
         """
         self.assertion_store = assertion_store
         self._rebuild_payload()
@@ -75,10 +67,10 @@ class Claim(SuperBox):
 
     def _build_assertions_array(self) -> list[dict[str, Any]]:
         """
-        Строим массив claim['assertions'] из текущего AssertionStore:
+        Build the claim[‘assertions’] array from the current AssertionStore:
           - url:  self#jumbf=/c2pa/<manifest_label>/c2pa.assertions/<label>
           - alg:  sha256
-          - hash: sha256( JUMBF-superbox-content = description + content_boxes ) для этого assertion
+          - hash: sha256( JUMBF-superbox-content = description + content_boxes ) for this assertion
         """
         out: list[dict[str, Any]] = []
         if not self.assertion_store:
@@ -111,13 +103,13 @@ class Claim(SuperBox):
 
     def _build_cbor_payload(self) -> bytes:
         """
-        Каноничный CBOR-контент claim.
-        Включаем:
+        Canonical CBOR content claim.
+        Include:
           - claim_generator
-          - instanceID (стабилен для объекта)
-          - signature (ссылка на c2pa.signature)
-          - опционально dc:format
-          - опционально assertions (если есть assertion_store)
+          - instanceID (stable for the object)
+          - signature (reference to c2pa.signature)
+          - optional dc:format
+          - optional assertions (if there is an assertion_store)
         """
         m: dict[str, Any] = {
             "claim_generator": self.claim_generator,
