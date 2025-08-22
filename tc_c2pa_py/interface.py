@@ -4,6 +4,7 @@ from tc_c2pa_py.c2pa.assertion import Assertion, HashDataAssertion
 from tc_c2pa_py.c2pa.assertion_store import AssertionStore
 from tc_c2pa_py.c2pa.claim import Claim
 from tc_c2pa_py.c2pa.claim_signature import ClaimSignature
+from tc_c2pa_py.c2pa.config import RETRY_SIGNATURE
 from tc_c2pa_py.c2pa.manifest import Manifest
 from tc_c2pa_py.c2pa.manifest_store import ManifestStore
 from tc_c2pa_py.c2pa_injection.jpeg_injection import JpgSegmentApp11Storage
@@ -54,8 +55,8 @@ def TC_C2PA_EmplaceManifest(
     manifests: ManifestStore,
 ) -> bytes:
     if hasattr(manifests, "manifests"):
-        for m in manifests.manifests:
-            claim = getattr(m, "claim", None)
+        for manifest in manifests.manifests:
+            claim = getattr(manifest, "claim", None)
             if claim is not None and hasattr(claim, "set_format"):
                 if format_type == C2PA_ContentTypes.jpg:
                     claim.set_format("image/jpeg")
@@ -63,11 +64,11 @@ def TC_C2PA_EmplaceManifest(
                     claim.set_format("application/pdf")
 
     if format_type == C2PA_ContentTypes.jpg:
-        guess = 0
-        last = -1
+        guessed_length = 0
+        final_length = -1
         tail = b""
-        for _ in range(8):
-            manifests.set_hash_data_length_for_all(guess)
+        for _ in range(RETRY_SIGNATURE):
+            manifests.set_hash_data_length_for_all(guessed_length)
             payload = manifests.serialize()
             storage = JpgSegmentApp11Storage(
                 app11_segment_box_length=manifests.get_length(),
@@ -76,10 +77,10 @@ def TC_C2PA_EmplaceManifest(
             )
             tail = storage.serialize()
             total_len = len(tail)
-            if total_len == last:
+            if total_len == final_length:
                 break
-            last = total_len
-            guess = total_len
+            final_length = total_len
+            guessed_length = total_len
         return content_bytes[:c2pa_offset] + tail + content_bytes[c2pa_offset:]
 
     if format_type == C2PA_ContentTypes.pdf:

@@ -7,7 +7,7 @@ from tc_c2pa_py.utils.content_types import c2pa_content_types
 class ManifestStore(SuperBox):
     """
     C2PA Manifest Store (JUMBF superbox) with one or more Manifest.
-    IMPORTANT: here we do NOT “guess” transport manifest bytes (JPEG/PDF, etc.).
+    IMPORTANT: here we do NOT “guess” length of specific manifest bytes (JPEG/PDF, etc.).
     For PDF, the length of the exception is set by the injector; for JPEG, by its own injector.
     """
 
@@ -19,8 +19,8 @@ class ManifestStore(SuperBox):
         super().sync_payload()
 
     def set_hash_data_length_for_all(self, length: int) -> None:
-        for m in self.manifests:
-            m.set_hash_data_length(length)
+        for manifest in self.manifests:
+            manifest.set_hash_data_length(length)
         super().sync_payload()
 
     def serialize(self) -> bytes:

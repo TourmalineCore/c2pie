@@ -3,6 +3,7 @@ from __future__ import annotations
 import re
 from typing import NamedTuple
 
+from tc_c2pa_py.c2pa.config import RETRY_SIGNATURE
 from tc_c2pa_py.c2pa.manifest_store import ManifestStore
 
 
@@ -70,7 +71,7 @@ def emplace_manifest_into_pdf(base: bytes, manifests: ManifestStore, *, author: 
 
     guess = 0
     last = -1
-    for _ in range(8):
+    for _ in range(RETRY_SIGNATURE):
         manifests.set_hash_data_length_for_all(guess)
         store = manifests.serialize()
         L = len(store)
