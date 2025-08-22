@@ -9,44 +9,51 @@ from tc_c2pa_py.interface import (
     TC_C2PA_GenerateManifest,
 )
 
-key_filepath = "tests/fixtures/crypto/ps256.pem"
-cert_filepath = "tests/fixtures/crypto/ps256.pub"
+def sign_image(
+    input_path: str = "tests/fixtures/test_image.jpg",
+    output_path: str = "test_application/test_injected_image.jpg",
+) -> None:
+    key_filepath = "tests/fixtures/crypto/ps256.pem"
+    cert_filepath = "tests/fixtures/crypto/ps256.pub"
 
-if key_filepath != "":
-    with open(key_filepath, "rb") as f:
-        key = f.read()
-else:
-    key = []
+    if key_filepath != "":
+        with open(key_filepath, "rb") as f:
+            key = f.read()
+    else:
+        key = []
 
-if cert_filepath != "":
-    with open(cert_filepath, "rb") as f:
-        certificate = f.read()
-else:
-    key = []
+    if cert_filepath != "":
+        with open(cert_filepath, "rb") as f:
+            certificate = f.read()
+    else:
+        key = []
 
-cai_offset = 2
+    cai_offset = 2
 
-with open("tests/fixtures/test_image.jpg", "rb") as binary_image:
-    raw_bytes = binary_image.read()
+    with open(input_path, "rb") as binary_image:
+        raw_bytes = binary_image.read()
 
-creative_work_schema = {
-    "@context": "https://schema.org",
-    "@type": "CreativeWork",
-    "author": [{"@type": "Person", "name": "Tourmaline Core"}],
-    "copyrightYear": "2024",
-    "copyrightHolder": "tc-c2pa-py",
-}
-creative_work_assertion = TC_C2PA_GenerateAssertion(C2PA_AssertionTypes.creative_work, creative_work_schema)
+    creative_work_schema = {
+        "@context": "https://schema.org",
+        "@type": "CreativeWork",
+        "author": [{"@type": "Person", "name": "Tourmaline Core"}],
+        "copyrightYear": "2024",
+        "copyrightHolder": "tc-c2pa-py",
+    }
+    creative_work_assertion = TC_C2PA_GenerateAssertion(C2PA_AssertionTypes.creative_work, creative_work_schema)
 
-hash_data_assertion = TC_C2PA_GenerateHashDataAssertion(
-    cai_offset=cai_offset, hashed_data=hashlib.sha256(raw_bytes).digest()
-)
+    hash_data_assertion = TC_C2PA_GenerateHashDataAssertion(
+        cai_offset=cai_offset, hashed_data=hashlib.sha256(raw_bytes).digest()
+    )
 
-assertions = [creative_work_assertion, hash_data_assertion]
+    assertions = [creative_work_assertion, hash_data_assertion]
 
-manifest = TC_C2PA_GenerateManifest(assertions=assertions, private_key=key, certificate_chain=certificate)
+    manifest = TC_C2PA_GenerateManifest(assertions=assertions, private_key=key, certificate_chain=certificate)
 
-raw_bytes = TC_C2PA_EmplaceManifest(C2PA_ContentTypes.jpg, raw_bytes, cai_offset, manifest)
+    raw_bytes = TC_C2PA_EmplaceManifest(C2PA_ContentTypes.jpg, raw_bytes, cai_offset, manifest)
 
-with open("test_application/test_injected_image.jpg", "wb") as binary_file:
-    binary_file.write(raw_bytes)
+    with open(output_path, "wb") as binary_file:
+        binary_file.write(raw_bytes)
+
+if __name__ == "__main__":
+    sign_image()
