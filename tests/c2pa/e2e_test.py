@@ -1,14 +1,16 @@
+import json
+import os
+import shutil
+import subprocess
+from pathlib import Path
+
+import pytest
+
 from test_application.jpeg_test_app import sign_image
 from test_application.pdf_test_app import sign_pdf
 
-import os
-import json
-import subprocess
-import pytest
-import shutil
-from pathlib import Path
-
 FIXTURES_DIR = Path(__file__).parent.parent / "fixtures"
+
 
 def fixture_path(name: str) -> Path:
     p = FIXTURES_DIR / name
@@ -16,10 +18,12 @@ def fixture_path(name: str) -> Path:
         raise FileNotFoundError(f"Fixture not found: {p}")
     return p
 
+
 def copy_fixture(src_name: str, dst_path: Path) -> None:
     src = fixture_path(src_name)
     dst_path.parent.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(src, dst_path)
+
 
 def has_c2patool() -> bool:
     return shutil.which("c2patool") is not None
@@ -66,7 +70,7 @@ def test_jpeg_e2e_c2patool(tmp_path):
 
     try:
         sign_image(
-            input_path=inp, 
+            input_path=inp,
             output_path=out,
         )
     except NotImplementedError:
@@ -91,7 +95,7 @@ def test_pdf_e2e_c2patool(tmp_path):
 
     try:
         sign_pdf(
-            input_path=inp, 
+            input_path=inp,
             output_path=out,
         )
     except NotImplementedError:

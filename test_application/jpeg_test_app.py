@@ -9,6 +9,7 @@ from tc_c2pa_py.interface import (
     TC_C2PA_GenerateManifest,
 )
 
+
 def sign_image(
     input_path: str = "tests/fixtures/test_image.jpg",
     output_path: str = "test_application/test_injected_image.jpg",
@@ -54,6 +55,7 @@ def sign_image(
 
     with open(output_path, "wb") as binary_file:
         binary_file.write(raw_bytes)
+
 
 if __name__ == "__main__":
     sign_image()
