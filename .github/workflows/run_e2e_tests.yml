@@ -1,0 +1,45 @@
+name: Run E2E-tests
+
+on:
+  pull_request:
+  push:
+    branches:
+      - 'feature/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  run-e2e-tests:
+    name: Run e2e tests (container)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    container:
+      image: ghcr.io/tourmalinecore/${{ github.event.repository.name }}:latest
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Build package
+        run: |
+          chmod +x ./scripts/*.sh
+          ./scripts/build_package.sh
+
+      - name: Ensure pytest is available
+        run: |
+          if ! command -v pytest >/dev/null 2>&1; then
+            python -m pip install -U pip pytest
+          fi
+
+      - name: Run unit tests
+        run: |
+          mkdir -p reports
+          cd tc_c2pa_py && pytest ./tests/c2pa/e2e_test.py --ignore=test_application -q --junitxml=reports/junit.xml --maxfail=1
