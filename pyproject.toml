@@ -6,14 +6,15 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
 ]
-authors = ["Olga Kuzmicheva <vgubin@tourmalinecore.com>", "Vladimir Gubin <vgubin@tourmalinecore.com>",
+authors = ["Snezhana Lazareva <vgubin@tourmalinecore.com>, "Vladimir Gubin <vgubin@tourmalinecore.com>", "Olga Kuzmicheva <vgubin@tourmalinecore.com>",
   "Oleg Kliavlin <vgubin@tourmalinecore.com>", "Dmitriy Starodubtcev <vgubin@tourmalinecore.com>"]
 
 [project]
 name = "tc_c2pa_py"
 authors = [ 
-  { name="Olga Kuzmicheva ", email="vgubin@tourmalinecore.com" },
+  { name="Snezhana Lazareva", email="vgubin@tourmalinecore.com" },
   { name="Vladimir Gubin", email="vgubin@tourmalinecore.com" },
+  { name="Olga Kuzmicheva ", email="vgubin@tourmalinecore.com" },
   { name="Oleg Kliavlin", email="vgubin@tourmalinecore.com" },
   { name="Dmitriy Starodubtcev", email="vgubin@tourmalinecore.com" },
 ]
@@ -23,7 +24,7 @@ Homepage = "https://github.com/TourmalineCore/tc-c2pa-py"
 Issues = "https://github.com/TourmalineCore/tc-c2pa-py/issues"
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3. 9"
 pytest = "^7.4.0"
 cbor2 = "^5.6.3"
 cryptography = "^42.0.5"
