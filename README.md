@@ -63,6 +63,7 @@ ruff check . --fix
 - PDF: `test_application/pdf_test_app.py`  
 
 Use the VC Code task `Build package`
+
 Use the VC Code task `Run JPEG test application` or `Run PDF test application`
 
 To run application you need to have:
@@ -70,12 +71,12 @@ To run application you need to have:
 2. Certificate chain and public key (`tests/fixtures/crypto`)
 
 The workflow of test applications:
-1) Load a sample asset (`tests/fixtures/test_image.jpg` or `tests/fixtures/test_document.pdf`).  
+1) Load a sample asset (`tests/fixtures/test_image.jpg` or `tests/fixtures/test_document.pdf`);
 2) Build a manifest:
-   - `TC_C2PA_GenerateAssertion` (e.g., CreativeWork),
-   - `TC_C2PA_GenerateHashDataAssertion` (hard‑binding),
-   - `TC_C2PA_GenerateManifest` (claim + signature + store).  
-3) Embed the manifest (`TC_C2PA_EmplaceManifest`).  
+   - `TC_C2PA_GenerateAssertion`
+   - `TC_C2PA_GenerateHashDataAssertion`
+   - `TC_C2PA_GenerateManifest` 
+3) Embed the manifest (`TC_C2PA_EmplaceManifest`);  
 4) Write a new asset with C2PA.
 
 Validate with:
