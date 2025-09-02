@@ -6,7 +6,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
 ]
-authors = ["Snezhana Lazareva <vgubin@tourmalinecore.com>, "Vladimir Gubin <vgubin@tourmalinecore.com>", "Olga Kuzmicheva <vgubin@tourmalinecore.com>",
+authors = ["Snezhana Lazareva <vgubin@tourmalinecore.com>", "Vladimir Gubin <vgubin@tourmalinecore.com>", "Olga Kuzmicheva <vgubin@tourmalinecore.com>",
   "Oleg Kliavlin <vgubin@tourmalinecore.com>", "Dmitriy Starodubtcev <vgubin@tourmalinecore.com>"]
 
 [project]
