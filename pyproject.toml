@@ -6,7 +6,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
 ]
-authors = ["Snezhana Lazareva <contact@tourmalinecore.com>, "Vladimir Gubin <contact@tourmalinecore.com>", "Olga Kuzmicheva <contact@tourmalinecore.com>",
+authors = ["Tourmaline Core <contact@tourmalinecore.com>"]
 
 [project]
 name = "tc_c2pa_py"
