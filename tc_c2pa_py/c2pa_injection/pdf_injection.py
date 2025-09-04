@@ -27,7 +27,7 @@ def _max_obj_num(b: bytes) -> int:
 
 
 def _extract_pages_ref(b: bytes) -> str:
-    mcat = re.search(rb"\n(\d+)\s+0\s+obj\s*<<[^>]*?/Type\s*/Catalog[^>]*?>>", b, re.DOTALL)
+    mcat = re.search(rb"\n(\d+)\s+0\s+obj\s*<<.*?/Type\s*/Catalog.*?>>", b, re.DOTALL)
     if not mcat:
         raise ValueError("Catalog not found")
     end = b.find(b"endobj", mcat.start())
