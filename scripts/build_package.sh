@@ -1,4 +1,4 @@
+rm -rf dist
 rm -rf build
 
-python setup.py build
-python setup.py install
+pyproject-build && poetry install --no-interaction --no-ansi
