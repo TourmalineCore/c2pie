@@ -38,8 +38,7 @@ jobs:
 
       - name: Run poetry install
         run: |
-          poetry config virtualenvs.create false \
-          && poetry lock && poetry install --no-interaction --no-ansi
+          poetry lock && poetry install --no-interaction --no-ansi
 
       - name: Ensure pytest is available
         run: |
