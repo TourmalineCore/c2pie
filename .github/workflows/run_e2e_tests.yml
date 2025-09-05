@@ -34,7 +34,7 @@ jobs:
 
       - name: Install poetry
         run: |
-          pip install "poetry>=1.0.0"
+          pipx install poetry
 
       - name: Run poetry install
         run: |
