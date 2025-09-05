@@ -50,4 +50,4 @@ jobs:
         run: |
           mkdir -p reports
           echo pwd
-          pytest tests/c2pa/e2e_test.py
+          poetry run pytest tests/c2pa/e2e_test.py
