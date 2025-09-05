@@ -11,7 +11,7 @@
 - C2PA spec: https://c2pa.org/  
 - Validation: https://github.com/contentauth/c2pa-rs (`c2patool`)
 
-> ⚠️ This library helps you build valid manifests, but trust decisions (anchors, allow/deny lists, TSA) are your responsibility. For production, you must provision a certificate chain anchored to an accepted trust root and configure validation policy accordingly.
+> ⚠️ This library helps you build valid manifests, but trust decisions (anchors, allow/deny lists, TSA) are your responsibility. For production, you must provide a certificate chain anchored to an accepted trust root and configure validation policy accordingly.
 
 ---
 
