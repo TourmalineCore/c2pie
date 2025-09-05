@@ -158,7 +158,7 @@ We ship three GitHub Actions (see `.github/workflows/`):
 
 ## Certificates & trust
 
-- Example keys live under `tests/fixtures/crypto/`. They are suitable for development only.  
+- Example keys are located in `tests/fixtures/crypto/`. They are suitable for development only.  
 - For production:
   - use a real document‑signing certificate (RSA‑PSS or ECDSA per C2PA),  
   - provide a leaf + intermediates bundle (no root),  
