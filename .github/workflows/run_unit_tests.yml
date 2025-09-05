@@ -34,7 +34,7 @@ jobs:
 
       - name: Install poetry
         run: |
-          pipx install poetry
+          pip install poetry --python $(which python)
 
       - name: Run poetry install
         run: |
