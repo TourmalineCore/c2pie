@@ -48,9 +48,6 @@ jobs:
 
       - name: Install c2patool
         run: |
-          export RUSTUP_HOME=/home/vscode/.rustup \
-          export CARGO_HOME=/home/vscode/.cargo \
-          export PATH=/home/vscode/.cargo/bin:/home/vscode/.local/bin:$PATH \
           curl -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable && \
           cargo install c2patool --locked
 
