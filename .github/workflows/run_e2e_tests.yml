@@ -48,8 +48,7 @@ jobs:
 
       - name: Install cargo
         run: |
-          curl -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable && \
-          source $HOME/.cargo/env
+          curl -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
       
       - name: Install c2patool
         run: |
