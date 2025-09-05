@@ -46,6 +46,11 @@ jobs:
             python -m pip install -U pip pytest
           fi
 
+      - name: Install cargo
+        uses: baptiste0928/cargo-install@v3
+        with:
+          crate: cargo-hack
+            
       - name: Install c2patool
         run: |
           curl -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable && \
