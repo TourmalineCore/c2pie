@@ -28,10 +28,14 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Build package
+      - name: Install poetry
         run: |
-          chmod +x ./scripts/*.sh
-          ./scripts/build_package.sh
+          pip install "poetry>=1.0.0"
+
+      - name: Run poetry install
+        run: |
+          poetry config virtualenvs.create false \
+          && poetry lock && poetry install --no-interaction --no-ansi
 
       - name: Ensure pytest is available
         run: |
