@@ -31,3 +31,8 @@ twine = "^6.1.0"
 [build-system]
 requires = ["poetry>=0.12"]
 build-backend = "poetry.masonry.api"
+
+[tool.pytest.ini_options]
+markers = [
+    "e2e: marks tests as e2e",
+]
