@@ -49,7 +49,7 @@ jobs:
       - name: Run unit tests
         run: |
           mkdir -p reports
-          pytest --ignore=test_application -q --junitxml=reports/junit.xml --maxfail=1
+          poetry run pytest --ignore=test_application -q --junitxml=reports/junit.xml --maxfail=1
 
       - name: Upload test report (JUnit)
         if: always()
