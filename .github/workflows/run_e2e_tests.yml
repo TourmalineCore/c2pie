@@ -53,7 +53,7 @@ jobs:
           path: |
             ~/.rustup
             ~/.cargo
-          key: ${{ runner.os }}-rust-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-rust-
           restore-keys: |
             ${{ runner.os }}-rust-
 
