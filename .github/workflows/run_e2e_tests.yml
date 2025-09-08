@@ -58,7 +58,7 @@ jobs:
 
       - name: Verify if c2patool is installed 
         run: |
-          cargo -V
+          c2patool -V
 
       - name: Run e2e tests
         run: |
