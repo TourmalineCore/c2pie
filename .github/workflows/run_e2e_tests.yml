@@ -53,6 +53,7 @@ jobs:
       
       - name: Install c2patool
         run: |
+          . "$HOME/.cargo/env"
           cargo install c2patool --locked
 
       - name: Run e2e tests
