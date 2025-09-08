@@ -56,6 +56,10 @@ jobs:
           . "$HOME/.cargo/env"
           cargo install c2patool --locked
 
+      - name: Verify if c2patool is installed 
+        run: |
+          cargo -V
+
       - name: Run e2e tests
         run: |
           mkdir -p reports
