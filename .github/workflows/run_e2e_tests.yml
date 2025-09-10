@@ -46,15 +46,30 @@ jobs:
             python -m pip install -U pip pytest
           fi
 
-      - name: Install cargo
+      - name: Cache Rust and Cargo dependencies
+        id: cache-rust
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.rustup
+            ~/.cargo
+          key: ${{ runner.os }}-rust-
+          restore-keys: |
+            ${{ runner.os }}-rust-
+
+      - name: Install Rust toolchain and c2patool
+        if: steps.cache-rust.outputs.cache-hit != 'true'
         run: |
-          curl -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable 
-          . "$HOME/.cargo/env"
-      
-      - name: Install c2patool
-        run: |
+          curl -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
           . "$HOME/.cargo/env"
           cargo install c2patool --locked
+
+      - name: Add cargo to PATH
+        run: echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+      - name: Verify if c2patool is installed 
+        run: |
+          c2patool -V
 
       - name: Run e2e tests
         run: |
