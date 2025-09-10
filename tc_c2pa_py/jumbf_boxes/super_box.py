@@ -1,19 +1,28 @@
 # Jumbf super box class
 
 from tc_c2pa_py.jumbf_boxes.box import Box
+from tc_c2pa_py.jumbf_boxes.content_box import ContentBox
 from tc_c2pa_py.jumbf_boxes.description_box import DescriptionBox
 from tc_c2pa_py.utils.content_types import jumbf_content_types
 
 
 class SuperBox(Box):
-    def __init__(self, content_type=jumbf_content_types["json"], label="", content_boxes=None):
+    def __init__(
+        self,
+        content_type: bytes = jumbf_content_types["json"],
+        label: str = "",
+        content_boxes: list[ContentBox] | None = None,
+    ):
         self.description_box = DescriptionBox(content_type=content_type, label=label)
         self.content_boxes = [] if content_boxes is None else content_boxes
 
         payload = self.description_box.serialize() + self.serialize_content_boxes()
         super().__init__(b"jumb".hex(), payload=payload)
 
-    def add_content_box(self, content_box):
+    def add_content_box(
+        self,
+        content_box: ContentBox,
+    ):
         self.content_boxes.append(content_box)
         self.sync_payload()
 

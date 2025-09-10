@@ -5,7 +5,11 @@ from tc_c2pa_py.utils.content_types import jumbf_content_types
 
 
 class DescriptionBox(Box):
-    def __init__(self, content_type=jumbf_content_types["json"], label=""):
+    def __init__(
+        self,
+        content_type: bytes = jumbf_content_types["json"],
+        label: str = "",
+    ):
         self.label = label
         self.content_type = content_type
         self.toggle = 3

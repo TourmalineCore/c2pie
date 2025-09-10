@@ -20,7 +20,7 @@ def cbor_to_bytes(json_object):
     return cbor2.dumps(json_object)
 
 
-def get_assertion_content_type(assertion_type):
+def get_assertion_content_type(assertion_type: C2PA_AssertionTypes):
     if assertion_type == C2PA_AssertionTypes.creative_work:
         return jumbf_content_types["json"]
     elif assertion_type == C2PA_AssertionTypes.data_hash:
@@ -31,7 +31,7 @@ def get_assertion_content_type(assertion_type):
         return b""
 
 
-def get_assertion_content_box_type(assertion_type):
+def get_assertion_content_box_type(assertion_type: C2PA_AssertionTypes):
     if assertion_type == C2PA_AssertionTypes.creative_work:
         return b"json".hex()
     elif assertion_type == C2PA_AssertionTypes.data_hash:
@@ -42,7 +42,7 @@ def get_assertion_content_box_type(assertion_type):
         return b""
 
 
-def get_assertion_label(assertion_type):
+def get_assertion_label(assertion_type: C2PA_AssertionTypes):
     if assertion_type == C2PA_AssertionTypes.creative_work:
         return "stds.schema-org.CreativeWork"
     elif assertion_type == C2PA_AssertionTypes.data_hash:
