@@ -1,15 +1,24 @@
+from typing import override
+
 JPEG_SEGMENT_MAX_PAYLOAD_LENGTH = 65517
 
 
 class JpgSegment:
-    def __init__(self, payload_length, marker=bytes.fromhex("EB")):  # noqa: B008
+    def __init__(
+        self,
+        payload_length: int,
+        marker: bytes = bytes.fromhex("EB"),
+    ):  # noqa: B008
         self.marker = marker
         self.payload_length = payload_length
 
     def get_segment_length(self):
         return self.payload_length + 2  # payload length + size of payload length
 
-    def serialize(self, payload):
+    def serialize(
+        self,
+        payload: bytes,
+    ):
         serialized_data = b""
 
         serialized_data += bytes.fromhex("FF") + self.marker
@@ -32,7 +41,8 @@ class JpgSegmentApp11(JpgSegment):
     def get_payload_length(self, payload_length):
         return 2 + 2 + 4 + 4 + 4 + payload_length
 
-    def serialize(self):
+    @override
+    def serialize(self, payload=None):
         _en = self.en.to_bytes(2, "big")
         _z = self.z.to_bytes(4, "big")
 
@@ -42,7 +52,12 @@ class JpgSegmentApp11(JpgSegment):
 
 
 class JpgSegmentApp11Storage:
-    def __init__(self, app11_segment_box_length, app11_segment_box_type, payload):
+    def __init__(
+        self,
+        app11_segment_box_length: int,
+        app11_segment_box_type: bytes,
+        payload: bytes,
+    ):
         self.l_box = app11_segment_box_length
         self.t_box = app11_segment_box_type
         self.payload = payload

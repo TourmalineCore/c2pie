@@ -2,7 +2,11 @@
 
 
 class Box:
-    def __init__(self, box_type, payload=b""):
+    def __init__(
+        self,
+        box_type: str,
+        payload: bytes = b"",
+    ):
         self.payload = payload  # Box payload
         self.t_box = box_type
         self.l_box = (
