@@ -5,26 +5,28 @@
     "context": "..",
     "dockerfile": "../Dockerfile"
   },
-  "customizations": {
-    "vscode": {
-      "extensions": [
-        "charliermarsh.ruff",       
-        "ms-python.python",         
-        "ms-python.vscode-pylance"  
-      ],
-      "settings": {
-        "[python]": {
-          "editor.defaultFormatter": "charliermarsh.ruff",
-          "editor.formatOnSave": true,
-          "editor.codeActionsOnSave": {
-            "source.fixAll.ruff": "explicit",
-            "source.organizeImports.ruff": "explicit"
-          }
-        },
-
-        "notebook.formatOnSave.enabled": true
-      }
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-python.python",
+				"ms-python.vscode-pylance",
+				"vscode-icons-team.vscode-icons",
+				"wayou.vscode-todo-highlight",
+				"timonwong.shellcheck",
+				"charliermarsh.ruff"
+			],
+			"settings": {
+				"files.autoSave": "afterDelay",
+				"files.autoSaveDelay": 1000,
+				"[python]": {
+					"editor.formatOnSave": true,
+					"editor.defaultFormatter": "charliermarsh.ruff", 
+					"editor.codeActionsOnSave": {
+						"source.fixAll.ruff": "explicit",
+						"source.organizeImports.ruff": "explicit"
+					},
+				},
+			}
     }
-  },
-  "postCreateCommand": "python -m pip install -U pip && python -m pip install ruff"
+	},
 }
