@@ -6,14 +6,8 @@ ENV PIP_NO_CACHE_DIR=off \
   POETRY_VERSION=1.0.0
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    git curl ca-certificates \
-    build-essential pkg-config \
-    libssl-dev openssl \
-    qpdf libqpdf-dev \
-    libjpeg62-turbo-dev zlib1g-dev \
-    jq bash \
-    && rm -rf /var/lib/apt/lists/*
-
+    git curl ca-certificates build-essential
+    
 RUN pip install "poetry>=$POETRY_VERSION"
 
 ENV RUSTUP_HOME=/home/vscode/.rustup \
