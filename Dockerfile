@@ -22,9 +22,9 @@ ENV RUSTUP_HOME=/home/vscode/.rustup \
 RUN curl -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable && \
     cargo install c2patool --locked
 
-COPY . /tc-c2pa-py/
+COPY . /c2pie/
 
-WORKDIR tc-c2pa-py
+WORKDIR c2pie
 
 RUN poetry config virtualenvs.create false \
   && poetry lock && poetry install --no-interaction --no-ansi
