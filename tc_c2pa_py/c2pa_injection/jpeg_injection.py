@@ -1,5 +1,3 @@
-from typing import override
-
 JPEG_SEGMENT_MAX_PAYLOAD_LENGTH = 65517
 
 
@@ -41,7 +39,6 @@ class JpgSegmentApp11(JpgSegment):
     def get_payload_length(self, payload_length):
         return 2 + 2 + 4 + 4 + 4 + payload_length
 
-    @override
     def serialize(self, payload=None):
         _en = self.en.to_bytes(2, "big")
         _z = self.z.to_bytes(4, "big")
