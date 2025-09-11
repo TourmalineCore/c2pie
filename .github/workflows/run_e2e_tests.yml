@@ -16,11 +16,6 @@ jobs:
     name: Run e2e tests (container)
     runs-on: ubuntu-22.04
     timeout-minutes: 30
-    container:
-      image: ghcr.io/tourmalinecore/${{ github.event.repository.name }}:latest
-      credentials:
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
       - name: Checkout repository
