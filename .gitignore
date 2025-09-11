@@ -4,5 +4,5 @@ __pycache__
 build
 dist
 test_application/**/*.jpg
-test_application/**/*.pdf
+test_application/*.pdf
 .vscode/launch.json
