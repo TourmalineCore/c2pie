@@ -1,4 +1,4 @@
-from tc_c2pa_py.jumbf_boxes.box import Box
+from c2pie.jumbf_boxes.box import Box
 
 
 def test_create_box():

@@ -1,9 +1,9 @@
 # Jumbf super box class
 
-from tc_c2pa_py.jumbf_boxes.box import Box
-from tc_c2pa_py.jumbf_boxes.content_box import ContentBox
-from tc_c2pa_py.jumbf_boxes.description_box import DescriptionBox
-from tc_c2pa_py.utils.content_types import jumbf_content_types
+from c2pie.jumbf_boxes.box import Box
+from c2pie.jumbf_boxes.content_box import ContentBox
+from c2pie.jumbf_boxes.description_box import DescriptionBox
+from c2pie.utils.content_types import jumbf_content_types
 
 
 class SuperBox(Box):

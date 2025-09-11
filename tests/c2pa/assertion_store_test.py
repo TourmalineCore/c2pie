@@ -1,7 +1,7 @@
-from tc_c2pa_py.c2pa.assertion import Assertion
-from tc_c2pa_py.c2pa.assertion_store import AssertionStore
-from tc_c2pa_py.utils.assertion_schemas import C2PA_AssertionTypes
-from tc_c2pa_py.utils.content_types import c2pa_content_types
+from c2pie.c2pa.assertion import Assertion
+from c2pie.c2pa.assertion_store import AssertionStore
+from c2pie.utils.assertion_schemas import C2PA_AssertionTypes
+from c2pie.utils.content_types import c2pa_content_types
 
 
 def test_create_assertion_store():
@@ -19,7 +19,7 @@ def test_create_assertion_store_with_content():
         "@type": "CreativeWork",
         "author": [{"@type": "Person", "name": "Tourmaline Core"}],
         "copyrightYear": "2024",
-        "copyrightHolder": "tc_c2pa_py",
+        "copyrightHolder": "c2pie",
     }
     test_assertion = Assertion(assertion_type=C2PA_AssertionTypes.creative_work, schema=creative_work_schema)
 

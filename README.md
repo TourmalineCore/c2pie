@@ -90,7 +90,7 @@ c2patool path/to/your_output.pdf
 ## API overview (high‑level)
 
 ```python
-from tc_c2pa_py.interface import (
+from c2pie.interface import (
     TC_C2PA_GenerateAssertion,
     TC_C2PA_GenerateHashDataAssertion,
     TC_C2PA_GenerateManifest,

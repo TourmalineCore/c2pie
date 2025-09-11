@@ -1,7 +1,7 @@
 # Description jumbf box class
 
-from tc_c2pa_py.jumbf_boxes.box import Box
-from tc_c2pa_py.utils.content_types import jumbf_content_types
+from c2pie.jumbf_boxes.box import Box
+from c2pie.utils.content_types import jumbf_content_types
 
 
 class DescriptionBox(Box):

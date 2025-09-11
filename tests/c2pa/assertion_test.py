@@ -1,6 +1,6 @@
-from tc_c2pa_py.c2pa.assertion import Assertion
-from tc_c2pa_py.utils.assertion_schemas import C2PA_AssertionTypes, cbor_to_bytes, json_to_bytes
-from tc_c2pa_py.utils.content_types import jumbf_content_types
+from c2pie.c2pa.assertion import Assertion
+from c2pie.utils.assertion_schemas import C2PA_AssertionTypes, cbor_to_bytes, json_to_bytes
+from c2pie.utils.content_types import jumbf_content_types
 
 
 def test_create_assertion():
@@ -32,7 +32,7 @@ def test_create_assertion_with_correct_schema():
         "@type": "CreativeWork",
         "author": [{"@type": "Person", "name": "Tourmaline Core"}],
         "copyrightYear": "2024",
-        "copyrightHolder": "tc_c2pa_py",
+        "copyrightHolder": "c2pie",
     }
 
     test_assertion = Assertion(C2PA_AssertionTypes.creative_work, creative_work_schema)
@@ -46,14 +46,14 @@ def test_serialize_json_assertion():
         "@type": "CreativeWork",
         "author": [{"@type": "Person", "name": "Tourmaline Core"}],
         "copyrightYear": "2024",
-        "copyrightHolder": "tc_c2pa_py",
+        "copyrightHolder": "c2pie",
     }
 
     test_serialized_json_assertion = json_to_bytes(creative_work_schema)
 
     assert (
         test_serialized_json_assertion
-        == b'{"@context":"https://schema.org","@type":"CreativeWork","author":[{"@type":"Person","name":"Tourmaline Core"}],"copyrightYear":"2024","copyrightHolder":"tc_c2pa_py"}'  # noqa: E501
+        == b'{"@context":"https://schema.org","@type":"CreativeWork","author":[{"@type":"Person","name":"Tourmaline Core"}],"copyrightYear":"2024","copyrightHolder":"c2pie"}'  # noqa: E501
     )
 
 
@@ -71,7 +71,7 @@ def test_serialize_json_assertion():  # noqa: F811
         "@type": "CreativeWork",
         "author": [{"@type": "Person", "name": "Tourmaline Core"}],
         "copyrightYear": "2024",
-        "copyrightHolder": "tc_c2pa_py",
+        "copyrightHolder": "c2pie",
     }
 
     test_assertion = Assertion(C2PA_AssertionTypes.creative_work, creative_work_schema)

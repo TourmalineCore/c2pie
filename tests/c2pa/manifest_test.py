@@ -1,5 +1,5 @@
-from tc_c2pa_py.c2pa.manifest import Manifest
-from tc_c2pa_py.utils.content_types import c2pa_content_types
+from c2pie.c2pa.manifest import Manifest
+from c2pie.utils.content_types import c2pa_content_types
 
 
 def test_create_manifest():

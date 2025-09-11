@@ -3,7 +3,7 @@ import json
 
 import cbor2
 
-from tc_c2pa_py.utils.content_types import jumbf_content_types
+from c2pie.utils.content_types import jumbf_content_types
 
 
 class C2PA_AssertionTypes(enum.Enum):

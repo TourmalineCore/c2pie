@@ -1,6 +1,6 @@
-from tc_c2pa_py.jumbf_boxes.content_box import ContentBox
-from tc_c2pa_py.jumbf_boxes.super_box import SuperBox
-from tc_c2pa_py.utils.content_types import jumbf_content_types
+from c2pie.jumbf_boxes.content_box import ContentBox
+from c2pie.jumbf_boxes.super_box import SuperBox
+from c2pie.utils.content_types import jumbf_content_types
 
 
 def test_create_super_box():

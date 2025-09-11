@@ -8,9 +8,9 @@ from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives.serialization import Encoding
 
-from tc_c2pa_py.jumbf_boxes.content_box import ContentBox
-from tc_c2pa_py.jumbf_boxes.super_box import SuperBox
-from tc_c2pa_py.utils.content_types import c2pa_content_types
+from c2pie.jumbf_boxes.content_box import ContentBox
+from c2pie.jumbf_boxes.super_box import SuperBox
+from c2pie.utils.content_types import c2pa_content_types
 
 
 def _split_pem_certs_to_der(pem_bytes: bytes) -> list[bytes]:

@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from typing import Any
 
-from tc_c2pa_py.jumbf_boxes.content_box import ContentBox
-from tc_c2pa_py.jumbf_boxes.super_box import SuperBox
-from tc_c2pa_py.utils.assertion_schemas import (
+from c2pie.jumbf_boxes.content_box import ContentBox
+from c2pie.jumbf_boxes.super_box import SuperBox
+from c2pie.utils.assertion_schemas import (
     C2PA_AssertionTypes,
     cbor_to_bytes,
     get_assertion_content_box_type,
@@ -12,7 +12,7 @@ from tc_c2pa_py.utils.assertion_schemas import (
     get_assertion_label,
     json_to_bytes,
 )
-from tc_c2pa_py.utils.content_types import jumbf_content_types
+from c2pie.utils.content_types import jumbf_content_types
 
 
 class Assertion(SuperBox):

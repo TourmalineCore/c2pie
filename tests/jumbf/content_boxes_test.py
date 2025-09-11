@@ -1,4 +1,4 @@
-from tc_c2pa_py.jumbf_boxes.content_box import ContentBox
+from c2pie.jumbf_boxes.content_box import ContentBox
 
 
 def test_create_content_box():
