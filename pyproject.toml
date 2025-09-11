@@ -43,3 +43,6 @@ omit = [
   "*_test.py",
   "*/__init__.py",
 ]
+
+[tool.coverage.report]
+show_missing = true
