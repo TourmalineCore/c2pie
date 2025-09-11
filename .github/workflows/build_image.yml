@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - feature/*
   # to allow to wait for a docker image to be published to proceed in another workflow
   workflow_call:
 
