@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "tc_c2pa_py"
+name = "c2pie"
 version = "0.2.0"
 description = "The TC-C2PA-Py is python library which provide C2PA standard functionality."
 classifiers = [
@@ -10,7 +10,7 @@ authors = ["Snezhana Lazareva <vgubin@tourmalinecore.com>", "Vladimir Gubin <vgu
   "Oleg Kliavlin <vgubin@tourmalinecore.com>", "Dmitriy Starodubtcev <vgubin@tourmalinecore.com>"]
 
 [project]
-name = "tc_c2pa_py"
+name = "c2pie"
 authors = [ 
   { name="Snezhana Lazareva", email="vgubin@tourmalinecore.com" },
   { name="Vladimir Gubin", email="vgubin@tourmalinecore.com" },

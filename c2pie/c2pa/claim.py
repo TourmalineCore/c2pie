@@ -6,9 +6,9 @@ from typing import Any
 
 import cbor2
 
-from tc_c2pa_py.jumbf_boxes.content_box import ContentBox
-from tc_c2pa_py.jumbf_boxes.super_box import SuperBox
-from tc_c2pa_py.utils.content_types import c2pa_content_types
+from c2pie.jumbf_boxes.content_box import ContentBox
+from c2pie.jumbf_boxes.super_box import SuperBox
+from c2pie.utils.content_types import c2pa_content_types
 
 
 def _sha256(b: bytes) -> bytes:
@@ -20,7 +20,7 @@ class Claim(SuperBox):
 
     def __init__(
         self,
-        claim_generator: str = "tc_c2pa_py",
+        claim_generator: str = "c2pie",
         manifest_label: str | None = None,
         assertion_store=None,
         dc_format: str | None = None,

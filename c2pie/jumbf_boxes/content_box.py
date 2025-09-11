@@ -1,6 +1,6 @@
 # Content jumbf box class
 
-from tc_c2pa_py.jumbf_boxes.box import Box
+from c2pie.jumbf_boxes.box import Box
 
 
 class ContentBox(Box):

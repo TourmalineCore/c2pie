@@ -1,6 +1,6 @@
 import hashlib
 
-from tc_c2pa_py.interface import (
+from c2pie.interface import (
     C2PA_AssertionTypes,
     C2PA_ContentTypes,
     TC_C2PA_EmplaceManifest,

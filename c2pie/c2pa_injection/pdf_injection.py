@@ -3,8 +3,8 @@ from __future__ import annotations
 import re
 from typing import NamedTuple
 
-from tc_c2pa_py.c2pa.config import RETRY_SIGNATURE
-from tc_c2pa_py.c2pa.manifest_store import ManifestStore
+from c2pie.c2pa.config import RETRY_SIGNATURE
+from c2pie.c2pa.manifest_store import ManifestStore
 
 
 class PdfInfo(NamedTuple):

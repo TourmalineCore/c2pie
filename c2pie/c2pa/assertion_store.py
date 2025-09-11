@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from tc_c2pa_py.jumbf_boxes.super_box import SuperBox
-from tc_c2pa_py.utils.assertion_schemas import C2PA_AssertionTypes
-from tc_c2pa_py.utils.content_types import c2pa_content_types
+from c2pie.jumbf_boxes.super_box import SuperBox
+from c2pie.utils.assertion_schemas import C2PA_AssertionTypes
+from c2pie.utils.content_types import c2pa_content_types
 
 
 class AssertionStore(SuperBox):

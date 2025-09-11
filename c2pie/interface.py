@@ -1,16 +1,16 @@
 from __future__ import annotations
 
-from tc_c2pa_py.c2pa.assertion import Assertion, HashDataAssertion
-from tc_c2pa_py.c2pa.assertion_store import AssertionStore
-from tc_c2pa_py.c2pa.claim import Claim
-from tc_c2pa_py.c2pa.claim_signature import ClaimSignature
-from tc_c2pa_py.c2pa.config import RETRY_SIGNATURE
-from tc_c2pa_py.c2pa.manifest import Manifest
-from tc_c2pa_py.c2pa.manifest_store import ManifestStore
-from tc_c2pa_py.c2pa_injection.jpeg_injection import JpgSegmentApp11Storage
-from tc_c2pa_py.c2pa_injection.pdf_injection import emplace_manifest_into_pdf
-from tc_c2pa_py.utils.assertion_schemas import C2PA_AssertionTypes
-from tc_c2pa_py.utils.content_types import C2PA_ContentTypes
+from c2pie.c2pa.assertion import Assertion, HashDataAssertion
+from c2pie.c2pa.assertion_store import AssertionStore
+from c2pie.c2pa.claim import Claim
+from c2pie.c2pa.claim_signature import ClaimSignature
+from c2pie.c2pa.config import RETRY_SIGNATURE
+from c2pie.c2pa.manifest import Manifest
+from c2pie.c2pa.manifest_store import ManifestStore
+from c2pie.c2pa_injection.jpeg_injection import JpgSegmentApp11Storage
+from c2pie.c2pa_injection.pdf_injection import emplace_manifest_into_pdf
+from c2pie.utils.assertion_schemas import C2PA_AssertionTypes
+from c2pie.utils.content_types import C2PA_ContentTypes
 
 
 def TC_C2PA_GenerateAssertion(assertion_type: C2PA_AssertionTypes, assertion_schema) -> Assertion:
@@ -32,7 +32,7 @@ def TC_C2PA_GenerateManifest(assertions, private_key: bytes, certificate_chain: 
     manifest.set_assertion_store(assertion_store)
 
     claim = Claim(
-        claim_generator="tc_c2pa_py",
+        claim_generator="c2pie",
         manifest_label=manifest.get_manifest_label(),
         assertion_store=assertion_store,
     )
