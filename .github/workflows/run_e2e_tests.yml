@@ -27,11 +27,12 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install poetry
-        run: |
-          pip install poetry --python $(which python)
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: 'latest'
 
-      - name: Run poetry install
+      - name: Run Poetry install
         run: |
           poetry lock && poetry install --no-interaction --no-ansi
 
