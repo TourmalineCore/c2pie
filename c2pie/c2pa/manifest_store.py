@@ -13,12 +13,19 @@ class ManifestStore(SuperBox):
 
     def __init__(self, manifests: list | None = None):
         self.manifests: list = [] if manifests is None else manifests
-        super().__init__(content_type=c2pa_content_types["manifest_store"], label="c2pa", content_boxes=self.manifests)
+        super().__init__(
+            content_type=c2pa_content_types["manifest_store"],
+            label="c2pa",
+            content_boxes=self.manifests,
+        )
 
     def sync_payload(self):
         super().sync_payload()
 
-    def set_hash_data_length_for_all(self, length: int) -> None:
+    def set_hash_data_length_for_all(
+        self,
+        length: int,
+    ) -> None:
         for manifest in self.manifests:
             manifest.set_hash_data_length(length)
         super().sync_payload()

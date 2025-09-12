@@ -53,7 +53,12 @@ def _xref_entry(off: int) -> bytes:
     return f"{off:010d} 00000 n \n".encode("ascii")
 
 
-def emplace_manifest_into_pdf(base: bytes, manifests: ManifestStore, *, author: str | None = None) -> bytes:
+def emplace_manifest_into_pdf(
+    base: bytes,
+    manifests: ManifestStore,
+    *,
+    author: str | None = None,
+) -> bytes:
     """
     Incrementally adds C2PA Manifest Store to PDF.
     - Exception c2pa.hash.data: start == len(base), length == length of the entire tail (see C2PA 2.2).

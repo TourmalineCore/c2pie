@@ -6,6 +6,7 @@ from typing import Any
 
 import cbor2
 
+from c2pie.c2pa.assertion_store import AssertionStore
 from c2pie.jumbf_boxes.content_box import ContentBox
 from c2pie.jumbf_boxes.super_box import SuperBox
 from c2pie.utils.content_types import c2pa_content_types
@@ -20,13 +21,13 @@ class Claim(SuperBox):
 
     def __init__(
         self,
+        assertion_store: AssertionStore,
         claim_generator: str = "c2pie",
-        manifest_label: str | None = None,
-        assertion_store=None,
-        dc_format: str | None = None,
+        manifest_label: str = f"urn:c2pa:{uuid.uuid4().hex}",
+        dc_format: str = None,
     ):
         self.claim_generator = claim_generator
-        self.manifest_label = manifest_label or f"urn:c2pa:{uuid.uuid4().hex}"
+        self.manifest_label = manifest_label
         self.assertion_store = assertion_store
         self.dc_format = dc_format
 
