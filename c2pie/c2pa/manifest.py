@@ -1,5 +1,3 @@
-import uuid
-
 from c2pie.jumbf_boxes.super_box import SuperBox
 from c2pie.utils.content_types import c2pa_content_types
 
@@ -10,11 +8,14 @@ class Manifest(SuperBox):
     The manifest label is compatible with c2patool: urn:c2pa:<uuid-hex>
     """
 
-    def __init__(self, claim=None, claim_signature=None, assertion_store=None):
-        self.claim = claim
-        self.claim_signature = claim_signature
-        self.assertion_store = assertion_store
-        self.manifest_label = f"urn:c2pa:{uuid.uuid4().hex}"
+    def __init__(
+        self,
+        manifest_label: str,
+    ):
+        self.manifest_label = manifest_label
+        self.claim = None
+        self.claim_signature = None
+        self.assertion_store = None
 
         super().__init__(content_type=c2pa_content_types["default_manifest"], label=self.manifest_label)
 
@@ -34,17 +35,20 @@ class Manifest(SuperBox):
         return self.manifest_label
 
     def get_assertions(self):
-        return self.assertion_store.get_assertions()
+        if self.assertion_store:
+            return self.assertion_store.get_assertions()
+        return
 
     def set_hash_data_length(self, length: int):
         """
         Updates the length of exceptions in HashData, reassembles Claim (assertion hashes)
         and ClaimSignature (COSE Sign1 detached over Claim CBOR).
         """
-        self.assertion_store.set_hash_data_length(length)
+        if self.assertion_store and self.claim and self.claim_signature:
+            self.assertion_store.set_hash_data_length(length)
 
-        self.claim.set_assertion_store(self.assertion_store)
+            self.claim.set_assertion_store(self.assertion_store)
 
-        self.claim_signature.set_claim(self.claim)
+            self.claim_signature.set_claim(self.claim)
 
         self.sync_payload()
