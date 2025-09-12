@@ -6,7 +6,9 @@ from c2pie.utils.content_types import c2pa_content_types
 
 
 def test_create_claim_with_label():
-    test_claim = Claim(claim_generator="c2pie", manifest_label="valid_manifest_label", assertion_store=None)
+    test_claim = Claim(
+        claim_generator="c2pie", manifest_label="valid_manifest_label", assertion_store=AssertionStore([])
+    )
 
     assert test_claim is not None
     assert test_claim.claim_generator == "c2pie"

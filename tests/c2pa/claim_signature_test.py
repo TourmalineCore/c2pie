@@ -6,8 +6,11 @@ from c2pie.utils.assertion_schemas import C2PA_AssertionTypes
 from c2pie.utils.content_types import c2pa_content_types
 
 
-def test_create_claim_signature():
-    test_claim_signature = ClaimSignature(claim=None, private_key=None, certificate=None)
+def test_create_claim_signature_with_empty():
+    assertion_store = AssertionStore(assertions=[])
+    test_claim_signature = ClaimSignature(
+        claim=Claim(assertion_store=assertion_store), private_key=b"", certificate_pem_bundle=b"", certificate=None
+    )
 
     assert test_claim_signature is not None
     assert test_claim_signature.get_label() == "c2pa.signature"
@@ -18,17 +21,11 @@ def test_create_claim_signature_with_claim():
     key_filepath = "tests/fixtures/crypto/ps256.pem"
     cert_filepath = "tests/fixtures/crypto/ps256.pub"
 
-    if key_filepath != "":
-        with open(key_filepath, "rb") as f:
-            key = f.read()
-    else:
-        key = []
-
-    if cert_filepath != "":
-        with open(cert_filepath, "rb") as f:
-            certificate = f.read()
-    else:
-        key = []
+    with open(key_filepath, "rb") as f:
+        key = f.read()
+    
+    with open(cert_filepath, "rb") as f:
+        certificate = f.read()
 
     creative_work_schema = {
         "@context": "https://schema.org",

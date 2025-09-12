@@ -5,7 +5,7 @@ from c2pie.utils.content_types import c2pa_content_types
 
 
 def test_create_assertion_store():
-    test_assertion_store = AssertionStore()
+    test_assertion_store = AssertionStore(assertions=[])
 
     assert test_assertion_store is not None
     assert test_assertion_store.get_content_type() == c2pa_content_types["assertions"]

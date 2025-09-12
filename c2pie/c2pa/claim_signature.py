@@ -44,7 +44,7 @@ class ClaimSignature(SuperBox):
         claim: Claim,
         *,
         private_key: bytes,
-        certificate_pem_bundle: bytes,
+        certificate_pem_bundle: bytes = None,
         certificate: bytes = None,
     ):
         if certificate_pem_bundle is None and certificate is not None:
