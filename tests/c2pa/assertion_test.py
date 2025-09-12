@@ -65,7 +65,7 @@ def test_serialize_cbor_assertion():
     assert test_serialized_cbor_assertion == b"\xa1gactions\x81\xa2factionkc2pa.editedjparametershgradient"
 
 
-def test_serialize_json_assertion():  # noqa: F811
+def test_assertion_content_boxes_not_empty():  # noqa: F811
     creative_work_schema = {
         "@context": "https://schema.org",
         "@type": "CreativeWork",
