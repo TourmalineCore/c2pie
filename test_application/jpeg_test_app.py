@@ -17,22 +17,16 @@ def sign_image(
     key_filepath = "tests/fixtures/crypto/ps256.pem"
     cert_filepath = "tests/fixtures/crypto/ps256.pub"
 
-    if key_filepath != "":
-        with open(key_filepath, "rb") as f:
-            key = f.read()
-    else:
-        key = []
+    with open(key_filepath, "rb") as f:
+        key = f.read()
 
-    if cert_filepath != "":
-        with open(cert_filepath, "rb") as f:
-            certificate = f.read()
-    else:
-        key = []
-
-    cai_offset = 2
+    with open(cert_filepath, "rb") as f:
+        certificate = f.read()
 
     with open(input_path, "rb") as binary_image:
         raw_bytes = binary_image.read()
+
+    cai_offset = 2
 
     creative_work_schema = {
         "@context": "https://schema.org",
