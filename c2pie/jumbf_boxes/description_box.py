@@ -18,8 +18,8 @@ class DescriptionBox(Box):
 
         super().__init__(b"jumd".hex(), payload=payload)
 
-    def get_label(self):
+    def get_label(self) -> str:
         return self.label
 
-    def get_content_type(self):
+    def get_content_type(self) -> bytes:
         return self.content_type

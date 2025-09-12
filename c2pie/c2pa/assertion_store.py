@@ -6,16 +6,24 @@ from c2pie.utils.content_types import c2pa_content_types
 
 
 class AssertionStore(SuperBox):
-    def __init__(self, assertions=None):
+    def __init__(
+        self,
+        assertions: list,
+    ):
         self.assertions = [] if assertions is None else assertions
         super().__init__(
-            content_type=c2pa_content_types["assertions"], label="c2pa.assertions", content_boxes=self.assertions
+            content_type=c2pa_content_types["assertions"],
+            label="c2pa.assertions",
+            content_boxes=self.assertions,
         )
 
-    def get_assertions(self):
+    def get_assertions(self) -> list:
         return self.assertions
 
-    def set_hash_data_length(self, length: int) -> None:
+    def set_hash_data_length(
+        self,
+        length: int,
+    ) -> None:
         for assertion in self.assertions:
             if assertion.type == C2PA_AssertionTypes.data_hash:
                 assertion.set_hash_data_length(length)
