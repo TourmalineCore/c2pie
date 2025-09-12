@@ -10,7 +10,7 @@ class AssertionStore(SuperBox):
         self,
         assertions: list,
     ):
-        self.assertions = [] if assertions is None else assertions
+        self.assertions = assertions
         super().__init__(
             content_type=c2pa_content_types["assertions"],
             label="c2pa.assertions",
