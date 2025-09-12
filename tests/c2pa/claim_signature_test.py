@@ -46,5 +46,5 @@ def test_create_claim_signature_with_claim():
 
     test_claim_signature = ClaimSignature(claim=test_claim, private_key=key, certificate=certificate)
 
-    test_claim_signature.claim is not None  # noqa: B015
-    test_claim_signature.content_boxes[0].get_type() == b"cbor".hex()  # noqa: B015
+    assert test_claim_signature.claim is not None  # noqa: B015
+    assert test_claim_signature.content_boxes[0].get_type() == b"cbor".hex()  # noqa: B015
