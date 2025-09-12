@@ -1,3 +1,5 @@
+import uuid
+
 from c2pie.jumbf_boxes.super_box import SuperBox
 from c2pie.utils.content_types import c2pa_content_types
 
@@ -10,7 +12,7 @@ class Manifest(SuperBox):
 
     def __init__(
         self,
-        manifest_label: str,
+        manifest_label: str = f"urn:c2pa:{uuid.uuid4().hex}",
     ):
         self.manifest_label = manifest_label
         self.claim = None
