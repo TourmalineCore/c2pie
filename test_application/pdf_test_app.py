@@ -34,7 +34,10 @@ def sign_pdf(
         "copyrightYear": "2024",
         "copyrightHolder": "tc-c2pa-py",
     }
-    creative_work_assertion = TC_C2PA_GenerateAssertion(C2PA_AssertionTypes.creative_work, creative_work_schema)
+    creative_work_assertion = TC_C2PA_GenerateAssertion(
+        C2PA_AssertionTypes.creative_work,
+        creative_work_schema,
+    )
 
     hash_data_assertion = TC_C2PA_GenerateHashDataAssertion(
         cai_offset=cai_offset, hashed_data=hashlib.sha256(raw_pdf).digest()
@@ -44,7 +47,12 @@ def sign_pdf(
 
     manifest = TC_C2PA_GenerateManifest(assertions=assertions, private_key=key, certificate_chain=certificate)
 
-    result_pdf = TC_C2PA_EmplaceManifest(C2PA_ContentTypes.pdf, raw_pdf, cai_offset, manifest)
+    result_pdf = TC_C2PA_EmplaceManifest(
+        format_type=C2PA_ContentTypes.pdf,
+        content_bytes=raw_pdf,
+        c2pa_offset=cai_offset,
+        manifests=manifest,
+    )
 
     with open(output_path, "wb") as f:
         f.write(result_pdf)
