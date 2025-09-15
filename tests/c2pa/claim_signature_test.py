@@ -6,7 +6,7 @@ from c2pie.utils.assertion_schemas import C2PA_AssertionTypes
 from c2pie.utils.content_types import c2pa_content_types
 
 
-def test_create_claim_signature_with_empty():
+def test_create_claim_signature_with_empty_claim():
     assertion_store = AssertionStore(assertions=[])
     test_claim_signature = ClaimSignature(
         claim=Claim(assertion_store=assertion_store), private_key=b"", certificate_pem_bundle=b"", certificate=None
@@ -17,13 +17,13 @@ def test_create_claim_signature_with_empty():
     assert test_claim_signature.get_content_type() == c2pa_content_types["claim_signature"]
 
 
-def test_create_claim_signature_with_claim():
+def test_create_claim_signature_with_non_empty_claim():
     key_filepath = "tests/fixtures/crypto/ps256.pem"
     cert_filepath = "tests/fixtures/crypto/ps256.pub"
 
     with open(key_filepath, "rb") as f:
         key = f.read()
-    
+
     with open(cert_filepath, "rb") as f:
         certificate = f.read()
 
