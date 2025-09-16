@@ -83,15 +83,15 @@ class Claim(SuperBox):
         if not assertions:
             return out
 
-        for assetion in assertions:
-            label = getattr(assetion, "label", None)
-            if label is None and hasattr(assetion, "get_label"):
-                label = assetion.get_label()
+        for assertion in assertions:
+            label = getattr(assertion, "label", None)
+            if label is None and hasattr(assertion, "get_label"):
+                label = assertion.get_label()
 
-            if hasattr(assetion, "get_data_for_signing"):
-                data = assetion.get_data_for_signing()
+            if hasattr(assertion, "get_data_for_signing"):
+                data = assertion.get_data_for_signing()
             else:
-                data = assetion.description_box.serialize() + assetion.serialize_content_boxes()
+                data = assertion.description_box.serialize() + assertion.serialize_content_boxes()
 
             out.append(
                 {
