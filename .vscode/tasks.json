@@ -34,7 +34,7 @@
         {
             "label": "Build package",
             "type": "shell",
-            "command": "./scripts/build_package.sh",
+            "command": "rm -rf dist && rm -rf build && poetry build",
             "problemMatcher": [],
             "group": {
                 "kind": "build",

@@ -3,7 +3,7 @@ FROM python:3.12-slim
 ENV PIP_NO_CACHE_DIR=off \
   PIP_DISABLE_PIP_VERSION_CHECK=on \
   PIP_DEFAULT_TIMEOUT=100 \
-  POETRY_VERSION=1.0.0
+  POETRY_VERSION=1.8.3
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git curl ca-certificates build-essential
