@@ -30,7 +30,7 @@
 
 ### Prerequisites
 ---
-1) Python environment. Currently supported Python versions: 3.9 - 3.12.10
+1) Python environment. Currently supported Python versions: 3.9 - 3.12
 2) Private key and certificate chain pair. 
 3) Key and certificate filepaths exported into the current environment with:
 ```bash
