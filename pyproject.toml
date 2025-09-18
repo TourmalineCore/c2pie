@@ -8,12 +8,6 @@ classifiers = [
 ]
 authors = ["Tourmaline Core <contact@tourmalinecore.com>"]
 
-packages = [
-    { include = "c2pie" },
-    { include = "test_application" },
-]
-
-
 [project]
 name = "c2pie"
 authors = [ 
@@ -25,7 +19,7 @@ Homepage = "https://github.com/TourmalineCore/tc-c2pa-py"
 Issues = "https://github.com/TourmalineCore/tc-c2pa-py/issues"
 
 [project.scripts]
-c2pie-sign = 'c2pie.__main__:main'
+c2pie-sign = 'c2pie.main:main'
 
 [tool.poetry.dependencies]
 python = "^3.9,<3.13"
