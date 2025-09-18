@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "c2pie"
 version = "0.2.0"
-description = "The TC-C2PA-Py is python library which provide C2PA standard functionality."
+description = "The c2pie is python library which provide C2PA standard functionality."
 classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
