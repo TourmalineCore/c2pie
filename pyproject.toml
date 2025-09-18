@@ -28,8 +28,8 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/TourmalineCore/tc-c2pa-py"
-Issues = "https://github.com/TourmalineCore/tc-c2pa-py/issues"
+Homepage = "https://github.com/TourmalineCore/c2pie"
+Issues = "https://github.com/TourmalineCore/c2pie/issues"
 
 [project.scripts]
 c2pie-sign = 'c2pie.main:main'
