@@ -42,7 +42,6 @@ pytz = "^2024.1"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.0"
-twine = "^6.1.0"
 pytest-cov = "^7.0.0"
 
 [build-system]
