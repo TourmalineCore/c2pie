@@ -4,7 +4,7 @@
         {
             "label": "Run JPEG test application",
             "type": "shell",
-            "command": "poetry install --no-interaction --no-ansi > /dev/null && python ./test_application/jpeg_test_app.py",
+            "command": "poetry install --no-interaction --no-ansi > /dev/null && export $(cat .env | xargs) && c2pie-sign --input_file ${TEST_IMAGE_PATH}",
             "problemMatcher": [],
             "group": {
                 "kind": "build",
@@ -14,7 +14,7 @@
         {
             "label": "Run PDF test application",
             "type": "shell",
-            "command": "poetry install --no-interaction --no-ansi > /dev/null && python ./test_application/pdf_test_app.py",
+            "command": "poetry install --no-interaction --no-ansi > /dev/null && export $(cat .env | xargs) && c2pie-sign --input_file ${TEST_PDF_PATH}",
             "problemMatcher": [],
             "group": {
                 "kind": "build",
