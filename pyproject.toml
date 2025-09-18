@@ -7,6 +7,10 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 authors = ["Tourmaline Core <contact@tourmalinecore.com>"]
+[[tool.poetry.source]]
+name = "PyPI"
+priority = "primary"
+
 
 [project]
 name = "c2pie"
