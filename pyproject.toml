@@ -1,12 +1,7 @@
 [tool.poetry]
 name = "c2pie"
 version = "0.2.0"
-description = "The c2pie is python library which provide C2PA standard functionality."
-classifiers = [
-    "Programming Language :: Python :: 3",
-    "Operating System :: OS Independent",
-]
-authors = ["Tourmaline Core <contact@tourmalinecore.com>"]
+
 [[tool.poetry.source]]
 name = "PyPI"
 priority = "primary"
@@ -14,8 +9,22 @@ priority = "primary"
 
 [project]
 name = "c2pie"
+description = "The c2pie is python library which provide C2PA standard functionality."
 authors = [ 
   { name="Tourmaline Core", email="contact@tourmalinecore.com" },
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Natural Language :: English",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: POSIX :: Linux",
+    'Operating System :: Microsoft :: Windows',
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
 ]
 
 [project.urls]
