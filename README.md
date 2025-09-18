@@ -1,4 +1,4 @@
-# TC-C2PA-PY
+# C2PIE
 
 [![Build](https://github.com/TourmalineCore/tc-c2pa-py/actions/workflows/build_image.yml/badge.svg)](https://github.com/TourmalineCore/tc-c2pa-py/actions/workflows/build_image.yml)
 [![Unit Tests](https://github.com/TourmalineCore/tc-c2pa-py/actions/workflows/run_unit_tests.yml/badge.svg)](https://github.com/TourmalineCore/tc-c2pa-py/actions/workflows/run_unit_tests.yml)
@@ -6,14 +6,13 @@
 
 ---
 
-**TC-C2PA-PY** is an open‑source Python library for constructing C2PA Content Credentials manifests that validate with `c2patool` and common C2PA consumers. It supports building claims, assertions, and COSE signatures and embedding the manifest store into JPEG (APP11) and PDF (incremental update) assets.
+**C2PIE** is an open‑source Python library for constructing C2PA Content Credentials manifests that validate with `c2patool` and common C2PA consumers. It supports building claims, assertions, and COSE signatures and embedding the manifest store into JPEG (APP11) and PDF (incremental update) assets.
 
 - C2PA spec: https://c2pa.org/  
 - Validation: https://github.com/contentauth/c2pa-rs (`c2patool`)
 
 > ⚠️ This library helps you build valid manifests, but trust decisions (anchors, allow/deny lists, TSA) are your responsibility. For production, you must provide a certificate chain anchored to an accepted trust root and configure validation policy accordingly.
 
----
 
 ## Features
 
@@ -25,27 +24,68 @@
   - PDF via incremental update at EOF (xref/trailer preserved; `/AF` + `/Names/EmbeddedFiles`).  
 - Validates with `c2patool` (structure + signatures).
 
----
+
 
 ## Quick start
 
-### 1) Clone & (optionally) use Dev Containers
+### Prerequisites
+---
+1) Python environment. Currently supported Python versions: 3.9 - 3.12.10
+2) Private key and certificate chain pair. 
+3) Key and certificate filepaths exported into the current environment with:
+```bash
+export C2PIE_KEY_FILEPATH=path/to/your/private/key/file
+export C2PIE_CERT_FILEPATH=path/to/your/certificate/chain/file
+```
+
+### Usage
+---
+
+#### 1) Install c2pie package
+
+Run from Python shell terminal:
+```bash
+pip install c2pie
+```
+
+#### 2) Run the following command to sign an input .jpg or .pdf:
+```bash
+c2pie-sign --input-file path/to/input/file
+```
+
+By default, signed file will be saved to the same directory as the input file with the *signed_* prefix. 
+To explicitly set output path, use:
+```bash
+c2pie-sign --input-file path/to/input_file --output-file path/to/output/file
+```
+
+
+
+## For developers
+
+First of all, clone and (optionally) use Dev Containers:
 
 - Install Docker and VS Code “Dev Containers” extension.  
-- Open the repo in VS Code and Reopen in Container. The container installs Python, your package in editable mode, and configures Ruff (lint + format on save).
+- Open the repo in VS Code and Reopen in Container. The container installs Python, your package in editable mode, and configures Ruff which provided linting and formatting on save.
 
-> Dev container also sets Ruff as default formatter and auto‑fixes on save (see `.devcontainer/devcontainer.json`).
+> Dev container also sets Ruff as default formatter and enables auto-fixing on save (see `.devcontainer/devcontainer.json`).
 
-### 2) Run tests
+
+### Run tests
 
 Run from terminal:
 ```bash
-pytest -q
+pytest
 ```
 
 Or use the VC Code task `Run unit tests`
 
-### 3) Lint & format
+Or if you'd like to get info on test coverage, use:
+```bash
+pytest --cov
+```
+
+### Lint & format
 
 ```bash
 # check formatting & linting
@@ -57,20 +97,22 @@ ruff format .
 ruff check . --fix
 ```
 
-### 4) Try the example apps
+### Try the example apps
 
-- JPEG: `test_application/jpeg_test_app.py`  
-- PDF: `test_application/pdf_test_app.py`  
+
+To run test applications, you need to fill out TEST_PDF_PATH and/or TEST_IMAGE_PATH in values in *.env*. Test scripts use these filepaths as input files for signing.
+
+Also make sure that you have certificate chain and public key in `tests/fixtures/crypto`. They should be there by default if you've cloned the repository. If needed, you can change their filepaths in *.env* as well.
+
 
 Use the VC Code task `Build package`
 
 Use the VC Code task `Run JPEG test application` or `Run PDF test application`
 
-To run application you need to have:
-1. Sample files (`tests/fixtures/`)
-2. Certificate chain and public key (`tests/fixtures/crypto`)
 
-The workflow of test applications:
+### Example apps workflow
+
+
 1) Load a sample asset (`tests/fixtures/test_image.jpg` or `tests/fixtures/test_document.pdf`);
 2) Build a manifest:
    - `TC_C2PA_GenerateAssertion`
@@ -79,13 +121,15 @@ The workflow of test applications:
 3) Embed the manifest (`TC_C2PA_EmplaceManifest`);  
 4) Write a new asset with C2PA.
 
-Validate with:
+### Validation
+
+Output files can be validated with:
 ```bash
 c2patool path/to/your_output.jpg
 c2patool path/to/your_output.pdf
 ```
 
----
+
 
 ## API overview (high‑level)
 
@@ -144,7 +188,6 @@ result_bytes = TC_C2PA_EmplaceManifest(
 
 The library takes care of iterative sizing so the `c2pa.hash.data` matches exactly, otherwise validators return `assertion.dataHash.mismatch`.
 
----
 
 ## CI: build, lint, and tests
 
@@ -154,7 +197,6 @@ We ship three GitHub Actions (see `.github/workflows/`):
 - **Lint** (`lint.yml`): Ruff lint + format checks.  
 - **Run unit_tests** (`run_unit_tests.yml`): containerized unit tests.
 
----
 
 ## Certificates & trust
 
@@ -164,7 +206,6 @@ We ship three GitHub Actions (see `.github/workflows/`):
   - provide a leaf + intermediates bundle (no root),  
   - configure trust anchors/allow‑lists in your validator environment. 
 
----
 
 ## Contributing
 
