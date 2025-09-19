@@ -110,7 +110,8 @@ def emplace_manifest_into_pdf(
         object_5 = (
             f"{starting_value + 4} 0 obj\n".encode("ascii")
             + (
-                f"<< /Type /Catalog /Pages {info.pages_ref} /Names {starting_value + 3} 0 R /AF [ {starting_value + 1} 0 R ] >>\n"
+                f"<< /Type /Catalog /Pages {info.pages_ref} /Names "
+                f"{starting_value + 3} 0 R /AF [ {starting_value + 1} 0 R ] >>\n"
             ).encode("ascii")
             + b"endobj\n"
         )
