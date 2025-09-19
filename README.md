@@ -1,5 +1,5 @@
-# C2PIE
-
+c2pie
+===
 [![Build](https://github.com/TourmalineCore/tc-c2pa-py/actions/workflows/build_image.yml/badge.svg)](https://github.com/TourmalineCore/tc-c2pa-py/actions/workflows/build_image.yml)
 [![Unit Tests](https://github.com/TourmalineCore/tc-c2pa-py/actions/workflows/run_unit_tests.yml/badge.svg)](https://github.com/TourmalineCore/tc-c2pa-py/actions/workflows/run_unit_tests.yml)
 [![Lint](https://github.com/TourmalineCore/tc-c2pa-py/actions/workflows/lint.yml/badge.svg)](https://github.com/TourmalineCore/tc-c2pa-py/actions/workflows/lint.yml)
@@ -16,13 +16,17 @@
 
 ## Features
 
-- C2PA Claim (`c2pa.claim`) with canonical CBOR, `dc:format`, `alg`, and hashed‑URIs for assertions.
-- C2PA Signature (`c2pa.signature`) using COSE_Sign1 (PS256) with detached payload and `x5chain` in protected header.
-- Assertion Store with common assertions (e.g., `c2pa.hash.data` hard‑binding, schema.org CreativeWork, etc.).
-- Embedding
+🥧 C2PA Claim (`c2pa.claim`) with canonical CBOR, `dc:format`, `alg`, and hashed‑URIs for assertions.
+
+🥧 C2PA Signature (`c2pa.signature`) using COSE_Sign1 (PS256) with detached payload and `x5chain` in protected header.
+
+🥧 Assertion Store with common assertions (e.g., `c2pa.hash.data` hard‑binding, schema.org CreativeWork, etc.).
+
+🥧 Embedding
   - JPEG via APP11 segments (size‑driven iterative layout).
   - PDF via incremental update at EOF (xref/trailer preserved; `/AF` + `/Names/EmbeddedFiles`).  
-- Validates with `c2patool` (structure + signatures).
+
+🥧 Validation with `c2patool` (structure + signatures).
 
 
 
@@ -217,4 +221,5 @@ We ship three GitHub Actions (see `.github/workflows/`):
 
 ## License
 
-MIT
+MIT License. See [c2pie repository's license](LICENSE) for more information.
+
