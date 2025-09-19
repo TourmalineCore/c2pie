@@ -1,6 +1,5 @@
 import hashlib
 import os
-from enum import Enum
 
 from c2pie.interface import (
     C2PA_AssertionTypes,
@@ -9,6 +8,7 @@ from c2pie.interface import (
     TC_C2PA_GenerateHashDataAssertion,
     TC_C2PA_GenerateManifest,
 )
+from c2pie.utils.content_types import C2PA_ContentTypes
 
 creative_work_schema = {
     "@context": "https://schema.org",
@@ -20,9 +20,9 @@ creative_work_schema = {
 
 
 def _load_certificates_and_key(
-    key_path: str,
-    certificates_path: str,
-) -> list[bytes]:
+    key_path: str | None,
+    certificates_path: str | None,
+) -> tuple[bytes, bytes]:
     if not key_path:
         raise ValueError("Key filepath variable has not been set. Cannot sign the provided file.")
     if not certificates_path:
@@ -37,7 +37,7 @@ def _load_certificates_and_key(
 
 
 def sign_file(
-    file_type: Enum,
+    file_type: C2PA_ContentTypes,
     input_path: str,
     output_path: str,
     key_path: str | None = os.getenv("C2PIE_KEY_FILEPATH"),
@@ -67,7 +67,11 @@ def sign_file(
 
     assertions = [creative_work_assertion, hash_data_assertion]
 
-    manifest = TC_C2PA_GenerateManifest(assertions=assertions, private_key=key, certificate_chain=certificates)
+    manifest = TC_C2PA_GenerateManifest(
+        assertions=assertions,
+        private_key=key,
+        certificate_chain=certificates,
+    )
 
     signed_bytes = TC_C2PA_EmplaceManifest(
         format_type=file_type,
