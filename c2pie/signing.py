@@ -14,25 +14,21 @@ from c2pie.interface import (
 
 
 def sign_pdf(
-    key_filepath: str | None = os.getenv("C2PIE_KEY_FILEPATH"),
-    cert_filepath: str | None = os.getenv("C2PIE_CERT_FILEPATH"),
+    key_path: str | None = os.getenv("C2PIE_KEY_FILEPATH"),
+    certificates_path: str | None = os.getenv("C2PIE_CERT_FILEPATH"),
     input_path: str = "tests/fixtures/test_doc.pdf",
-    output_path: str | None = None,
+    output_path: str = "tests/fixtures/signed_test_doc.pdf",
 ) -> None:
-    if not key_filepath:
+    if not key_path:
         print("Key filepath variable has not been set. Cannot sign the provided file.")
         return
-    if not cert_filepath:
+    if not certificates_path:
         print("Cert filepath variable has not been set. Cannot sign the provided file.")
         return
 
-    if not output_path:
-        directory, filename = os.path.split(input_path)[0], os.path.split(input_path)[1]
-        output_path = directory + "/signed_" + filename
-
-    with open(key_filepath, "rb") as f:
+    with open(key_path, "rb") as f:
         key = f.read()
-    with open(cert_filepath, "rb") as f:
+    with open(certificates_path, "rb") as f:
         certificate = f.read()
 
     with open(input_path, "rb") as f:
@@ -74,26 +70,22 @@ def sign_pdf(
 
 
 def sign_image(
-    key_filepath: str | None = os.getenv("C2PIE_KEY_FILEPATH"),
-    cert_filepath: str | None = os.getenv("C2PIE_CERT_FILEPATH"),
+    key_path: str | None = os.getenv("C2PIE_KEY_FILEPATH"),
+    cert_path: str | None = os.getenv("C2PIE_CERT_FILEPATH"),
     input_path: str = "tests/fixtures/test_image.jpg",
-    output_path: str | None = None,
+    output_path: str = "tests/fixtures/signed_test_image.jpg",
 ) -> None:
-    if not key_filepath:
+    if not key_path:
         print("Key filepath variable has not been set. Cannot sign the provided image.")
         return
-    if not cert_filepath:
+    if not cert_path:
         print("Cert filepath variable has not been set. Cannot sign the provided image.")
         return
 
-    if not output_path:
-        directory, filename = os.path.split(input_path)[0], os.path.split(input_path)[1]
-        output_path = directory + "/signed_" + filename
-
-    with open(key_filepath, "rb") as f:
+    with open(key_path, "rb") as f:
         key = f.read()
 
-    with open(cert_filepath, "rb") as f:
+    with open(cert_path, "rb") as f:
         certificate = f.read()
 
     with open(input_path, "rb") as binary_image:

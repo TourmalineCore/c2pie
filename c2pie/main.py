@@ -71,7 +71,10 @@ def main() -> None:
     file_extension = input_file_path.suffix
 
     # sign the provided file
-    extension_to_sign_def[file_extension](input_path=input_file_path)
+    extension_to_sign_def[file_extension](
+        input_path=input_file_path,
+        output_path=output_file_path,
+    )
 
 
 if __name__ == "__main__":
