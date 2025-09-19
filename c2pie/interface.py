@@ -72,11 +72,11 @@ def TC_C2PA_EmplaceManifest(
                     claim.set_format("application/pdf")
 
     if format_type == C2PA_ContentTypes.jpg:
-        guessed_length = 0
+        assumed_hash_data_len = 0
         final_length = -1
         tail = b""
         for _ in range(RETRY_SIGNATURE):
-            manifests.set_hash_data_length_for_all(guessed_length)
+            manifests.set_hash_data_length_for_all(assumed_hash_data_len)
             payload = manifests.serialize()
             storage = JpgSegmentApp11Storage(
                 app11_segment_box_length=manifests.get_length(),
@@ -88,7 +88,7 @@ def TC_C2PA_EmplaceManifest(
             if total_len == final_length:
                 break
             final_length = total_len
-            guessed_length = total_len
+            assumed_hash_data_len = total_len
         return content_bytes[:c2pa_offset] + tail + content_bytes[c2pa_offset:]
 
     if format_type == C2PA_ContentTypes.pdf:

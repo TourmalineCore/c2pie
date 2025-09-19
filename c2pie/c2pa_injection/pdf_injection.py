@@ -21,7 +21,7 @@ def _find_startxref(bytes: bytes) -> int:
     return int(patterns[-1].group(1))
 
 
-def _max_obj_num(bytes: bytes) -> int:
+def _get_max_obj_num(bytes: bytes) -> int:
     object_numbers = [int(m.group(1)) for m in re.finditer(rb"\n(\d+)\s+0\s+obj\b", bytes)]
     return max(object_numbers) if object_numbers else 0
 
@@ -40,11 +40,11 @@ def _extract_pages_ref(bytes: bytes) -> str:
     return f"{int(page_count.group(1))} 0 R"
 
 
-def _scan(bytes: bytes) -> PdfInfo:
+def _scan_pdf_to_get_its_data(bytes: bytes) -> PdfInfo:
     return PdfInfo(
         content=bytes,
         startxref=_find_startxref(bytes),
-        max_obj=_max_obj_num(bytes),
+        max_obj=_get_max_obj_num(bytes),
         pages_ref=_extract_pages_ref(bytes),
     )
 
@@ -64,7 +64,7 @@ def emplace_manifest_into_pdf(
     - Exception c2pa.hash.data: start == len(initial_content), length == length of the entire tail (see C2PA 2.2).
     - Sign the claim, build the jumbf store, place it as EmbeddedFile, write xref/trailer correctly.
     """
-    info = _scan(initial_content)
+    info = _scan_pdf_to_get_its_data(initial_content)
     initial_length_of_file = len(initial_content)
     pointer_on_previous_xref = info.startxref
     starting_value = info.max_obj + 1
@@ -72,12 +72,12 @@ def emplace_manifest_into_pdf(
     subtype = "/application#2Fc2pa"
     fname = "manifest.c2pa"
 
-    want_info = bool(author)
+    author_info_required = bool(author)
 
-    guess = 0
+    assumed_hash_data_len = 0
     last = -1
     for _ in range(RETRY_SIGNATURE):
-        manifests.set_hash_data_length_for_all(guess)
+        manifests.set_hash_data_length_for_all(assumed_hash_data_len)
         store = manifests.serialize()
         length_of_c2pa_manifest = len(store)
 
@@ -116,7 +116,7 @@ def emplace_manifest_into_pdf(
             + b"endobj\n"
         )
 
-        if want_info:
+        if author_info_required:
             author_s = author.replace(")", r"\)") if author else ""
             object_6 = (
                 f"{starting_value + 5} 0 obj\n".encode("ascii")
@@ -132,13 +132,13 @@ def emplace_manifest_into_pdf(
         offset_of_object_3 = offset_of_object_2 + len(object_2)
         offset_of_object_4 = offset_of_object_3 + len(object_3)
         offset_of_object_5 = offset_of_object_4 + len(object_4)
-        if want_info:
+        if author_info_required:
             offset_of_object_6 = offset_of_object_5 + len(object_5)
             xref_pos = offset_of_object_6 + len(object_6)
         else:
             xref_pos = offset_of_object_5 + len(object_5)
 
-        count = 5 + (1 if want_info else 0)
+        count = 5 + (1 if author_info_required else 0)
         xref = b"xref\n" + f"{starting_value} {count}\n".encode("ascii")
         xref += (
             _xref_entry(offset_of_object_1)
@@ -147,7 +147,7 @@ def emplace_manifest_into_pdf(
             + _xref_entry(offset_of_object_4)
             + _xref_entry(offset_of_object_5)
         )
-        if want_info:
+        if author_info_required:
             xref += _xref_entry(offset_of_object_6)
 
         size_val = starting_value + count
@@ -157,7 +157,7 @@ def emplace_manifest_into_pdf(
             + f"/Root {starting_value + 4} 0 R ".encode("ascii")
             + f"/Prev {pointer_on_previous_xref} ".encode("ascii")
         )
-        if want_info:
+        if author_info_required:
             trailer += f"/Info {starting_value + 5} 0 R ".encode("ascii")
         trailer += b">>\n"
 
@@ -180,8 +180,8 @@ def emplace_manifest_into_pdf(
         if total_len == last:
             return initial_content + tail
         last = total_len
-        guess = total_len
+        assumed_hash_data_len = total_len
 
-    manifests.set_hash_data_length_for_all(guess)
+    manifests.set_hash_data_length_for_all(assumed_hash_data_len)
     store = manifests.serialize()
     return initial_content + tail

@@ -7,7 +7,7 @@ from c2pie.utils.content_types import c2pa_content_types
 class ManifestStore(SuperBox):
     """
     C2PA Manifest Store (JUMBF superbox) with one or more Manifest.
-    IMPORTANT: here we do NOT “guess” length of specific manifest bytes (JPEG/PDF, etc.).
+    IMPORTANT: here we do NOT "assume" length of specific manifest bytes (JPEG/PDF, etc.).
     For PDF, the length of the exception is set by the injector; for JPEG, by its own injector.
     """
 
