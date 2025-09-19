@@ -3,7 +3,6 @@ import enum
 
 class C2PA_ContentTypes(enum.Enum):
     jpg: str = ".jpg"
-    jpeg: str = ".jpeg"
     pdf: str = ".pdf"
 
 
