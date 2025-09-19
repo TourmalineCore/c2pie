@@ -69,8 +69,8 @@ c2pie-sign --input-file path/to/input_file --output-file path/to/output/file
 
 First of all, clone and (optionally) use Dev Containers:
 
-- Install Docker and VS Code “Dev Containers” extension.  
-- Open the repo in VS Code and Reopen in Container. The container installs Python, your package in editable mode, and configures Ruff which provided linting and formatting on save.
+1. Install Docker and VS Code “Dev Containers” extension.  
+2. Open the repo in VS Code and Reopen in Container. The container installs Python, your package in editable mode, and configures Ruff which provided linting and formatting on save.
 
 > Dev container also sets Ruff as default formatter and enables auto-fixing on save (see `.devcontainer/devcontainer.json`).
 
@@ -187,8 +187,9 @@ result_bytes = TC_C2PA_EmplaceManifest(
 
 ### Notes for PDF vs JPEG
 
-- **PDF**: we append an incremental update. The `c2pa.hash.data` exclusion starts at `len(original_pdf)` and its length equals the final tail size (computed iteratively).  
-- **JPEG**: we insert APP11 segments. The exclusion start is the APP11 insertion offset; the length is the final APP11 payload length (also computed iteratively).
+🥧  **PDF**: we append an incremental update. The `c2pa.hash.data` exclusion starts at `len(original_pdf)` and its length equals the final tail size (computed iteratively).  
+
+🥧  **JPEG**: we insert APP11 segments. The exclusion start is the APP11 insertion offset; the length is the final APP11 payload length (also computed iteratively).
 
 The library takes care of iterative sizing so the `c2pa.hash.data` matches exactly, otherwise validators return `assertion.dataHash.mismatch`.
 
@@ -204,8 +205,9 @@ We ship three GitHub Actions (see `.github/workflows/`):
 
 ## Certificates & trust
 
-- Example keys are located in `tests/fixtures/crypto/`. They are suitable for development only.  
-- For production:
+Example keys are located in `tests/fixtures/crypto/`. They are suitable for development only.  
+
+For production:
   - use a real document‑signing certificate (RSA‑PSS or ECDSA per C2PA),  
   - provide a leaf + intermediates bundle (no root),  
   - configure trust anchors/allow‑lists in your validator environment. 
@@ -213,9 +215,11 @@ We ship three GitHub Actions (see `.github/workflows/`):
 
 ## Contributing
 
-- Use Conventional Commits (e.g., `feat:`, `fix:`, `style(ruff):`, `ci:`).  
-- Run `ruff format` + `ruff check --fix` before committing.  
-- Add unit tests for new behavior.
+🥧  Use Conventional Commits (e.g., `feat:`, `fix:`, `style(ruff):`, `ci:`).  
+
+🥧  Run `ruff format` + `ruff check --fix` before committing.  
+
+🥧  Add unit tests for new behavior.
 
 ---
 
