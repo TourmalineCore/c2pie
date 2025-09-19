@@ -6,8 +6,8 @@ from pathlib import Path
 
 import pytest
 
-from test_application.jpeg_test_app import sign_image
-from test_application.pdf_test_app import sign_pdf
+from c2pie.signing import sign_file
+from c2pie.utils.content_types import C2PA_ContentTypes
 
 FIXTURES_DIR = Path(__file__).parent.parent / "fixtures"
 
@@ -56,60 +56,50 @@ def _c2pa_json_report(asset_path: str) -> dict:
 
 
 @pytest.mark.e2e
-def test_jpeg_e2e_c2patool(tmp_path):
-    if not has_c2patool():
-        pytest.skip("c2patool not available")
-    if sign_image is None:
-        pytest.skip("sign_image not available")
-
-    os.environ["C2PA_BACKEND"] = "tool"
-
-    inp = tmp_path / "in.jpg"
-    out = tmp_path / "out.jpg"
-    copy_fixture("./test_image.jpg", inp)
-
-    try:
-        sign_image(
-            input_path=inp,
-            output_path=out,
-        )
-    except NotImplementedError:
-        pytest.xfail("sign_image not implemented yet")
-
-    data = _c2pa_json_report(str(out))
-    assert "manifests" in data or "manifest" in data
-
-
-@pytest.mark.e2e
 def test_pdf_e2e_c2patool(tmp_path):
     if not has_c2patool():
         pytest.skip("c2patool not available")
-    if sign_pdf is None:
+    if sign_file is None:
         pytest.skip("sign_pdf not available yet")
 
     os.environ["C2PA_BACKEND"] = "tool"
 
-    inp = tmp_path / "in.pdf"
-    out = tmp_path / "out.pdf"
-    copy_fixture("./test_doc.pdf", inp)
+    inp_pdf = tmp_path / "in.pdf"
+    out_pdf = tmp_path / "out.pdf"
+    copy_fixture("./test_doc.pdf", inp_pdf)
 
     try:
-        sign_pdf(
-            input_path=inp,
-            output_path=out,
+        sign_file(
+            file_type=C2PA_ContentTypes(".pdf"),
+            input_path=inp_pdf,
+            output_path=out_pdf,
         )
     except NotImplementedError:
-        pytest.xfail("sign_pdf not implemented yet")
+        pytest.xfail("sign_file not implemented yet")
 
-    data = _c2pa_json_report(str(out))
-    assert "manifests" in data or "manifest" in data
+    inp_jpg = tmp_path / "in.jpg"
+    out_jpg = tmp_path / "out.jpg"
+    copy_fixture("./test_image.jpg", inp_jpg)
 
-    manifests = data.get("manifests")
-    assert manifests, "no manifests in output"
+    try:
+        sign_file(
+            file_type=C2PA_ContentTypes(".jpg"),
+            input_path=inp_jpg,
+            output_path=out_jpg,
+        )
+    except NotImplementedError:
+        pytest.xfail("sign_file not implemented yet")
 
-    if isinstance(manifests, dict):
-        manifests_list = list(manifests.values())
-    else:
-        manifests_list = manifests
+    for out in [out_pdf, out_jpg]:
+        data = _c2pa_json_report(str(out))
+        assert "manifests" in data or "manifest" in data
 
-    assert manifests_list, "empty manifests list after normalization"
+        manifests = data.get("manifests")
+        assert manifests, "no manifests in output"
+
+        if isinstance(manifests, dict):
+            manifests_list = list(manifests.values())
+        else:
+            manifests_list = manifests
+
+        assert manifests_list, "empty manifests list after normalization"

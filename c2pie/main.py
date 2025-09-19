@@ -1,15 +1,12 @@
 import argparse
+from enum import Enum
 from pathlib import Path
 
-from c2pie.signing import sign_image, sign_pdf
+from c2pie.signing import sign_file
+from c2pie.utils.content_types import C2PA_ContentTypes
 
-supported_extensions: list = [".pdf", ".jpeg", ".jpg"]
-extension_to_sign_def: dict = {
-    ".pdf": sign_pdf,
-    ".jpeg": sign_image,
-    ".jpg": sign_image,
-}
-
+supported_extensions: list[str] = [_type.value for _type in C2PA_ContentTypes]
+ 
 
 def parse_arguments():
     parser = argparse.ArgumentParser(
@@ -68,10 +65,11 @@ def main() -> None:
         name_of_input_file = input_file_path.name
         output_file_path = input_file_path.with_name("signed_" + name_of_input_file)
 
-    file_extension = input_file_path.suffix
+    file_content_type: Enum = C2PA_ContentTypes(input_file_path.suffix)
 
     # sign the provided file
-    extension_to_sign_def[file_extension](
+    sign_file(
+        file_type=file_content_type,
         input_path=input_file_path,
         output_path=output_file_path,
     )

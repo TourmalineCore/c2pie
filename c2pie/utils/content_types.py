@@ -2,8 +2,9 @@ import enum
 
 
 class C2PA_ContentTypes(enum.Enum):
-    jpg = 0
-    pdf = 1
+    jpg: str = ".jpg"
+    jpeg: str = ".jpeg"
+    pdf: str = ".pdf"
 
 
 jumbf_content_types = {
