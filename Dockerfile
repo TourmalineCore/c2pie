@@ -6,7 +6,7 @@ ENV PIP_NO_CACHE_DIR=off \
   POETRY_VERSION=1.8.3
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    git curl ca-certificates build-essential
+    git curl ca-certificates build-essential ssh
     
 RUN pip install "poetry>=$POETRY_VERSION"
 
