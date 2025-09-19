@@ -76,7 +76,7 @@ def sign_file(
         manifests=manifest,
     )
 
-    with open(output_path, "wb") as f:
-        f.write(signed_bytes)
+    with open(output_path, "wb") as output_file:
+        output_file.write(signed_bytes)
 
     print(f"Successfully signed the file {input_path}!\nThe result was saved to {output_path}.")
