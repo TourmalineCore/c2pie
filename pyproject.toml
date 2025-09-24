@@ -9,7 +9,7 @@ priority = "primary"
 
 [project]
 name = "c2pie"
-description = "The c2pie is python library which provide C2PA standard functionality."
+description = "The c2pie is a Python library that provides C2PA standard functionality."
 authors = [ 
   { name="Tourmaline Core", email="contact@tourmalinecore.com" },
 ]
