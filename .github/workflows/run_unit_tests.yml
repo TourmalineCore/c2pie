@@ -1,23 +1,56 @@
-name: 'Run unit-tests'
+name: Run unit-tests
 
 on:
   pull_request:
+  push:
+    branches:
+      - 'feature/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: read
 
 jobs:
   run-unit-tests:
-    name: Run unit tests
-    runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/tourmalinecore/${{ github.event.repository.name }}:latest
-      credentials:
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+    name: Run unit tests (container)
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: 'latest'
+
+      - name: Run Poetry install
+        run: |
+          poetry lock && poetry install --no-interaction --no-ansi
+
+      - name: Ensure pytest is available
+        run: |
+          if ! command -v pytest >/dev/null 2>&1; then
+            python -m pip install -U pip pytest
+          fi
 
       - name: Run unit tests
         run: |
-          chmod +x ./scripts/*.sh
-          ./scripts/build_package.sh
-          pytest --ignore=test_application
+          mkdir -p reports
+          poetry run pytest --ignore=test_application -m "not e2e" -q --junitxml=reports/junit.xml --maxfail=1
+
+      - name: Upload test report (JUnit)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-${{ github.sha }}
+          path: reports/junit.xml

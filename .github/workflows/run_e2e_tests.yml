@@ -1,0 +1,74 @@
+name: Run E2E-tests
+
+on:
+  pull_request:
+  push:
+    branches:
+      - 'feature/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  run-e2e-tests:
+    name: Run e2e tests (container)
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: 'latest'
+
+      - name: Run Poetry install
+        run: |
+          poetry lock && poetry install --no-interaction --no-ansi
+
+      - name: Ensure pytest is available
+        run: |
+          if ! command -v pytest >/dev/null 2>&1; then
+            python -m pip install -U pip pytest
+          fi
+
+      - name: Cache Rust and Cargo dependencies
+        id: cache-rust
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.rustup
+            ~/.cargo
+          key: ${{ runner.os }}-rust-
+          restore-keys: |
+            ${{ runner.os }}-rust-
+
+      - name: Install Rust toolchain and c2patool
+        if: steps.cache-rust.outputs.cache-hit != 'true'
+        run: |
+          curl -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
+          . "$HOME/.cargo/env"
+          cargo install c2patool --locked
+
+      - name: Add cargo to PATH
+        run: echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+      - name: Verify if c2patool is installed 
+        run: |
+          c2patool -V
+
+      - name: Run e2e tests
+        run: |
+          mkdir -p reports
+          echo pwd
+          poetry run pytest tests/c2pa/e2e_test.py

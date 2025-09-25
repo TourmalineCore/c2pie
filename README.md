@@ -1,30 +1,179 @@
 # TC-C2PA-PY
-It is the open-source Python library which provide functionality of generation Content Credentials Manifest according to the [C2PA standard](https://c2pa.org/).   
-Main goal is to help construct C2PA manifest, however it is crucial for the library user to know what the manifest should look like in the final state in order to use the library's methods correctly. 
 
-Library usage example is located by following path: `test_application/test_app.py`.
+[![Build](https://github.com/TourmalineCore/tc-c2pa-py/actions/workflows/build_image.yml/badge.svg)](https://github.com/TourmalineCore/tc-c2pa-py/actions/workflows/build_image.yml)
+[![Unit Tests](https://github.com/TourmalineCore/tc-c2pa-py/actions/workflows/run_unit_tests.yml/badge.svg)](https://github.com/TourmalineCore/tc-c2pa-py/actions/workflows/run_unit_tests.yml)
+[![Lint](https://github.com/TourmalineCore/tc-c2pa-py/actions/workflows/lint.yml/badge.svg)](https://github.com/TourmalineCore/tc-c2pa-py/actions/workflows/lint.yml)
 
-## How to start this project
+---
 
-It is recommended to work with existing modules using [Dev containers](https://code.visualstudio.com/docs/devcontainers/containers) in Visual Studio Code.
+**TC-C2PA-PY** is an open‑source Python library for constructing C2PA Content Credentials manifests that validate with `c2patool` and common C2PA consumers. It supports building claims, assertions, and COSE signatures and embedding the manifest store into JPEG (APP11) and PDF (incremental update) assets.
 
-### Prerequisites
+- C2PA spec: https://c2pa.org/  
+- Validation: https://github.com/contentauth/c2pa-rs (`c2patool`)
 
-- Install [WSL](https://ubuntu.com/desktop/wsl) 
-- Install the Docker client ([Windows](https://docs.docker.com/desktop/setup/install/windows-install/) / [Mac](https://docs.docker.com/desktop/setup/install/mac-install/) / [Linux](https://docs.docker.com/desktop/setup/install/linux-install/)) 
-  - Make sure Docker client is the latest version
-  - Make sure Docker uses WSL 2 based engine
+> ⚠️ This library helps you build valid manifests, but trust decisions (anchors, allow/deny lists, TSA) are your responsibility. For production, you must provide a certificate chain anchored to an accepted trust root and configure validation policy accordingly.
 
-### Open the project
+---
 
-- Make sure Docker daemon is running before opening the dev container (`Ctrl + Shift + P` -> "Reopen in container" or click the button in the lower left corner -> "Reopen in container")
-- Microsoft VS Code
-  - VS Code should also have the "Dev Containers" extension installed. To check it, open "View: Extensions" with `Ctrl + Shift + X`.
+## Features
 
+- C2PA Claim (`c2pa.claim`) with canonical CBOR, `dc:format`, `alg`, and hashed‑URIs for assertions.
+- C2PA Signature (`c2pa.signature`) using COSE_Sign1 (PS256) with detached payload and `x5chain` in protected header.
+- Assertion Store with common assertions (e.g., `c2pa.hash.data` hard‑binding, schema.org CreativeWork, etc.).
+- Embedding
+  - JPEG via APP11 segments (size‑driven iterative layout).
+  - PDF via incremental update at EOF (xref/trailer preserved; `/AF` + `/Names/EmbeddedFiles`).  
+- Validates with `c2patool` (structure + signatures).
 
-### How to run project
+---
 
-There are VSCode tasks provided to interact with code. Please use `Ctrl + Shift + B` to open the context menu:
-- `Run unit tests` task runs all unit tests that provided in `tests` folder.
-- `Run test application` task runs the usage example of library that provided in `test_application` folder.
-- `Build package` task builds the Python library package that configured in `setup.py` file.
+## Quick start
+
+### 1) Clone & (optionally) use Dev Containers
+
+- Install Docker and VS Code “Dev Containers” extension.  
+- Open the repo in VS Code and Reopen in Container. The container installs Python, your package in editable mode, and configures Ruff (lint + format on save).
+
+> Dev container also sets Ruff as default formatter and auto‑fixes on save (see `.devcontainer/devcontainer.json`).
+
+### 2) Run tests
+
+Run from terminal:
+```bash
+pytest -q
+```
+
+Or use the VC Code task `Run unit tests`
+
+### 3) Lint & format
+
+```bash
+# check formatting & linting
+ruff format --check .
+ruff check .
+
+# apply fixes
+ruff format .
+ruff check . --fix
+```
+
+### 4) Try the example apps
+
+- JPEG: `test_application/jpeg_test_app.py`  
+- PDF: `test_application/pdf_test_app.py`  
+
+Use the VC Code task `Build package`
+
+Use the VC Code task `Run JPEG test application` or `Run PDF test application`
+
+To run application you need to have:
+1. Sample files (`tests/fixtures/`)
+2. Certificate chain and public key (`tests/fixtures/crypto`)
+
+The workflow of test applications:
+1) Load a sample asset (`tests/fixtures/test_image.jpg` or `tests/fixtures/test_document.pdf`);
+2) Build a manifest:
+   - `TC_C2PA_GenerateAssertion`
+   - `TC_C2PA_GenerateHashDataAssertion`
+   - `TC_C2PA_GenerateManifest` 
+3) Embed the manifest (`TC_C2PA_EmplaceManifest`);  
+4) Write a new asset with C2PA.
+
+Validate with:
+```bash
+c2patool path/to/your_output.jpg
+c2patool path/to/your_output.pdf
+```
+
+---
+
+## API overview (high‑level)
+
+```python
+from c2pie.interface import (
+    TC_C2PA_GenerateAssertion,
+    TC_C2PA_GenerateHashDataAssertion,
+    TC_C2PA_GenerateManifest,
+    TC_C2PA_EmplaceManifest,
+    C2PA_AssertionTypes,
+    C2PA_ContentTypes,
+)
+
+# 1) Assertions
+creative_work = TC_C2PA_GenerateAssertion(
+    C2PA_AssertionTypes.creative_work,
+    {
+        "@context": "https://schema.org",
+        "@type": "CreativeWork",
+        "author": [{"@type": "Person", "name": "Example Author"}],
+    },
+)
+
+# Hard‑binding (exclusion starts at original EOF for PDF, or APP11 insert offset for JPEG)
+hash_data = TC_C2PA_GenerateHashDataAssertion(
+    cai_offset=<offset>,
+    hashed_data=<sha256_of_original_asset_bytes>,
+)
+
+# 2) Manifest (claim + signature + assertion store)
+with open("tests/fixtures/crypto/ps256.pem", "rb") as f:
+    private_key = f.read()  # PKCS#8 PEM (RSA PSS)
+
+with open("tests/fixtures/crypto/ps256.pub", "rb") as f:
+    cert_chain = f.read()   # PEM bundle (leaf + intermediates)
+
+manifest_store = TC_C2PA_GenerateManifest(
+    assertions=[creative_work, hash_data],
+    private_key=private_key,
+    certificate_chain=cert_chain,
+)
+
+# 3) Embed
+result_bytes = TC_C2PA_EmplaceManifest(
+    C2PA_ContentTypes.pdf,  # or C2PA_ContentTypes.jpg
+    content_bytes=<bytes_of_original_asset>,
+    c2pa_offset=<offset>,   # for JPEG: insert offset; for PDF: len(original_bytes)
+    manifests=manifest_store,
+)
+```
+
+### Notes for PDF vs JPEG
+
+- **PDF**: we append an incremental update. The `c2pa.hash.data` exclusion starts at `len(original_pdf)` and its length equals the final tail size (computed iteratively).  
+- **JPEG**: we insert APP11 segments. The exclusion start is the APP11 insertion offset; the length is the final APP11 payload length (also computed iteratively).
+
+The library takes care of iterative sizing so the `c2pa.hash.data` matches exactly, otherwise validators return `assertion.dataHash.mismatch`.
+
+---
+
+## CI: build, lint, and tests
+
+We ship three GitHub Actions (see `.github/workflows/`):
+
+- **Build Image** (`build_image.yml`): build & tests on Python 3.8/3.10/3.12.  
+- **Lint** (`lint.yml`): Ruff lint + format checks.  
+- **Run unit_tests** (`run_unit_tests.yml`): containerized unit tests.
+
+---
+
+## Certificates & trust
+
+- Example keys are located in `tests/fixtures/crypto/`. They are suitable for development only.  
+- For production:
+  - use a real document‑signing certificate (RSA‑PSS or ECDSA per C2PA),  
+  - provide a leaf + intermediates bundle (no root),  
+  - configure trust anchors/allow‑lists in your validator environment. 
+
+---
+
+## Contributing
+
+- Use Conventional Commits (e.g., `feat:`, `fix:`, `style(ruff):`, `ci:`).  
+- Run `ruff format` + `ruff check --fix` before committing.  
+- Add unit tests for new behavior.
+
+---
+
+## License
+
+MIT

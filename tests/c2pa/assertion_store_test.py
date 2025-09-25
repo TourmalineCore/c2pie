@@ -1,34 +1,25 @@
-import pytest
-
-from tc_c2pa_py.c2pa.assertion import Assertion
-from tc_c2pa_py.c2pa.assertion_store import AssertionStore
-from tc_c2pa_py.utils.content_types import c2pa_content_types
-from tc_c2pa_py.utils.assertion_schemas import C2PA_AssertionTypes
+from c2pie.c2pa.assertion import Assertion
+from c2pie.c2pa.assertion_store import AssertionStore
+from c2pie.utils.assertion_schemas import C2PA_AssertionTypes
+from c2pie.utils.content_types import c2pa_content_types
 
 
 def test_create_assertion_store():
-
     test_assertion_store = AssertionStore()
 
-    assert test_assertion_store != None
-    assert test_assertion_store.get_content_type() == c2pa_content_types['assertions']
-    assert test_assertion_store.get_label() == 'c2pa.assertions'
+    assert test_assertion_store is not None
+    assert test_assertion_store.get_content_type() == c2pa_content_types["assertions"]
+    assert test_assertion_store.get_label() == "c2pa.assertions"
     assert len(test_assertion_store.content_boxes) == 0
 
 
 def test_create_assertion_store_with_content():
-
     creative_work_schema = {
         "@context": "https://schema.org",
         "@type": "CreativeWork",
-        "author": [
-            {
-                "@type": "Person",
-                "name": "Tourmaline Core"
-            }
-        ],
+        "author": [{"@type": "Person", "name": "Tourmaline Core"}],
         "copyrightYear": "2024",
-        "copyrightHolder": "tc_c2pa_py"
+        "copyrightHolder": "c2pie",
     }
     test_assertion = Assertion(assertion_type=C2PA_AssertionTypes.creative_work, schema=creative_work_schema)
 
