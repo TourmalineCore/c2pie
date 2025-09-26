@@ -14,7 +14,7 @@ authors = [
   { name="Tourmaline Core", email="contact@tourmalinecore.com" },
 ]
 classifiers = [
-    "Development Status :: 5 - Production/Stable",
+    "Development Status :: 4 - Beta",
     "Natural Language :: English",
     "Operating System :: MacOS :: MacOS X",
     "Operating System :: POSIX :: Linux",
