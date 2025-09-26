@@ -1,36 +1,53 @@
 [tool.poetry]
 name = "c2pie"
 version = "0.2.0"
-description = "The TC-C2PA-Py is python library which provide C2PA standard functionality."
-classifiers = [
-    "Programming Language :: Python :: 3",
-    "Operating System :: OS Independent",
-]
-authors = ["Tourmaline Core <contact@tourmalinecore.com>"]
+
+[[tool.poetry.source]]
+name = "PyPI"
+priority = "primary"
+
 
 [project]
 name = "c2pie"
+description = "The c2pie is a Python library that provides C2PA standard functionality."
 authors = [ 
   { name="Tourmaline Core", email="contact@tourmalinecore.com" },
 ]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Natural Language :: English",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: POSIX :: Linux",
+    'Operating System :: Microsoft :: Windows',
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
 
 [project.urls]
-Homepage = "https://github.com/TourmalineCore/tc-c2pa-py"
-Issues = "https://github.com/TourmalineCore/tc-c2pa-py/issues"
+Homepage = "https://github.com/TourmalineCore/c2pie"
+Issues = "https://github.com/TourmalineCore/c2pie/issues"
+
+[project.scripts]
+c2pie-sign = 'c2pie.main:main'
 
 [tool.poetry.dependencies]
-python = "^3.9,<3.13"
+python = "^3.9,<3.14"
 cbor2 = "^5.6.3"
 cryptography = "^42.0.5"
 pytz = "^2024.1"
+cffi = "<=2.0.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.0"
-twine = "^6.1.0"
 pytest-cov = "^7.0.0"
 
 [build-system]
-requires = ["poetry>=0.12"]
+requires = ["poetry>=1.8.3"]
 build-backend = "poetry.masonry.api"
 
 [tool.pytest.ini_options]

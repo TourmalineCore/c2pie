@@ -18,7 +18,11 @@ from c2pie.utils.content_types import jumbf_content_types
 class Assertion(SuperBox):
     """Universal assertion superbox (one content box)."""
 
-    def __init__(self, assertion_type: C2PA_AssertionTypes, schema: dict[str, Any]):
+    def __init__(
+        self,
+        assertion_type: C2PA_AssertionTypes,
+        schema: dict[str, Any],
+    ):
         self.type = assertion_type
         self.schema = schema
 

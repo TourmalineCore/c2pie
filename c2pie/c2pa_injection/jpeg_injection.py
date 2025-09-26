@@ -52,7 +52,7 @@ class JpgSegmentApp11Storage:
     def __init__(
         self,
         app11_segment_box_length: int,
-        app11_segment_box_type: bytes,
+        app11_segment_box_type: str,
         payload: bytes,
     ):
         self.l_box = app11_segment_box_length

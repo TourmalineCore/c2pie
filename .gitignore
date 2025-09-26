@@ -3,6 +3,6 @@ __pycache__
 *.egg-info
 build
 dist
-test_application/**/*.jpg
-test_application/**/*.pdf
+**/signed_*
 .vscode/launch.json
+.env

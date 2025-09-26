@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import uuid
+
 from c2pie.c2pa.assertion import Assertion, HashDataAssertion
 from c2pie.c2pa.assertion_store import AssertionStore
 from c2pie.c2pa.claim import Claim
@@ -13,7 +15,7 @@ from c2pie.utils.assertion_schemas import C2PA_AssertionTypes
 from c2pie.utils.content_types import C2PA_ContentTypes
 
 
-def TC_C2PA_GenerateAssertion(assertion_type: C2PA_AssertionTypes, assertion_schema) -> Assertion:
+def TC_C2PA_GenerateAssertion(assertion_type: C2PA_AssertionTypes, assertion_schema: dict) -> Assertion:
     return Assertion(assertion_type, assertion_schema)
 
 
@@ -21,12 +23,18 @@ def TC_C2PA_GenerateHashDataAssertion(cai_offset: int, hashed_data: bytes) -> Ha
     return HashDataAssertion(cai_offset, hashed_data)
 
 
-def TC_C2PA_GenerateManifest(assertions, private_key: bytes, certificate_chain: bytes) -> ManifestStore:
+def TC_C2PA_GenerateManifest(
+    assertions: list,
+    private_key: bytes,
+    certificate_chain: bytes,
+) -> ManifestStore:
     """
     private_key: PKCS#8 PEM (RSA) bytes
     certificate_chain: PEM bundle (leaf + intermediates, NO root) bytes
     """
-    manifest = Manifest()
+
+    manifest_label = f"urn:c2pa:{uuid.uuid4().hex}"
+    manifest = Manifest(manifest_label=manifest_label)
 
     assertion_store = AssertionStore(assertions=assertions)
     manifest.set_assertion_store(assertion_store)
@@ -39,7 +47,7 @@ def TC_C2PA_GenerateManifest(assertions, private_key: bytes, certificate_chain: 
     manifest.set_claim(claim)
 
     claim_signature = ClaimSignature(
-        claim,
+        claim=claim,
         private_key=private_key,
         certificate_pem_bundle=certificate_chain,
     )
@@ -64,11 +72,11 @@ def TC_C2PA_EmplaceManifest(
                     claim.set_format("application/pdf")
 
     if format_type == C2PA_ContentTypes.jpg:
-        guessed_length = 0
+        assumed_hash_data_len = 0
         final_length = -1
         tail = b""
         for _ in range(RETRY_SIGNATURE):
-            manifests.set_hash_data_length_for_all(guessed_length)
+            manifests.set_hash_data_length_for_all(assumed_hash_data_len)
             payload = manifests.serialize()
             storage = JpgSegmentApp11Storage(
                 app11_segment_box_length=manifests.get_length(),
@@ -80,7 +88,7 @@ def TC_C2PA_EmplaceManifest(
             if total_len == final_length:
                 break
             final_length = total_len
-            guessed_length = total_len
+            assumed_hash_data_len = total_len
         return content_bytes[:c2pa_offset] + tail + content_bytes[c2pa_offset:]
 
     if format_type == C2PA_ContentTypes.pdf:
