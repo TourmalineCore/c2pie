@@ -25,6 +25,7 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
 
 [project.urls]
@@ -35,10 +36,11 @@ Issues = "https://github.com/TourmalineCore/c2pie/issues"
 c2pie-sign = 'c2pie.main:main'
 
 [tool.poetry.dependencies]
-python = "^3.9,<3.13"
+python = "^3.9,<3.14"
 cbor2 = "^5.6.3"
 cryptography = "^42.0.5"
 pytz = "^2024.1"
+cffi = "<=2.0.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.0"
