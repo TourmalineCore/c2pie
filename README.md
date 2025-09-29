@@ -4,14 +4,12 @@
     <img alt="с2pie Logo" src="docs/images/c2pie-logo-for-light-mode.svg" style="width: 45%;>
 </picture>
 
------------------
-
 <br></br>
 
 [![Unit Tests](https://github.com/TourmalineCore/tc-c2pa-py/actions/workflows/run_unit_tests.yml/badge.svg)](https://github.com/TourmalineCore/tc-c2pa-py/actions/workflows/run_unit_tests.yml)
 [![Lint](https://github.com/TourmalineCore/tc-c2pa-py/actions/workflows/lint.yml/badge.svg)](https://github.com/TourmalineCore/tc-c2pa-py/actions/workflows/lint.yml)
 
------------------
+---
 
 **C2PIE** is an open‑source Python library for constructing C2PA Content Credentials manifests that validate with `c2patool` and common C2PA consumers. It supports building claims, assertions, and COSE signatures and embedding the manifest store into JPEG (APP11) and PDF (incremental update) assets.
 
