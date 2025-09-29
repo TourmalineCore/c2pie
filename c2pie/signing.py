@@ -1,5 +1,6 @@
 import hashlib
 import os
+from pathlib import Path
 
 from c2pie.interface import (
     C2PA_AssertionTypes,
@@ -17,6 +18,46 @@ creative_work_schema = {
     "copyrightYear": "2026",
     "copyrightHolder": "c2pie",
 }
+
+
+def _get_content_type_by_filepath(file_path: Path) -> C2PA_ContentTypes:
+    file_content_type = C2PA_ContentTypes(file_path.suffix)
+    return file_content_type
+
+
+def _ensure_path_correctness(file_path: Path) -> None:
+    supported_extensions: list[str] = [_type.value for _type in C2PA_ContentTypes]
+    # check if input_file_path isn't a directory
+    if file_path.is_dir():
+        raise ValueError(f"The provided path is a directory, not a file: {file_path}.")
+
+    # check if file has one of the supported extensions
+    extension_of_input_file = file_path.suffix
+    if extension_of_input_file not in supported_extensions:
+        raise ValueError(
+            f"The file has an incorrect extension: {extension_of_input_file}"
+            f" Currently, only the following extensions are supported: {supported_extensions}.",
+        )
+
+
+def _validate_input_and_output_paths(
+    input_file_path: Path,
+    output_file_path: Path | None,
+) -> tuple[Path, Path]:
+    if not input_file_path.exists():
+        raise ValueError(f"Cannot find the provided path: {input_file_path}.")
+
+    # check if arguments are correct
+    _ensure_path_correctness(input_file_path)
+    if output_file_path:
+        _ensure_path_correctness(output_file_path)
+
+    # fix output_file_path
+    if not output_file_path:
+        name_of_input_file = input_file_path.name
+        output_file_path = input_file_path.with_name("signed_" + name_of_input_file)
+
+    return input_file_path, output_file_path
 
 
 def _load_certificates_and_key(
@@ -37,9 +78,8 @@ def _load_certificates_and_key(
 
 
 def sign_file(
-    file_type: C2PA_ContentTypes,
-    input_path: str,
-    output_path: str,
+    input_path: Path,
+    output_path: Path | None = None,
     key_path: str | None = os.getenv("C2PIE_KEY_FILEPATH"),
     certificates_path: str | None = os.getenv("C2PIE_CERT_FILEPATH"),
 ) -> None:
@@ -50,6 +90,13 @@ def sign_file(
         key_path=key_path,
         certificates_path=certificates_path,
     )
+
+    input_path, output_path = _validate_input_and_output_paths(
+        input_file_path=input_path,
+        output_file_path=output_path,
+    )
+
+    file_type: C2PA_ContentTypes = _get_content_type_by_filepath(file_path=input_path)
 
     if file_type.name == "pdf":
         cai_offset = len(raw_bytes)
