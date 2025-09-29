@@ -4,6 +4,8 @@
     <img xsalt="с2pie Logo" src="docs/images/c2pie-logo-for-light-mode.svg" style="width: 50%;">
 </picture>
 
+-------
+
 [![Unit Tests](https://github.com/TourmalineCore/tc-c2pa-py/actions/workflows/run_unit_tests.yml/badge.svg)](https://github.com/TourmalineCore/tc-c2pa-py/actions/workflows/run_unit_tests.yml)
 [![Lint](https://github.com/TourmalineCore/tc-c2pa-py/actions/workflows/lint.yml/badge.svg)](https://github.com/TourmalineCore/tc-c2pa-py/actions/workflows/lint.yml)
 
