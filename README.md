@@ -1,7 +1,7 @@
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/images/c2pie-logo-for-dark-mode.svg"> 
   <source media="(prefers-color-scheme: light)" srcset="docs/images/c2pie-logo-for-light-mode.svg">
-  <img alt="с2pie Logo" src="docs/images/c2pie-logo-for-light-mode.svg" style="align-content: center">
+  <img alt="с2pie Logo" src="docs/images/c2pie-logo-for-light-mode.svg" style="width: 400px; display: block; margin: auto">
 </picture>
 
 
