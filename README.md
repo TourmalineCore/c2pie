@@ -1,5 +1,9 @@
-c2pie
-===
+<picture align="center">
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/C2PIE logo light.svg">
+  <img alt="с2pie Logo" src="docs/images//C2PIE logo dark.svg" style="width:300px">
+</picture>
+
+
 [![Unit Tests](https://github.com/TourmalineCore/tc-c2pa-py/actions/workflows/run_unit_tests.yml/badge.svg)](https://github.com/TourmalineCore/tc-c2pa-py/actions/workflows/run_unit_tests.yml)
 [![Lint](https://github.com/TourmalineCore/tc-c2pa-py/actions/workflows/lint.yml/badge.svg)](https://github.com/TourmalineCore/tc-c2pa-py/actions/workflows/lint.yml)
 
@@ -224,5 +228,5 @@ For production:
 
 ## License
 
-MIT License. See [c2pie repository's license](LICENSE) for more information.
+Apache License. See [c2pie repository's license](LICENSE) for more information.
 
