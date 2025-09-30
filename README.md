@@ -50,23 +50,47 @@ export C2PIE_CERT_FILEPATH=path/to/your/certificate/chain/file
 ### Usage
 ---
 
-#### 1) Install c2pie package
+#### CLI
+
+##### 1) Install c2pie package
 
 Run from Python shell terminal:
 ```bash
 pip install c2pie
 ```
 
-#### 2) Run the following command to sign an input .jpg or .pdf:
+##### 2) Run the following command to sign an input .jpg or .pdf:
 ```bash
-c2pie-sign --input-file path/to/input/file
+c2pie sign --input-file path/to/input/file
 ```
 
 By default, signed file will be saved to the same directory as the input file with the *signed_* prefix. 
 To explicitly set output path, use:
 ```bash
-c2pie-sign --input-file path/to/input_file --output-file path/to/output/file
+c2pie sign --input-file path/to/input_file --output-file path/to/output/file
 ```
+
+#### Code
+
+To sign a file and save the output to the same directory:
+
+```python
+from c2pie.signing import sign_file
+
+input_file_path = "path/to/file"
+sign_file(input_path=input_file_path)
+```
+
+To set a custom output path:
+```python
+from c2pie.signing import sign_file
+
+input_file_path = "path/to/file"
+output_file_path = "path/to/another/file/
+sign_file(input_path=input_file_path, output_path=output_file_path)
+```
+
+
 
 
 
