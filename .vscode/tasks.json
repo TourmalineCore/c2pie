@@ -40,6 +40,16 @@
                 "kind": "build",
                 "isDefault": false
             }
+        },
+        {
+            "label": "Lint and Format",
+            "type": "shell",
+            "command": "poetry install --no-interaction --no-ansi > /dev/null && ruff format . && ruff check --fix .",
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
         }
     ]
 }
