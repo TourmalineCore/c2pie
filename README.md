@@ -22,6 +22,7 @@ For more detailed feature specification, please look at the [Features](#-feature
 
 ## 🥧 Quick start
 
+
 ### Prerequisites
 
 1) Python environment. Currently supported Python versions: 3.9 - 3.13
@@ -95,7 +96,6 @@ First of all, clone and (optionally) use [Dev Containers](https://code.visualstu
 
 
 ### Run test applications
-------
 
 To run test applications, you need to fill out *TEST_PDF_PATH* and/or *TEST_IMAGE_PATH* in values in *.env*. Test scripts use these filepaths as input files for signing.
 
@@ -109,6 +109,7 @@ You can test the signing workflow with the following VS Code tasks:
 ⋗ `Run JPEG test application` 
 
 ⋗ `Run PDF test application`
+
 ### Run tests
 
 Run from terminal:
@@ -154,6 +155,7 @@ The latter option is also available via the VC Code task `Lint and Format`
 
 
 ## 🥧 Features
+
 
 ⋗ C2PA Claim (`c2pa.claim`) with canonical CBOR, `dc:format`, `alg`, and hashed‑URIs for assertions.
 
