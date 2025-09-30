@@ -11,6 +11,16 @@ from c2pie.utils.content_types import C2PA_ContentTypes
 
 FIXTURES_DIR = Path(__file__).parent.parent / "fixtures"
 
+test_files_by_extension = {
+    "pdf": [
+        "test_doc.pdf",
+        "test_doc2.pdf",
+    ],
+    "jpg": [
+        "test_image.jpg",
+    ],
+}
+
 
 def fixture_path(name: str) -> Path:
     path = FIXTURES_DIR / name
@@ -60,31 +70,27 @@ def test_e2e_c2patool(tmp_path):
         input_file = tmp_path / f"in.{content_type.name}"
         output_file = tmp_path / f"out.{content_type.name}"
 
-        fixture_name = {
-            "pdf": "test_doc.pdf",
-            "jpg": "test_image.jpg",
-        }
+        for test_file in test_files_by_extension[content_type.name]:
+            copy_fixture(f"./{test_file}", input_file)
 
-        copy_fixture(f"./{fixture_name[content_type.name]}", input_file)
+            try:
+                sign_file(
+                    file_type=content_type,
+                    input_path=input_file,
+                    output_path=output_file,
+                )
+            except NotImplementedError:
+                pytest.xfail("sign_file not implemented yet")
 
-        try:
-            sign_file(
-                file_type=content_type,
-                input_path=input_file,
-                output_path=output_file,
-            )
-        except NotImplementedError:
-            pytest.xfail("sign_file not implemented yet")
+            data = _c2pa_json_report(str(output_file))
+            assert "manifests" in data or "manifest" in data
 
-        data = _c2pa_json_report(str(output_file))
-        assert "manifests" in data or "manifest" in data
+            manifests = data.get("manifests")
+            assert manifests, "no manifests in output"
 
-        manifests = data.get("manifests")
-        assert manifests, "no manifests in output"
+            if isinstance(manifests, dict):
+                manifests_list = list(manifests.values())
+            else:
+                manifests_list = manifests
 
-        if isinstance(manifests, dict):
-            manifests_list = list(manifests.values())
-        else:
-            manifests_list = manifests
-
-        assert manifests_list, "empty manifests list after normalization"
+            assert manifests_list, "empty manifests list after normalization"
