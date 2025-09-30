@@ -8,18 +8,23 @@ supported_extensions: list[str] = [_type.value for _type in C2PA_ContentTypes]
 
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(
+    global_parser = argparse.ArgumentParser(
         prog="c2pie",
         description=f"A program designed to embed C2PA Content Credentials"
         f"into files with supported extensions.\nCurrently, the "
         f"supported extensions are: {supported_extensions}.",
     )
-    parser.add_argument(
+
+    subparsers = global_parser.add_subparsers(title="subcommands", help="commands")
+
+    sign_parser = subparsers.add_parser("sign", help="embed c2pa signature into a file")
+
+    sign_parser.add_argument(
         "--input_file",
         type=Path,
         help="path to the input file to sign.",
     )
-    parser.add_argument(
+    sign_parser.add_argument(
         "-o",
         "--output",
         dest="output_file",
@@ -28,11 +33,11 @@ def parse_arguments():
         help="optional path to save the signed file. If omitted, the program saves to 'signed_' + input_file.",
     )
 
-    return parser.parse_args()
+    sign_parser.set_defaults(func=sign)
+    return global_parser.parse_args()
 
 
-def main() -> None:
-    arguments = parse_arguments()
+def sign(arguments: argparse.Namespace) -> None:
     input_file_path = arguments.input_file
     output_file_path = arguments.output_file
 
@@ -41,6 +46,11 @@ def main() -> None:
         input_path=input_file_path,
         output_path=output_file_path,
     )
+
+
+def main() -> None:
+    arguments = parse_arguments()
+    arguments.func(arguments)
 
 
 if __name__ == "__main__":

@@ -33,7 +33,7 @@ Homepage = "https://github.com/TourmalineCore/c2pie"
 Issues = "https://github.com/TourmalineCore/c2pie/issues"
 
 [project.scripts]
-c2pie-sign = 'c2pie.main:main'
+c2pie = 'c2pie.main:main'
 
 [tool.poetry.dependencies]
 python = "^3.9,<3.14"
