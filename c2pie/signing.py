@@ -1,8 +1,5 @@
 import hashlib
 import os
-from io import BytesIO
-
-from pypdf import PdfWriter
 
 from c2pie.interface import (
     C2PA_AssertionTypes,
@@ -20,18 +17,6 @@ creative_work_schema = {
     "copyrightYear": "2026",
     "copyrightHolder": "c2pie",
 }
-
-
-def _read_pdf_using_pypdf(input_path: str) -> bytes:
-    with open(input_path, "rb") as input_file_bytes:
-        input_stream = BytesIO(input_file_bytes.read())
-
-    output_stream = BytesIO()
-    pdf_writer = PdfWriter(input_stream)
-    pdf_writer.write(output_stream)
-    output_stream.seek(0)
-    byte_string = output_stream.read()
-    return byte_string
 
 
 def _load_certificates_and_key(
@@ -58,17 +43,17 @@ def sign_file(
     key_path: str | None = os.getenv("C2PIE_KEY_FILEPATH"),
     certificates_path: str | None = os.getenv("C2PIE_CERT_FILEPATH"),
 ) -> None:
+    with open(input_path, "rb") as f:
+        raw_bytes = f.read()
+
     key, certificates = _load_certificates_and_key(
         key_path=key_path,
         certificates_path=certificates_path,
     )
 
     if file_type.name == "pdf":
-        raw_bytes = _read_pdf_using_pypdf(input_path=input_path)
         cai_offset = len(raw_bytes)
     else:
-        with open(input_path, "rb") as f:
-            raw_bytes = f.read()
         cai_offset = 2
 
     creative_work_assertion = TC_C2PA_GenerateAssertion(

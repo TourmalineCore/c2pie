@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 import re
+from io import BytesIO
 from typing import NamedTuple
+
+from pypdf import PdfWriter
 
 from c2pie.c2pa.config import RETRY_SIGNATURE
 from c2pie.c2pa.manifest_store import ManifestStore
@@ -12,6 +15,16 @@ class PdfInfo(NamedTuple):
     startxref: int
     max_obj: int
     pages_ref: str
+
+
+def _read_pdf_using_pypdf(initial_content: bytes) -> bytes:
+    input_stream = BytesIO(initial_content)
+    output_stream = BytesIO()
+    pdf_writer = PdfWriter(input_stream)
+    pdf_writer.write(output_stream)
+    output_stream.seek(0)
+    byte_string = output_stream.read()
+    return byte_string
 
 
 def _find_startxref(bytes: bytes) -> int:
@@ -40,12 +53,12 @@ def _extract_pages_ref(bytes: bytes) -> str:
     return f"{int(page_count.group(1))} 0 R"
 
 
-def _scan_pdf_to_get_its_data(bytes: bytes) -> PdfInfo:
+def _scan_pdf_to_get_its_data(initial_content: bytes) -> PdfInfo:
     return PdfInfo(
-        content=bytes,
-        startxref=_find_startxref(bytes),
-        max_obj=_get_max_obj_num(bytes),
-        pages_ref=_extract_pages_ref(bytes),
+        content=initial_content,
+        startxref=_find_startxref(initial_content),
+        max_obj=_get_max_obj_num(initial_content),
+        pages_ref=_extract_pages_ref(initial_content),
     )
 
 
@@ -64,7 +77,11 @@ def emplace_manifest_into_pdf(
     - Exception c2pa.hash.data: start == len(initial_content), length == length of the entire tail (see C2PA 2.2).
     - Sign the claim, build the jumbf store, place it as EmbeddedFile, write xref/trailer correctly.
     """
-    info = _scan_pdf_to_get_its_data(initial_content)
+    try:
+        info = _scan_pdf_to_get_its_data(initial_content)
+    except ValueError:
+        initial_content = _read_pdf_using_pypdf(initial_content=initial_content)
+        info = _scan_pdf_to_get_its_data(initial_content)
     initial_length_of_file = len(initial_content)
     pointer_on_previous_xref = info.startxref
     starting_value = info.max_obj + 1
