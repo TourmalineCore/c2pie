@@ -45,6 +45,7 @@ cffi = "<=2.0.0"
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.0"
 pytest-cov = "^7.0.0"
+ruff = "^0.13.2"
 
 [build-system]
 requires = ["poetry>=1.8.3"]
