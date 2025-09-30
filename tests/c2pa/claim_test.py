@@ -67,5 +67,3 @@ def test_create_claim_with_none_as_assertion_store():
     test_claim = Claim(assertion_store=None)  # type: ignore
     payload = cbor2.loads(test_claim.content_boxes[0].get_payload())
     assert "assertions" not in payload.keys()
-
-
