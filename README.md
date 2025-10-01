@@ -42,7 +42,7 @@ For more detailed feature specification, please look at the [Features](#-feature
 ### Usage
 ---
 
-### Command Line Interface
+#### Command Line Interface
 
 You can run the following command to sign an input .jpg or .pdf:
 ```bash
@@ -55,7 +55,7 @@ To explicitly set output path, use:
 c2pie sign --input-file path/to/input_file --output-file path/to/output/file
 ```
 
-### Code
+#### Code
 
 To sign a file and save the output to the same directory:
 
@@ -75,7 +75,7 @@ output_file_path = "path/to/another/file/"
 sign_file(input_path=input_file_path, output_path=output_file_path)
 ```
 
-### Validation
+#### Validation
 
 
 Output files can be validated with:
@@ -141,6 +141,9 @@ ruff check . --fix
 
 The latter option is also available via the VC Code task `Lint and Format`
 
+### CI
+
+#TODO
 
 
 ## 🥧 Features
@@ -175,25 +178,54 @@ The latter option is also available via the VC Code task `Lint and Format`
 
 The library takes care of iterative sizing so the `c2pa.hash.data` matches exactly, otherwise validators return `assertion.dataHash.mismatch`.
 
+## 🥧 Certificates
+
+Example certificate and key are located in `tests/credentials`. They are suitable for development only ⚠️
+
+### Generating your own mock credentials
+
+You can generate your own mock credentials for testing and developing the package following these steps:
+
+1. Generate a private key:
+    ```bash
+    openssl genrsa -out credentials/<private-key-filename>.pem 2048
+    ```
+
+2. Generate a Certificate Signing Request (CSR):
+    ```bash
+    openssl req -new -key credentials/<private-key-filename>.pem -out csr.pem
+    ```
+
+3. Generate a Self-Signed Certificate:
+    ```bash
+    openssl x509 -req -days 365 -in csr.pem -signkey  <private-key-filename>.pem -out credentials/<certificate-filename>.pem
+    ```
+    > ⚠️ Remember to update environment variables to use your newly generated credentials.
+
+    > You can change certificate's validity period with --days option at the last step.
+
+    > Certificate Signing Request file (*csr.pem*) can be deleted after the certificate has been generated.
+
+    
 
 
-## 🥧 CI
 
-#ToDo
+### For production
 
-## 🥧 Certificates & trust
+🔸 Use a real document‑signing certificate (RSA‑PSS or ECDSA per C2PA);
 
-Example keys are located in `tests/credentials`. They are suitable for development only.  
+🔸 Provide a leaf + intermediates bundle (no root);  
 
-For production:
-  - use a real document‑signing certificate (RSA‑PSS or ECDSA per C2PA),  
-  - provide a leaf + intermediates bundle (no root),  
-  - configure trust anchors/allow‑lists in your validator environment. 
+🔸 Configure trust anchors/allow‑lists in your validator environment. 
 
+For detailed information on signing and certificates please explore the [corresponding section in the Content Authenticity Initiative (CAI) documentation](https://opensource.contentauthenticity.org/docs/signing/)
 
 ## 🥧 Relevant links
-∗ C2PA spec: https://c2pa.org/  
-∗ c2patool for validation: https://github.com/contentauth/c2pa-rs
+∗ [CAI documentation](https://opensource.contentauthenticity.org/docs)
+
+∗ [C2PA spec](https://c2pa.org/)  
+
+∗ [c2patool for validation](https://github.com/contentauth/c2pa-rs)
 
 
 ## 🥧 Contributing
@@ -204,7 +236,6 @@ For production:
 
 🔸 Add unit tests for new behavior.
 
----
 
 ## License
 
