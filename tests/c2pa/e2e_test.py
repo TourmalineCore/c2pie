@@ -75,7 +75,6 @@ def test_e2e_signing_with_c2patool_validation(tmp_path):
 
             try:
                 sign_file(
-                    file_type=content_type,
                     input_path=input_file,
                     output_path=output_file,
                 )
