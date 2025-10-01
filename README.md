@@ -45,14 +45,14 @@ For more detailed feature specification, please look at the [Features](#-feature
 #### Command Line Interface
 
 You can run the following command to sign an input JPG/JPEG or PDF file:
-```bash
-c2pie sign --input-file path/to/input/file
+```python
+c2pie sign --input_file path/to/input_file
 ```
 
 By default, signed file will be saved to the same directory as the input file with the *signed_* prefix. 
 To explicitly set output path, use:
-```bash
-c2pie sign --input-file path/to/input_file --output-file path/to/output/file
+```python
+c2pie sign --input_file path/to/input_file --output_file path/to/output/file
 ```
 
 #### Code
@@ -113,14 +113,14 @@ You can test the signing workflow with the following VS Code tasks:
 ### Run tests
 
 Run from terminal:
-```bash
+```python
 pytest
 ```
 
 Or use the VC Code task `Run unit tests`
 
 Or if you'd like to get info on test coverage, use:
-```bash
+```python
 pytest --cov
 ```
 
@@ -128,13 +128,13 @@ pytest --cov
 
 You can check if there are any issues to deal with them manually:
 
-```bash
+```python
 ruff format --check .
 ruff check .
 ```
 
 Or check and automatically fix where possible:
-```bash
+```python
 ruff format .
 ruff check . --fix
 ```
