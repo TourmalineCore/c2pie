@@ -145,17 +145,17 @@ The latter option is also available via the VC Code task `Lint and Format`
 
 ## 🥧 Features
 
-⊛ C2PA Claim (`c2pa.claim`) with canonical CBOR, `dc:format`, `alg`, and hashed‑URIs for assertions.
+🔸 C2PA Claim (`c2pa.claim`) with canonical CBOR, `dc:format`, `alg`, and hashed‑URIs for assertions.
 
-⊛ C2PA Signature (`c2pa.signature`) using COSE_Sign1 (PS256) with detached payload and `x5chain` in protected header.
+🔸 C2PA Signature (`c2pa.signature`) using COSE_Sign1 (PS256) with detached payload and `x5chain` in protected header.
 
-⊛ Assertion Store with common assertions (e.g., `c2pa.hash.data` hard‑binding, schema.org CreativeWork, etc.).
+🔸 Assertion Store with common assertions (e.g., `c2pa.hash.data` hard‑binding, schema.org CreativeWork, etc.).
 
-⊛ Embedding
+🔸 Embedding
   - JPEG via APP11 segments (size‑driven iterative layout).
   - PDF via incremental update at EOF (xref/trailer preserved; `/AF` + `/Names/EmbeddedFiles`).  
 
-⊛ Validation with `c2patool` (structure + signatures).
+🔸 Validation with `c2patool` (structure + signatures).
 
 ### Workflow of test applications
 
@@ -169,9 +169,9 @@ The latter option is also available via the VC Code task `Lint and Format`
 
 ### Notes for PDF vs JPEG
 
-⊛ **PDF**: we append an incremental update. The `c2pa.hash.data` exclusion starts at `len(original_pdf)` and its length equals the final tail size (computed iteratively).  
+🔸 **PDF**: we append an incremental update. The `c2pa.hash.data` exclusion starts at `len(original_pdf)` and its length equals the final tail size (computed iteratively).  
 
-⊛ **JPEG**: we insert APP11 segments. The exclusion start is the APP11 insertion offset; the length is the final APP11 payload length (also computed iteratively).
+🔸 **JPEG**: we insert APP11 segments. The exclusion start is the APP11 insertion offset; the length is the final APP11 payload length (also computed iteratively).
 
 The library takes care of iterative sizing so the `c2pa.hash.data` matches exactly, otherwise validators return `assertion.dataHash.mismatch`.
 
@@ -198,11 +198,11 @@ s
 
 ## 🥧 Contributing
 
-⋗ Use Conventional Commits (e.g., `feat:`, `fix:`, `style(ruff):`, `ci:`).  
+🔸 Use Conventional Commits (e.g., `feat:`, `fix:`, `style(ruff):`, `ci:`).  
 
-⋗ Run `Lint and Format` task before committing.  
+🔸 Run `Lint and Format` task before committing.  
 
-⋗ Add unit tests for new behavior.
+🔸 Add unit tests for new behavior.
 
 ---
 
