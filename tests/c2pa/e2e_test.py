@@ -62,7 +62,7 @@ def test_e2e_signing_with_c2patool_validation(tmp_path):
     if not has_c2patool():
         pytest.skip("c2patool not available")
     if sign_file is None:
-        pytest.skip("sign_file not available yet")
+        pytest.skip("sign_file function not available yet")
 
     os.environ["C2PA_BACKEND"] = "tool"
 
@@ -80,7 +80,7 @@ def test_e2e_signing_with_c2patool_validation(tmp_path):
                     output_path=output_file,
                 )
             except NotImplementedError:
-                pytest.xfail("sign_file not implemented yet")
+                pytest.xfail("sign_file function not implemented yet")
 
             data = _c2pa_json_report(str(output_file))
             assert "manifests" in data or "manifest" in data
