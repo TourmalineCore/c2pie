@@ -22,17 +22,17 @@ test_files_by_extension = {
 }
 
 
-def fixture_path(name: str) -> Path:
-    path = FIXTURES_DIR / name
+def get_fixture_full_path(filename: str) -> Path:
+    path = FIXTURES_DIR / filename
     if not path.exists():
         raise FileNotFoundError(f"Fixture not found: {path}")
     return path
 
 
 def copy_fixture(source_path: str, destination_path: Path) -> None:
-    source_path = fixture_path(source_path)
+    source_full_path = get_fixture_full_path(source_path)
     destination_path.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copyfile(source_path, destination_path)
+    shutil.copyfile(source_full_path, destination_path)
 
 
 def has_c2patool() -> bool:
@@ -58,7 +58,7 @@ def _c2pa_json_report(asset_path: str) -> dict:
 
 
 @pytest.mark.e2e
-def test_e2e_c2patool(tmp_path):
+def test_e2e_signing_with_c2patool_validation(tmp_path):
     if not has_c2patool():
         pytest.skip("c2patool not available")
     if sign_file is None:
