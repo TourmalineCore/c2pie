@@ -105,7 +105,7 @@ ruff check . --fix
 
 To run test applications, you need to fill out TEST_PDF_PATH and/or TEST_IMAGE_PATH in values in *.env*. Test scripts use these filepaths as input files for signing.
 
-Also make sure that you have certificate chain and public key in `tests/fixtures/crypto`. They should be there by default if you've cloned the repository. If needed, you can change their filepaths in *.env* as well.
+Also make sure that you have test certificate chain and public key in `tests/credentials`. They should be there by default if you've cloned the repository. If needed, you can change their filepaths in *.env* as well.
 
 
 Use the VC Code task `Build package`
@@ -116,7 +116,7 @@ Use the VC Code task `Run JPEG test application` or `Run PDF test application`
 ### Example apps workflow
 
 
-1) Load a sample asset (`tests/fixtures/test_image.jpg` or `tests/fixtures/test_document.pdf`);
+1) Load a sample asset (`tests/test_files/test_image.jpg` or `tests/test_files/test_document.pdf`);
 2) Build a manifest:
    - `TC_C2PA_GenerateAssertion`
    - `TC_C2PA_GenerateHashDataAssertion`
@@ -163,10 +163,10 @@ hash_data = TC_C2PA_GenerateHashDataAssertion(
 )
 
 # 2) Manifest (claim + signature + assertion store)
-with open("tests/fixtures/crypto/ps256.pem", "rb") as f:
+with open("tests/credentials/ps256.pem", "rb") as f:
     private_key = f.read()  # PKCS#8 PEM (RSA PSS)
 
-with open("tests/fixtures/crypto/ps256.pub", "rb") as f:
+with open("tests/credentials/ps256.pub", "rb") as f:
     cert_chain = f.read()   # PEM bundle (leaf + intermediates)
 
 manifest_store = TC_C2PA_GenerateManifest(
@@ -204,7 +204,7 @@ We ship three GitHub Actions (see `.github/workflows/`):
 
 ## Certificates & trust
 
-Example keys are located in `tests/fixtures/crypto/`. They are suitable for development only.  
+Example keys are located in `tests/credentials`. They are suitable for development only.  
 
 For production:
   - use a real document‑signing certificate (RSA‑PSS or ECDSA per C2PA),  

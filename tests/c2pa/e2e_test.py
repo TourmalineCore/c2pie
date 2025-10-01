@@ -9,7 +9,7 @@ import pytest
 from c2pie.signing import sign_file
 from c2pie.utils.content_types import C2PA_ContentTypes
 
-FIXTURES_DIR = Path(__file__).parent.parent / "fixtures"
+FIXTURES_DIR = Path(__file__).parent.parent / "test_files"
 
 test_files_by_extension = {
     "pdf": [
@@ -22,15 +22,15 @@ test_files_by_extension = {
 }
 
 
-def get_fixture_full_path(filename: str) -> Path:
+def get_test_file_full_path(filename: str) -> Path:
     path = FIXTURES_DIR / filename
     if not path.exists():
         raise FileNotFoundError(f"Fixture not found: {path}")
     return path
 
 
-def copy_fixture(source_path: str, destination_path: Path) -> None:
-    source_full_path = get_fixture_full_path(source_path)
+def copy_test_file(source_path: str, destination_path: Path) -> None:
+    source_full_path = get_test_file_full_path(source_path)
     destination_path.parent.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(source_full_path, destination_path)
 
@@ -71,7 +71,7 @@ def test_e2e_signing_with_c2patool_validation(tmp_path):
         output_file = tmp_path / f"out.{content_type.name}"
 
         for test_file in test_files_by_extension[content_type.name]:
-            copy_fixture(f"./{test_file}", input_file)
+            copy_test_file(f"./{test_file}", input_file)
 
             try:
                 sign_file(
