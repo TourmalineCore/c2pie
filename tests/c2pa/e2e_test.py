@@ -9,20 +9,30 @@ import pytest
 from c2pie.signing import sign_file
 from c2pie.utils.content_types import C2PA_ContentTypes
 
-FIXTURES_DIR = Path(__file__).parent.parent / "fixtures"
+FIXTURES_DIR = Path(__file__).parent.parent / "test_files"
+
+test_files_by_extension = {
+    "pdf": [
+        "test_doc.pdf",
+        "test_doc2.pdf",
+    ],
+    "jpg": [
+        "test_image.jpg",
+    ],
+}
 
 
-def fixture_path(name: str) -> Path:
-    path = FIXTURES_DIR / name
+def get_test_file_full_path(filename: str) -> Path:
+    path = FIXTURES_DIR / filename
     if not path.exists():
         raise FileNotFoundError(f"Fixture not found: {path}")
     return path
 
 
-def copy_fixture(source_path: str, destination_path: Path) -> None:
-    source_path = fixture_path(source_path)
+def copy_test_file(source_path: str, destination_path: Path) -> None:
+    source_full_path = get_test_file_full_path(source_path)
     destination_path.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copyfile(source_path, destination_path)
+    shutil.copyfile(source_full_path, destination_path)
 
 
 def has_c2patool() -> bool:
@@ -48,11 +58,11 @@ def _c2pa_json_report(asset_path: str) -> dict:
 
 
 @pytest.mark.e2e
-def test_e2e_c2patool(tmp_path):
+def test_e2e_signing_with_c2patool_validation(tmp_path):
     if not has_c2patool():
         pytest.skip("c2patool not available")
     if sign_file is None:
-        pytest.skip("sign_file not available yet")
+        pytest.skip("sign_file function not available yet")
 
     os.environ["C2PA_BACKEND"] = "tool"
 
@@ -60,31 +70,27 @@ def test_e2e_c2patool(tmp_path):
         input_file = tmp_path / f"in.{content_type.name}"
         output_file = tmp_path / f"out.{content_type.name}"
 
-        fixture_name = {
-            "pdf": "test_doc.pdf",
-            "jpg": "test_image.jpg",
-        }
+        for test_file in test_files_by_extension[content_type.name]:
+            copy_test_file(f"./{test_file}", input_file)
 
-        copy_fixture(f"./{fixture_name[content_type.name]}", input_file)
+            try:
+                sign_file(
+                    file_type=content_type,
+                    input_path=input_file,
+                    output_path=output_file,
+                )
+            except NotImplementedError:
+                pytest.xfail("sign_file function not implemented yet")
 
-        try:
-            sign_file(
-                file_type=content_type,
-                input_path=input_file,
-                output_path=output_file,
-            )
-        except NotImplementedError:
-            pytest.xfail("sign_file not implemented yet")
+            data = _c2pa_json_report(str(output_file))
+            assert "manifests" in data or "manifest" in data
 
-        data = _c2pa_json_report(str(output_file))
-        assert "manifests" in data or "manifest" in data
+            manifests = data.get("manifests")
+            assert manifests, "no manifests in output"
 
-        manifests = data.get("manifests")
-        assert manifests, "no manifests in output"
+            if isinstance(manifests, dict):
+                manifests_list = list(manifests.values())
+            else:
+                manifests_list = manifests
 
-        if isinstance(manifests, dict):
-            manifests_list = list(manifests.values())
-        else:
-            manifests_list = manifests
-
-        assert manifests_list, "empty manifests list after normalization"
+            assert manifests_list, "empty manifests list after normalization"

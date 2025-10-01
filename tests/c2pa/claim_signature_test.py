@@ -18,8 +18,8 @@ def test_create_claim_signature_with_empty_claim():
 
 
 def test_create_claim_signature_with_non_empty_claim():
-    key_filepath = "tests/fixtures/crypto/ps256.pem"
-    cert_filepath = "tests/fixtures/crypto/ps256.pub"
+    key_filepath = "tests/credentials/ps256.pem"
+    cert_filepath = "tests/credentials/ps256.pub"
 
     with open(key_filepath, "rb") as f:
         key = f.read()

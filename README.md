@@ -99,16 +99,16 @@ First of all, clone and (optionally) use [Dev Containers](https://code.visualstu
 
 To run test applications, you need to fill out *TEST_PDF_PATH* and/or *TEST_IMAGE_PATH* in values in *.env*. Test scripts use these filepaths as input files for signing.
 
-Also make sure that you have certificate chain and public key in `tests/fixtures/crypto`. They should be there by default if you've cloned the repository. If needed, you can change their filepaths in *.env* as well.
+Also make sure that you have test certificate chain and public key in `tests/credentials`. They should be there by default if you've cloned the repository. If needed, you can change their filepaths in *.env* as well.
 
 >We recommend using Dev Containers here in order to automatically create an environment with all dependencies installed and environment variables exported.
 
 
 You can test the signing workflow with the following VS Code tasks:
 
-⊛ `Run JPEG test application` 
+🔸 `Run JPEG test application` 
 
-⊛ `Run PDF test application`
+🔸 `Run PDF test application`
 
 ### Run tests
 
@@ -159,7 +159,7 @@ The latter option is also available via the VC Code task `Lint and Format`
 
 ### Workflow of test applications
 
-1) Load a sample asset (`tests/fixtures/..`);
+1) Load a sample asset (`tests/test_files/..`);
 
 2) Build a manifest with `TC_C2PA_GenerateAssertion`, `TC_C2PA_GenerateHashDataAssertion`, `TC_C2PA_GenerateManifest` 
 
@@ -183,7 +183,7 @@ The library takes care of iterative sizing so the `c2pa.hash.data` matches exact
 
 ## 🥧 Certificates & trust
 
-Example keys are located in `tests/fixtures/crypto/`. They are suitable for development only.  
+Example keys are located in `tests/credentials`. They are suitable for development only.  
 
 For production:
   - use a real document‑signing certificate (RSA‑PSS or ECDSA per C2PA),  
@@ -194,7 +194,7 @@ For production:
 ## 🥧 Relevant links
 ∗ C2PA spec: https://c2pa.org/  
 ∗ c2patool for validation: https://github.com/contentauth/c2pa-rs
-s
+
 
 ## 🥧 Contributing
 
