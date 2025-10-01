@@ -44,7 +44,7 @@ For more detailed feature specification, please look at the [Features](#-feature
 
 #### Command Line Interface
 
-You can run the following command to sign an input .jpg or .pdf:
+You can run the following command to sign an input JPG/JPEG or PDF file:
 ```bash
 c2pie sign --input-file path/to/input/file
 ```
@@ -97,7 +97,7 @@ First of all, clone and (optionally) use [Dev Containers](https://code.visualstu
 
 ### Run test applications
 
-To run test applications, you need to fill out *TEST_PDF_PATH* and/or *TEST_IMAGE_PATH* in values in *.env*. Test scripts use these filepaths as input files for signing.
+To run test applications, you need to fill out `TEST_PDF_PATH` and/or `TEST_IMAGE_PATH` in values in *.env*. Test scripts use these filepaths as input files for signing.
 
 Also make sure that you have test certificate chain and public key in `tests/credentials`. They should be there by default if you've cloned the repository. If needed, you can change their filepaths in *.env* as well.
 
@@ -184,7 +184,7 @@ Example certificate and key are located in `tests/credentials`. They are suitabl
 
 ### Generating your own mock credentials
 
-You can generate your own mock credentials for testing and developing the package following these steps:
+You can generate your own mock credentials for testing and developing the package follow these steps:
 
 1. Generate a private key:
     ```bash
@@ -193,12 +193,17 @@ You can generate your own mock credentials for testing and developing the packag
 
 2. Generate a Certificate Signing Request (CSR):
     ```bash
-    openssl req -new -key credentials/<private-key-filename>.pem -out csr.pem
+    openssl req -new \
+    -key credentials/<private-key-filename>.pem \
+    -out csr.pem
     ```
 
 3. Generate a Self-Signed Certificate:
     ```bash
-    openssl x509 -req -days 365 -in csr.pem -signkey  <private-key-filename>.pem -out credentials/<certificate-filename>.pem
+    openssl x509 -req -days 365 \
+    -in csr.pem \
+    -signkey  credentials/<private-key-filename>.pem \
+    -out credentials/<certificate-filename>.pem
     ```
     > ⚠️ Remember to update environment variables to use your newly generated credentials.
 
@@ -218,7 +223,7 @@ You can generate your own mock credentials for testing and developing the packag
 
 🔸 Configure trust anchors/allow‑lists in your validator environment. 
 
-For detailed information on signing and certificates please explore the [corresponding section in the Content Authenticity Initiative (CAI) documentation](https://opensource.contentauthenticity.org/docs/signing/)
+For detailed information on signing and certificates please explore the [corresponding section in the Content Authenticity Initiative (CAI) documentation](https://opensource.contentauthenticity.org/docs/signing/).
 
 ## 🥧 Relevant links
 ∗ [CAI documentation](https://opensource.contentauthenticity.org/docs)
