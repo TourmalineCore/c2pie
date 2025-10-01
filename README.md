@@ -71,7 +71,7 @@ To set a custom output path:
 from c2pie.signing import sign_file
 
 input_file_path = "path/to/file"
-output_file_path = "path/to/another/file/
+output_file_path = "path/to/another/file/"
 sign_file(input_path=input_file_path, output_path=output_file_path)
 ```
 
@@ -106,9 +106,9 @@ Also make sure that you have certificate chain and public key in `tests/fixtures
 
 You can test the signing workflow with the following VS Code tasks:
 
-⋗ `Run JPEG test application` 
+⊛ `Run JPEG test application` 
 
-⋗ `Run PDF test application`
+⊛ `Run PDF test application`
 
 ### Run tests
 
@@ -143,7 +143,21 @@ The latter option is also available via the VC Code task `Lint and Format`
 
 
 
-### Workflow of test applicatio
+## 🥧 Features
+
+⊛ C2PA Claim (`c2pa.claim`) with canonical CBOR, `dc:format`, `alg`, and hashed‑URIs for assertions.
+
+⊛ C2PA Signature (`c2pa.signature`) using COSE_Sign1 (PS256) with detached payload and `x5chain` in protected header.
+
+⊛ Assertion Store with common assertions (e.g., `c2pa.hash.data` hard‑binding, schema.org CreativeWork, etc.).
+
+⊛ Embedding
+  - JPEG via APP11 segments (size‑driven iterative layout).
+  - PDF via incremental update at EOF (xref/trailer preserved; `/AF` + `/Names/EmbeddedFiles`).  
+
+⊛ Validation with `c2patool` (structure + signatures).
+
+### Workflow of test applications
 
 1) Load a sample asset (`tests/fixtures/..`);
 
@@ -153,30 +167,14 @@ The latter option is also available via the VC Code task `Lint and Format`
 
 4) Write a new asset with C2PA.
 
+### Notes for PDF vs JPEG
 
-## 🥧 Features
+⊛ **PDF**: we append an incremental update. The `c2pa.hash.data` exclusion starts at `len(original_pdf)` and its length equals the final tail size (computed iteratively).  
 
-
-⋗ C2PA Claim (`c2pa.claim`) with canonical CBOR, `dc:format`, `alg`, and hashed‑URIs for assertions.
-
-⋗ C2PA Signature (`c2pa.signature`) using COSE_Sign1 (PS256) with detached payload and `x5chain` in protected header.
-
-⋗ Assertion Store with common assertions (e.g., `c2pa.hash.data` hard‑binding, schema.org CreativeWork, etc.).
-
-⋗ Embedding
-  - JPEG via APP11 segments (size‑driven iterative layout).
-  - PDF via incremental update at EOF (xref/trailer preserved; `/AF` + `/Names/EmbeddedFiles`).  
-
-⋗ Validation with `c2patool` (structure + signatures).
-
-
-#### Notes for PDF vs JPEG
-
-⋗ **PDF**: we append an incremental update. The `c2pa.hash.data` exclusion starts at `len(original_pdf)` and its length equals the final tail size (computed iteratively).  
-
-⋗ **JPEG**: we insert APP11 segments. The exclusion start is the APP11 insertion offset; the length is the final APP11 payload length (also computed iteratively).
+⊛ **JPEG**: we insert APP11 segments. The exclusion start is the APP11 insertion offset; the length is the final APP11 payload length (also computed iteratively).
 
 The library takes care of iterative sizing so the `c2pa.hash.data` matches exactly, otherwise validators return `assertion.dataHash.mismatch`.
+
 
 
 ## 🥧 CI
