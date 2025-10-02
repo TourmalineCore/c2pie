@@ -1,6 +1,7 @@
 import hashlib
 import os
 from pathlib import Path
+from typing import Literal
 
 from c2pie.interface import (
     C2PA_AssertionTypes,
@@ -43,7 +44,7 @@ def _check_file_extension_is_supported(file_path: Path) -> None:
 
 def _validate_general_filepath(
     file_path: str | Path | None,
-    file_path_type: str = "general",
+    file_path_type: Literal["input_file", "output_file", "other"] = "other",
 ) -> Path:
     if not file_path:
         raise ValueError("File path has not been set")
@@ -57,7 +58,7 @@ def _validate_general_filepath(
         if not ensured_file_path.exists():
             raise ValueError(f"Cannot find the provided path: {file_path}.")
 
-    if file_path_type != "general":
+    if file_path_type != "other":
         _check_file_extension_is_supported(file_path=ensured_file_path)
 
     return ensured_file_path
