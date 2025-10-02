@@ -107,6 +107,8 @@ c2patool path/to/your_output.jpg
 c2patool path/to/your_output.pdf
 ```
 
+<br>
+
 # 🥧 For developers
 
 First of all, clone and (optionally) use [Dev Containers](https://code.visualstudio.com/docs/devcontainers/containers):
@@ -168,6 +170,7 @@ The latter option is also available via the VC Code task `Lint and Format`
 
 #TODO
 
+<br>
 
 # 🥧 Features
 
@@ -200,6 +203,8 @@ The latter option is also available via the VC Code task `Lint and Format`
 🔸 **JPEG**: we insert APP11 segments. The exclusion start is the APP11 insertion offset; the length is the final APP11 payload length (also computed iteratively).
 
 The library takes care of iterative sizing so the `c2pa.hash.data` matches exactly, otherwise validators return `assertion.dataHash.mismatch`.
+
+<br>
 
 # 🥧 Certificates
 
@@ -234,9 +239,6 @@ You can generate your own mock credentials for testing and developing the packag
 
 > Certificate Signing Request file (*csr.pem*) can be deleted after the certificate has been generated.
 
-    
-
-
 
 ## Getting credentials for production
 
@@ -248,6 +250,8 @@ You can generate your own mock credentials for testing and developing the packag
 
 For detailed information on signing and certificates please explore the [corresponding section in the Content Authenticity Initiative (CAI) documentation](https://opensource.contentauthenticity.org/docs/signing/).
 
+<br>
+
 # 🥧 Relevant links
 ∗ [CAI documentation](https://opensource.contentauthenticity.org/docs)
 
@@ -255,6 +259,7 @@ For detailed information on signing and certificates please explore the [corresp
 
 ∗ [c2patool for validation](https://github.com/contentauth/c2pa-rs)
 
+<br>
 
 # 🥧 Contributing
 
@@ -264,6 +269,7 @@ For detailed information on signing and certificates please explore the [corresp
 
 🔸 Add unit tests for new behavior.
 
+<br>
 
 # 🥧 License
 
