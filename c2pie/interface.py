@@ -15,15 +15,15 @@ from c2pie.utils.assertion_schemas import C2PA_AssertionTypes
 from c2pie.utils.content_types import C2PA_ContentTypes
 
 
-def TC_C2PA_GenerateAssertion(assertion_type: C2PA_AssertionTypes, assertion_schema: dict) -> Assertion:
+def c2pie_GenerateAssertion(assertion_type: C2PA_AssertionTypes, assertion_schema: dict) -> Assertion:
     return Assertion(assertion_type, assertion_schema)
 
 
-def TC_C2PA_GenerateHashDataAssertion(cai_offset: int, hashed_data: bytes) -> HashDataAssertion:
+def c2pie_GenerateHashDataAssertion(cai_offset: int, hashed_data: bytes) -> HashDataAssertion:
     return HashDataAssertion(cai_offset, hashed_data)
 
 
-def TC_C2PA_GenerateManifest(
+def c2pie_GenerateManifest(
     assertions: list,
     private_key: bytes,
     certificate_chain: bytes,
@@ -56,7 +56,7 @@ def TC_C2PA_GenerateManifest(
     return ManifestStore([manifest])
 
 
-def TC_C2PA_EmplaceManifest(
+def c2pie_EmplaceManifest(
     format_type: C2PA_ContentTypes,
     content_bytes: bytes,
     c2pa_offset: int,

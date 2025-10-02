@@ -4,10 +4,10 @@ from pathlib import Path
 
 from c2pie.interface import (
     C2PA_AssertionTypes,
-    TC_C2PA_EmplaceManifest,
-    TC_C2PA_GenerateAssertion,
-    TC_C2PA_GenerateHashDataAssertion,
-    TC_C2PA_GenerateManifest,
+    c2pie_EmplaceManifest,
+    c2pie_GenerateAssertion,
+    c2pie_GenerateHashDataAssertion,
+    c2pie_GenerateManifest,
 )
 from c2pie.utils.content_types import C2PA_ContentTypes
 
@@ -134,24 +134,24 @@ def sign_file(
     else:
         cai_offset = 2
 
-    creative_work_assertion = TC_C2PA_GenerateAssertion(
+    creative_work_assertion = c2pie_GenerateAssertion(
         C2PA_AssertionTypes.creative_work,
         creative_work_schema,
     )
 
-    hash_data_assertion = TC_C2PA_GenerateHashDataAssertion(
+    hash_data_assertion = c2pie_GenerateHashDataAssertion(
         cai_offset=cai_offset, hashed_data=hashlib.sha256(raw_bytes).digest()
     )
 
     assertions = [creative_work_assertion, hash_data_assertion]
 
-    manifest = TC_C2PA_GenerateManifest(
+    manifest = c2pie_GenerateManifest(
         assertions=assertions,
         private_key=key,
         certificate_chain=certificates,
     )
 
-    signed_bytes = TC_C2PA_EmplaceManifest(
+    signed_bytes = c2pie_EmplaceManifest(
         format_type=file_type,
         content_bytes=raw_bytes,
         c2pa_offset=cai_offset,

@@ -164,9 +164,9 @@ The latter option is also available via the VC Code task `Lint and Format`
 
 1) Load a sample asset (`tests/test_files/..`);
 
-2) Build a manifest with `TC_C2PA_GenerateAssertion`, `TC_C2PA_GenerateHashDataAssertion`, `TC_C2PA_GenerateManifest` 
+2) Build a manifest with `c2pie_GenerateAssertion`, `c2pie_GenerateHashDataAssertion`, `c2pie_GenerateManifest` 
 
-3) Embed the manifest (`TC_C2PA_EmplaceManifest`);  
+3) Embed the manifest (`c2pie_EmplaceManifest`);  
 
 4) Write a new asset with C2PA.
 
