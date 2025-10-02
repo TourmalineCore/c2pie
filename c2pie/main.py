@@ -7,7 +7,7 @@ from c2pie.utils.content_types import C2PA_ContentTypes
 supported_extensions: list[str] = [_type.value for _type in C2PA_ContentTypes]
 
 
-def parse_arguments():
+def parse_arguments() -> argparse.Namespace:
     global_parser = argparse.ArgumentParser(
         prog="c2pie",
         description=f"A program designed to embed C2PA Content Credentials"
