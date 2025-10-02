@@ -21,9 +21,9 @@ creative_work_schema = {
 
 
 def _ensure_path_type_for_filepath(path: str | Path) -> Path:
-    if type(path) is not Path:
-        return Path(path)
-    return path
+    if isinstance(path, Path):
+        return path
+    return Path(path)
 
 
 def _get_content_type_by_filepath(file_path: Path) -> C2PA_ContentTypes:
