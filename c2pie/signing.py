@@ -14,7 +14,7 @@ from c2pie.utils.content_types import C2PA_ContentTypes
 creative_work_schema = {
     "@context": "https://schema.org",
     "@type": "CreativeWork",
-    "author": [{"@type": "Person", "name": "Tourmaline Core"}],
+    "author": [{"@type": "Organization", "name": "Tourmaline Core"}],
     "copyrightYear": "2026",
     "copyrightHolder": "c2pie",
 }
