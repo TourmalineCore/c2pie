@@ -19,11 +19,34 @@ For more detailed feature specification, please look at the [Features](#-feature
 
 > ⚠️ This library helps you build valid manifests, but trust decisions (anchors, allow/deny lists, TSA) are your responsibility. For production, you must provide a certificate chain anchored to an accepted trust root and configure validation policy accordingly.
 
+## Table of Content
++ [🥧 Quick start](#-quick-start)
+  + [Prerequisites](#prerequisites)
+  + [Usage](#usage)
+    + [Command Line Interface](#command-line-interface)
+    + [Code](#code)
+    + [Validation](#validation)
++ [🥧 For developers](#-for-developers)
+  + [Run test applications](#run-test-applications)
+  + [Run tests](#run-tests)
+  + [Lint \& format](#lint--format)
+  + [CI](#ci)
++ [🥧 Features](#-features)
+  + [Workflow of test applications](#workflow-of-test-applications)
+  + [Notes for PDF vs JPEG](#notes-for-pdf-vs-jpeg)
++ [🥧 Certificates](#-certificates)
+  + [Generating your own mock credentials](#generating-your-own-mock-credentials)
+  + [Getting credentials for production](#getting-credentials-for-production)
++ [🥧 Relevant links](#-relevant-links)
++ [🥧 Contributing](#-contributing)
++ [🥧 License](#-license)
 
-## 🥧 Quick start
+<br>
+
+# 🥧 Quick start
 
 
-### Prerequisites
+## Prerequisites
 
 1) Python environment. Currently supported Python versions: 3.9 - 3.13
 2) Private key and certificate chain pair. 
@@ -39,10 +62,10 @@ For more detailed feature specification, please look at the [Features](#-feature
     ```
 
 
-### Usage
----
+## Usage
 
-#### Command Line Interface
+
+### Command Line Interface
 
 You can run the following command to sign an input JPG/JPEG or PDF file:
 ```python
@@ -55,7 +78,7 @@ To explicitly set output path, use:
 c2pie sign --input_file path/to/input_file --output_file path/to/output/file
 ```
 
-#### Code
+### Code
 
 To sign a file and save the output to the same directory:
 
@@ -75,7 +98,7 @@ output_file_path = "path/to/another/file/"
 sign_file(input_path=input_file_path, output_path=output_file_path)
 ```
 
-#### Validation
+### Validation
 
 
 Output files can be validated with:
@@ -84,7 +107,7 @@ c2patool path/to/your_output.jpg
 c2patool path/to/your_output.pdf
 ```
 
-## 🥧 For developers
+# 🥧 For developers
 
 First of all, clone and (optionally) use [Dev Containers](https://code.visualstudio.com/docs/devcontainers/containers):
 
@@ -95,7 +118,7 @@ First of all, clone and (optionally) use [Dev Containers](https://code.visualstu
 > Dev container also sets Ruff as default formatter and enables auto-fixing on save (see `.devcontainer/devcontainer.json`).
 
 
-### Run test applications
+## Run test applications
 
 To run test applications, you need to fill out `TEST_PDF_PATH` and/or `TEST_IMAGE_PATH` in values in *.env*. Test scripts use these filepaths as input files for signing.
 
@@ -110,21 +133,21 @@ You can test the signing workflow with the following VS Code tasks:
 
 🔸 `Run PDF test application`
 
-### Run tests
+## Run tests
 
 Run from terminal:
 ```python
 pytest
 ```
 
-Or use the VC Code task `Run unit tests`
+Or use the VC Code task `Run unit tests`. Note that the task excludes the e2e test. 
 
 Or if you'd like to get info on test coverage, use:
 ```python
 pytest --cov
 ```
 
-### Lint & format
+## Lint & format
 
 You can check if there are any issues to deal with them manually:
 
@@ -141,12 +164,12 @@ ruff check . --fix
 
 The latter option is also available via the VC Code task `Lint and Format`
 
-### CI
+## CI
 
 #TODO
 
 
-## 🥧 Features
+# 🥧 Features
 
 🔸 C2PA Claim (`c2pa.claim`) with canonical CBOR, `dc:format`, `alg`, and hashed‑URIs for assertions.
 
@@ -160,7 +183,7 @@ The latter option is also available via the VC Code task `Lint and Format`
 
 🔸 Validation with `c2patool` (structure + signatures).
 
-### Workflow of test applications
+## Workflow of test applications
 
 1) Load a sample asset (`tests/test_files/..`);
 
@@ -170,7 +193,7 @@ The latter option is also available via the VC Code task `Lint and Format`
 
 4) Write a new asset with C2PA.
 
-### Notes for PDF vs JPEG
+## Notes for PDF vs JPEG
 
 🔸 **PDF**: we append an incremental update. The `c2pa.hash.data` exclusion starts at `len(original_pdf)` and its length equals the final tail size (computed iteratively).  
 
@@ -178,11 +201,11 @@ The latter option is also available via the VC Code task `Lint and Format`
 
 The library takes care of iterative sizing so the `c2pa.hash.data` matches exactly, otherwise validators return `assertion.dataHash.mismatch`.
 
-## 🥧 Certificates
+# 🥧 Certificates
 
 Example certificate and key are located in `tests/credentials`. They are suitable for development only ⚠️
 
-### Generating your own mock credentials
+## Generating your own mock credentials
 
 You can generate your own mock credentials for testing and developing the package follow these steps:
 
@@ -205,17 +228,17 @@ You can generate your own mock credentials for testing and developing the packag
     -signkey  credentials/<private-key-filename>.pem \
     -out credentials/<certificate-filename>.pem
     ```
-    > ⚠️ Remember to update environment variables to use your newly generated credentials.
+> ⚠️ Remember to update environment variables to use your newly generated credentials.
 
-    > You can change certificate's validity period with --days option at the last step.
+> You can change certificate's validity period with --days option at the last step.
 
-    > Certificate Signing Request file (*csr.pem*) can be deleted after the certificate has been generated.
+> Certificate Signing Request file (*csr.pem*) can be deleted after the certificate has been generated.
 
     
 
 
 
-### For production
+## Getting credentials for production
 
 🔸 Use a real document‑signing certificate (RSA‑PSS or ECDSA per C2PA);
 
@@ -225,7 +248,7 @@ You can generate your own mock credentials for testing and developing the packag
 
 For detailed information on signing and certificates please explore the [corresponding section in the Content Authenticity Initiative (CAI) documentation](https://opensource.contentauthenticity.org/docs/signing/).
 
-## 🥧 Relevant links
+# 🥧 Relevant links
 ∗ [CAI documentation](https://opensource.contentauthenticity.org/docs)
 
 ∗ [C2PA spec](https://c2pa.org/)  
@@ -233,7 +256,7 @@ For detailed information on signing and certificates please explore the [corresp
 ∗ [c2patool for validation](https://github.com/contentauth/c2pa-rs)
 
 
-## 🥧 Contributing
+# 🥧 Contributing
 
 🔸 Use Conventional Commits (e.g., `feat:`, `fix:`, `style(ruff):`, `ci:`).  
 
@@ -242,7 +265,7 @@ For detailed information on signing and certificates please explore the [corresp
 🔸 Add unit tests for new behavior.
 
 
-## License
+# 🥧 License
 
 Apache License. See [c2pie repository's license](LICENSE) for more information.
 
