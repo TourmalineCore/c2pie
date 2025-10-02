@@ -43,7 +43,7 @@ def _check_file_extension_is_supported(file_path: Path) -> None:
 
 
 def _validate_general_filepath(
-    file_path: str | Path | None,
+    file_path: str | Path,
     file_path_type: Literal["input_file", "output_file", "other"] = "other",
 ) -> Path:
     if not file_path:
@@ -91,17 +91,13 @@ def _load_certificates_and_key(
     key_path: str | None,
     certificates_path: str | None,
 ) -> tuple[bytes, bytes]:
+    key_path = key_path or os.getenv("C2PIE_KEY_FILEPATH")
     if not key_path:
-        if os.getenv("C2PIE_KEY_FILEPATH"):
-            key_path = os.getenv("C2PIE_KEY_FILEPATH")
-        else:
-            raise ValueError("Key filepath variable has not been set. Cannot sign the provided file.")
+        raise ValueError("Key filepath variable has not been set. Cannot sign the provided file.")
 
+    certificates_path = certificates_path or os.getenv("C2PIE_CERT_FILEPATH")
     if not certificates_path:
-        if os.getenv("C2PIE_CERT_FILEPATH"):
-            certificates_path = os.getenv("C2PIE_CERT_FILEPATH")
-        else:
-            raise ValueError("Certificate filepath variable has not been set. Cannot sign the provided file.")
+        raise ValueError("Certificate filepath variable has not been set. Cannot sign the provided file.")
 
     validated_key_path = _validate_general_filepath(key_path)
     validated_certificates_path = _validate_general_filepath(certificates_path)
@@ -120,9 +116,6 @@ def sign_file(
     key_path: str | None = None,
     certificates_path: str | None = None,
 ) -> None:
-    with open(input_path, "rb") as f:
-        raw_bytes = f.read()
-
     key, certificates = _load_certificates_and_key(
         key_path=key_path,
         certificates_path=certificates_path,
@@ -132,6 +125,9 @@ def sign_file(
         input_file_path=input_path,
         output_file_path=output_path,
     )
+
+    with open(input_path, "rb") as f:
+        raw_bytes = f.read()
 
     file_type: C2PA_ContentTypes = _get_content_type_by_filepath(file_path=input_path)
 
