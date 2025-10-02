@@ -11,7 +11,7 @@
 
 <br>
 
-**c2pie** is an open‑source Python library for constructing [C2PA](https://c2pa.org/  ) Content Credentials manifests that validate with [`c2patool` ](https://github.com/contentauth/c2pa-rs) and other common C2PA consumers. 
+**c2pie** is an open‑source Python library for constructing [C2PA](https://c2pa.org/) Content Credentials manifests that validate with [`c2patool`](https://github.com/contentauth/c2pa-rs) and other common C2PA consumers. 
 
 The package supports building claims, assertions, and COSE signatures and embedding the manifest store into JPEG and PDF files. 
 
