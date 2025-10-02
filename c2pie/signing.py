@@ -43,22 +43,21 @@ def _check_file_extension_is_supported(file_path: Path) -> None:
 
 def _validate_general_filepath(
     file_path: str | Path | None,
-    is_input_path: bool = False,
-    is_output_path: bool = False,
+    file_path_type: str = "general",
 ) -> Path:
     if not file_path:
         raise ValueError("File path has not been set")
 
     ensured_file_path = _ensure_path_type_for_filepath(file_path)
 
-    if not is_output_path:
+    if file_path_type != "output_file":
         if ensured_file_path.is_dir():
             raise ValueError(f"The provided path is a directory, not a file: {file_path}.")
 
         if not ensured_file_path.exists():
             raise ValueError(f"Cannot find the provided path: {file_path}.")
 
-    if is_input_path or is_output_path:
+    if file_path_type != "general":
         _check_file_extension_is_supported(file_path=ensured_file_path)
 
     return ensured_file_path
@@ -68,10 +67,16 @@ def _validate_input_and_output_filepaths(
     input_file_path: Path | str,
     output_file_path: Path | str | None,
 ) -> tuple[Path, Path]:
-    validated_input_file_path = _validate_general_filepath(file_path=input_file_path, is_input_path=True)
+    validated_input_file_path = _validate_general_filepath(
+        file_path=input_file_path,
+        file_path_type="input_file",
+    )
 
     if output_file_path:
-        validated_output_file_path = _validate_general_filepath(file_path=output_file_path, is_output_path=True)
+        validated_output_file_path = _validate_general_filepath(
+            file_path=output_file_path,
+            file_path_type="output_file",
+        )
 
     # set output_file_path if not set
     if not output_file_path:
