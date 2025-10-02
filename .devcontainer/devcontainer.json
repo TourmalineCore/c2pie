@@ -27,6 +27,9 @@
 					},
 				},
 			}
-    }
+    	}
 	},
+	"runArgs": [
+        "--env-file", "${localWorkspaceFolder}/.env",
+    ],
 }
