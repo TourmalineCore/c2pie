@@ -142,7 +142,7 @@ To contribute to the c2pie package development, you can use one of the following
     This will automatically create and activate a poetry shell with project's dependencies installed.
 
 
-3. To run any Python command related to the project's dependencies, rememeber to add `poetry run` in front of the command. For example:
+3. To run any Python command related to the project's dependencies, remember to add `poetry run` in front of the command. For example:
     ```bash
     poetry run c2pie sign --input_file tests/test_files/test_doc.pdf
     

@@ -24,7 +24,7 @@
         {
             "label": "Run unit tests",
             "type": "shell",
-            "command": "poetry run pytest --ignore=test_application -m \"not e2e\"",
+            "command": "poetry run pytest -m \"not e2e\"",
             "problemMatcher": [],
             "group": {
                 "kind": "build",
