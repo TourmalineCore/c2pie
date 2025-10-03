@@ -27,6 +27,9 @@ For more detailed feature specification, please look at the [Features](#-feature
     + [Code](#code)
     + [Validation](#validation)
 + [🥧 For developers](#-for-developers)
+  + [First steps](#first-steps)
+    + [Using Dev Containers](#using-dev-containers)
+    + [Using a Local Environment](#using-a-local-environment)
   + [Run test applications](#run-test-applications)
   + [Run tests](#run-tests)
   + [Lint \& format](#lint--format)
@@ -111,13 +114,42 @@ c2patool path/to/your_output.pdf
 
 # 🥧 For developers
 
-First of all, clone and (optionally) use [Dev Containers](https://code.visualstudio.com/docs/devcontainers/containers):
+## First steps
 
-1. (optional) Install Docker and VS Code “Dev Containers” extension.  
+To contribute to the c2pie package development, you can use one of the following approaches after cloning the repository.
 
-2. Open the repo in VS Code and Reopen in Container. The container installs Python, your package in editable mode, and configures Ruff which provided linting and formatting on save.
+### Using Dev Containers
+1. Make sure you have installed Docker and [Dev Containers](https://code.visualstudio.com/docs/devcontainers/containers) extension for VS code
 
-> Dev container also sets Ruff as default formatter and enables auto-fixing on save (see `.devcontainer/devcontainer.json`).
+2. Open the repo in VS Code and Reopen in Container. The container installs Python, Poetry, the package in editable mode, and configures Ruff as a default formatter, which provides linting and formatting and enables auto-fixing files on save (see `.devcontainer/devcontainer.json`).
+
+### Using a Local Environment
+
+>We strongly recommend using Dev Containers in order to automatically create an isolated Python environment with all dependencies installed, environment variables exported and some helpful development tools included.
+
+
+1. Make sure the environment you're currently in has Python and Poetry installed and their versions meet the requirements of the project. You can verify that by running:
+
+    ```bash
+    python --version
+    poetry --version
+    ```
+
+2. Go to the repository's folder in terminal and run:
+    ```bash
+    poetry install
+    ```
+    This will automatically create and activate a poetry shell with project's dependencies installed.
+
+
+3. To run any Python command related to the project's dependencies, rememeber to add `poetry run` in front of the command. For example:
+    ```bash
+    poetry run c2pie sign --input_file tests/test_files/test_doc.pdf
+    
+    poetry run ruff check
+    ```
+
+    > Commands in further sections don't include `poetry run` by default as they are intended to be run from a Dev Container. 
 
 
 ## Run test applications
@@ -125,8 +157,6 @@ First of all, clone and (optionally) use [Dev Containers](https://code.visualstu
 To run test applications, you need to fill out `TEST_PDF_PATH` and/or `TEST_IMAGE_PATH` in values in *.env*. Test scripts use these filepaths as input files for signing.
 
 Also make sure that you have test certificate chain and public key in `tests/credentials`. They should be there by default if you've cloned the repository. If needed, you can change their filepaths in *.env* as well.
-
->We recommend using Dev Containers here in order to automatically create an environment with all dependencies installed and environment variables exported.
 
 
 You can test the signing workflow with the following VS Code tasks:
@@ -138,14 +168,14 @@ You can test the signing workflow with the following VS Code tasks:
 ## Run tests
 
 Run from terminal:
-```python
+```bash
 pytest
 ```
 
 Or use the VC Code task `Run unit tests`. Note that the task excludes the e2e test. 
 
 Or if you'd like to get info on test coverage, use:
-```python
+```bash
 pytest --cov
 ```
 
@@ -153,13 +183,13 @@ pytest --cov
 
 You can check if there are any issues to deal with them manually:
 
-```python
+```bash
 ruff format --check .
 ruff check .
 ```
 
 Or check and automatically fix where possible:
-```python
+```bash
 ruff format .
 ruff check . --fix
 ```
