@@ -52,7 +52,7 @@ For more detailed feature specification, please look at the [Features](#-feature
 ## Prerequisites
 
 1) Python environment. Currently supported Python versions: 3.9 - 3.13
-2) Private key and certificate chain pair. 
+2) Private key and certificate chain pair
 3) Key and certificate filepaths exported into the current environment with:
     ```bash
     export C2PIE_KEY_FILEPATH=path/to/your/private/key/file
@@ -119,7 +119,7 @@ c2patool path/to/your_output.pdf
 To contribute to the c2pie package development, you can use one of the following approaches after cloning the repository.
 
 ### Using Dev Containers
-1. Make sure you have installed Docker and [Dev Containers](https://code.visualstudio.com/docs/devcontainers/containers) extension for VS code
+1. Make sure you have installed Docker and [Dev Containers](https://code.visualstudio.com/docs/devcontainers/containers) extension for VS code.
 
 2. Open the repo in VS Code and Reopen in Container. The container installs Python, Poetry, the package in editable mode, and configures Ruff as a default formatter, which provides linting and formatting and enables auto-fixing files on save (see `.devcontainer/devcontainer.json`).
 
