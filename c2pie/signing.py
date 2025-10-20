@@ -25,13 +25,42 @@ def _read_schema_from_file(schema_filepath: str | Path) -> dict[str]:
         raise ex
 
 
-creative_work_schema = {
-    "@context": "https://schema.org",
-    "@type": "CreativeWork",
-    "author": [{"@type": "Organization", "name": "Tourmaline Core"}],
-    "copyrightYear": "2026",
-    "copyrightHolder": "c2pie",
-}
+def _validate_schema(schema: dict[str]) -> None:
+    expected_items = {
+        "@context": "https://schema.org",
+        "@type": "CreativeWork",
+    }
+
+    # check if @context and @type properties match with expected ones
+    for property in ["@context", "@type"]:
+        value = schema.get(property, None)
+        if value != expected_items[property]:
+            raise ValueError(
+                "schema must contain the following properties and their values: "
+                '{@context: "https://schema.org", "@type": "CreativeWork"}'
+            )
+
+    # check if copyrightYear and copyrightHolder exist
+    for property in ["copyrightYear", "copyrightHolder"]:
+        value = schema.get(property, None)
+        if not value:
+            raise ValueError("schema must provide copyrightYear and copyrightHolder properties")
+
+    # check if author.type is Organization or Person
+    author = schema.get("author", None)
+    if isinstance(author, list) and author:
+        raise ValueError('author must be a dict in a list containing "@type" and "name" properties')
+    else:
+        author = author[0]
+
+    author_type = author.get("@author", None)
+    author_name = author.get("name", None)
+
+    if not author_type or not author_name:
+        raise ValueError("author.name and author.type must be not empty")
+
+    if author_type != "Organization" or author_type != "Person":
+        raise ValueError('author.type must be "Organization" or "Person"')
 
 
 def _ensure_path_type_for_filepath(path: str | Path) -> Path:
@@ -141,6 +170,7 @@ def sign_file(
     )
 
     schema = _read_schema_from_file(schema_filepath=schema_path)
+    _validate_schema(schema=schema)
 
     with open(input_path, "rb") as f:
         raw_bytes = f.read()
