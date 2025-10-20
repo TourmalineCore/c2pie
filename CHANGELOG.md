@@ -2,6 +2,25 @@
 
 <!-- version list -->
 
+## v0.1.0-rc.1 (2025-10-20)
+
+### Documentation
+
+- **readme**: Add note on c2pie version
+  ([`3726a77`](https://github.com/TourmalineCore/c2pie/commit/3726a77c113c4dff2b344897af5f8b68521994dd))
+
+- **readme**: Change latest version reference
+  ([`6409e05`](https://github.com/TourmalineCore/c2pie/commit/6409e05957922b98883326c6d8c78af0f8b1346e))
+
+- **readme**: Remove note of package version in descr, change badge label
+  ([`a6efaf9`](https://github.com/TourmalineCore/c2pie/commit/a6efaf9f35ce21db4b041d97fd3fca8ad6d8445b))
+
+### Features
+
+- **example-app**: Add ability to set c2pie version that should be used in example app
+  ([`c9c95eb`](https://github.com/TourmalineCore/c2pie/commit/c9c95eb4c50f756735d9c0c71ea65d673363da04))
+
+
 ## v0.1.0-alpha.6 (2025-10-17)
 
 ### Bug Fixes
