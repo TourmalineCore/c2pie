@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 import os
 from pathlib import Path
 from typing import Literal
@@ -13,6 +14,16 @@ from c2pie.interface import (
     c2pie_GenerateManifest,
 )
 from c2pie.utils.content_types import C2PA_ContentTypes
+
+
+def _read_schema_from_file(schema_filepath: str | Path) -> dict[str]:
+    try:
+        with open(schema_filepath) as schema_file:
+            schema = json.load(schema_file.read())
+        return schema
+    except Exception as ex:
+        raise ex
+
 
 creative_work_schema = {
     "@context": "https://schema.org",
@@ -117,6 +128,7 @@ def sign_file(
     output_path: Path | str | None = None,
     key_path: str | None = None,
     certificates_path: str | None = None,
+    schema_path: str | None = None,
 ) -> None:
     key, certificates = _load_certificates_and_key(
         key_path=key_path,
@@ -127,6 +139,8 @@ def sign_file(
         input_file_path=input_path,
         output_file_path=output_path,
     )
+
+    schema = _read_schema_from_file(schema_filepath=schema_path)
 
     with open(input_path, "rb") as f:
         raw_bytes = f.read()
@@ -140,7 +154,7 @@ def sign_file(
 
     creative_work_assertion = c2pie_GenerateAssertion(
         C2PA_AssertionTypes.creative_work,
-        creative_work_schema,
+        schema,
     )
 
     hash_data_assertion = c2pie_GenerateHashDataAssertion(
