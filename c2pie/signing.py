@@ -16,10 +16,10 @@ from c2pie.interface import (
 from c2pie.utils.content_types import C2PA_ContentTypes
 
 
-def _read_schema_from_file(schema_filepath: str | Path) -> dict[str]:
+def _read_schema_from_file(schema_filepath: Path) -> dict[str]:
     try:
         with open(schema_filepath) as schema_file:
-            schema = json.load(schema_file.read())
+            schema = json.loads(schema_file.read())
         return schema
     except Exception as ex:
         raise ex
@@ -31,36 +31,54 @@ def _validate_schema(schema: dict[str]) -> None:
         "@type": "CreativeWork",
     }
 
-    # check if @context and @type properties match with expected ones
+    # check whether the @context and @type properties match the expected values
     for property in ["@context", "@type"]:
         value = schema.get(property, None)
         if value != expected_items[property]:
             raise ValueError(
-                "schema must contain the following properties and their values: "
+                "Schema must include the following properties with these values: "
                 '{@context: "https://schema.org", "@type": "CreativeWork"}'
             )
 
-    # check if copyrightYear and copyrightHolder exist
+    # check that "copyrightYear" and "copyrightHolder" exist
     for property in ["copyrightYear", "copyrightHolder"]:
         value = schema.get(property, None)
         if not value:
-            raise ValueError("schema must provide copyrightYear and copyrightHolder properties")
+            raise ValueError('Schema must include "copyrightYear" and "copyrightHolder"')
 
-    # check if author.type is Organization or Person
+    # check that "author" is a non-empty list whose first item has "@type" and "name"
     author = schema.get("author", None)
-    if isinstance(author, list) and author:
-        raise ValueError('author must be a dict in a list containing "@type" and "name" properties')
+    if not (isinstance(author, list) and author):
+        raise ValueError('author must be a non-empty list of objects with "@type" and "name"')
     else:
         author = author[0]
 
-    author_type = author.get("@author", None)
+    author_type = author.get("@type", None)
     author_name = author.get("name", None)
 
     if not author_type or not author_name:
-        raise ValueError("author.name and author.type must be not empty")
+        raise ValueError('author[@"type"] and author[@"name"] must not be empty')
 
-    if author_type != "Organization" or author_type != "Person":
-        raise ValueError('author.type must be "Organization" or "Person"')
+    if author_type != "Organization" and author_type != "Person":
+        raise ValueError('author["@type"] must be "Organization" or "Person"')
+
+
+def _load_signature_schema(schema_path: str | Path | None) -> dict[str]:
+    default_schema = {
+        "@context": "https://schema.org",
+        "@type": "CreativeWork",
+        "author": [{"@type": "Organization", "name": "Tourmaline Core"}],
+        "copyrightYear": "2026",
+        "copyrightHolder": "c2pie",
+    }
+
+    if schema_path is None:
+        return default_schema
+
+    validated_schema_path = _validate_general_filepath(file_path=schema_path)
+    schema = _read_schema_from_file(schema_filepath=validated_schema_path)
+    _validate_schema(schema=schema)
+    return schema
 
 
 def _ensure_path_type_for_filepath(path: str | Path) -> Path:
@@ -169,8 +187,7 @@ def sign_file(
         output_file_path=output_path,
     )
 
-    schema = _read_schema_from_file(schema_filepath=schema_path)
-    _validate_schema(schema=schema)
+    schema = _load_signature_schema(schema_path=schema_path)
 
     with open(input_path, "rb") as f:
         raw_bytes = f.read()
