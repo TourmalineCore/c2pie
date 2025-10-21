@@ -1,0 +1,41 @@
+name: Execute Readme Steps
+
+on:
+  push:
+    branches:
+      - feature/*
+
+jobs:
+  execute-readme-steps:
+    runs-on: ubuntu-24.04
+    container: python:3.9.2-buster
+    steps:
+    - name: Generate Certificates, Install c2pie, and Sign Image
+      run: |
+        openssl genrsa \
+          -out ./private-key-filename.pem 2048
+
+        openssl req \
+          -new \
+          -key ./private-key-filename.pem \
+          -subj "/C=PE/ST=Lima/L=Lima/O=Acme Inc. /OU=IT Department/CN=acme.com" \
+          -out ./csr.pem
+
+        openssl x509 \
+          -req \
+          -days 365 \
+          -in ./csr.pem \
+          -signkey  ./private-key-filename.pem \
+          -out ./certificate-filename.pem
+
+        pip install c2pie
+
+        wget https://github.com/TourmalineCore/c2pie/blob/master/example_app/test_files/test_image.jpg
+        
+        c2pie sign --input_file ./test_image.jpg
+
+    - name: Upload Signed Image
+      uses: actions/upload-artifact@v4
+      with:
+        name: signed_test_image
+        path: signed_test_image.jpg
