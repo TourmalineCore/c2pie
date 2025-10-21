@@ -75,7 +75,7 @@ For more detailed feature specification, please look at the [Features](#-feature
 
 3) Key and certificate filepaths exported into the current environment with:
     ```bash
-    export C2PIE_PRIVATE_KEY_FILE=<path/to/private_key_file>
+    export C2PIE_PRIVATE_KEY_FILE=private-key.pem
     export C2PIE_CERTIFICATE_CHAIN_FILE=certificate-chain.pub
     ```
 
@@ -91,13 +91,13 @@ For more detailed feature specification, please look at the [Features](#-feature
 
 You can run the following command to sign an input JPG or PDF file:
 ```python
-c2pie sign --input_file <path/to/input_file>
+c2pie sign --input_file path/to/input_file
 ```
 
 By default, signed file will be saved to the same directory as the input file with the *signed_* prefix. 
 To explicitly set output path, use:
 ```python
-c2pie sign --input_file <path/to/input_file> --output_file <path/to/output_file>
+c2pie sign --input_file path/to/input_file --output_file path/to/output_file
 ```
 
 If the file has been successfully signed, you'll see a message like this: 
