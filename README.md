@@ -33,15 +33,18 @@ For more detailed feature specification, please look at the [Features](#-feature
 
 ## Table of Contents
 + [🥧 Quick start](#-quick-start)
-  + [Running example apps with Docker Compose](#running-example-apps-with-docker-compose)
-  + [Running from your own environment](#running-from-your-own-environment)
+  + [Running from your local environment using globally installed Python](#running-from-your-local-environment-using-globally-installed-python)
     + [Prerequisites](#prerequisites)
     + [Usage](#usage)
       + [Command Line Interface](#command-line-interface)
       + [Code](#code)
     + [Validation](#validation)
-      + [c2patool](#c2patool)
       + [C2PA Verify Tool](#c2pa-verify-tool)
+      + [c2patool](#c2patool)
+  + [Running example apps with Docker Compose](#running-example-apps-with-docker-compose)
++ [🥧 Certificates](#-certificates)
+  + [Generating test credentials](#generating-test-credentials)
+  + [Getting credentials for production](#getting-credentials-for-production)
 + [🥧 For developers](#-for-developers)
   + [First steps](#first-steps)
     + [Using Dev Containers](#using-dev-containers)
@@ -52,9 +55,6 @@ For more detailed feature specification, please look at the [Features](#-feature
 + [🥧 Features](#-features)
   + [Workflow of test applications](#workflow-of-test-applications)
   + [Notes for PDF vs JPG/JPEG](#notes-for-pdf-vs-jpgjpeg)
-+ [🥧 Certificates](#-certificates)
-  + [Generating your own mock credentials](#generating-your-own-mock-credentials)
-  + [Getting credentials for production](#getting-credentials-for-production)
 + [🥧 Relevant links](#-relevant-links)
 + [🥧 Contributing](#-contributing)
 + [🥧 License](#-license)
@@ -75,8 +75,8 @@ For more detailed feature specification, please look at the [Features](#-feature
 
 3) Key and certificate filepaths exported into the current environment with:
     ```bash
-    export C2PIE_KEY_FILEPATH=<path/to/private_key_file>
-    export C2PIE_CERT_FILEPATH=<path/to/certificate_chain_file>
+    export C2PIE_PRIVATE_KEY_FILE=<path/to/private_key_file>
+    export C2PIE_CERTIFICATE_CHAIN_FILE=certificate-chain.pub
     ```
 
 4) c2pie package installed in your current environment:
@@ -274,7 +274,6 @@ You can generate your own private key and certificate chain pair for testing the
     -out csr.pem
     ```
 
-    printf "RU\ntest\ntest\ntest\ntest\ntest\ntest\ntest\ntest\n"| openssl req -new -key private-key.pem -out csr.pem
 3. Generate a Self-Signed Certificate:
     ```bash
     openssl x509 -req -days 365 \

@@ -93,11 +93,11 @@ def _load_certificates_and_key(
     key_path: str | None,
     certificates_path: str | None,
 ) -> tuple[bytes, bytes]:
-    key_path = key_path or os.getenv("C2PIE_KEY_FILEPATH")
+    key_path = key_path or os.getenv("C2PIE_PRIVATE_KEY_FILE")
     if not key_path:
         raise ValueError("Key filepath variable has not been set. Cannot sign the provided file.")
 
-    certificates_path = certificates_path or os.getenv("C2PIE_CERT_FILEPATH")
+    certificates_path = certificates_path or os.getenv("C2PIE_CERTIFICATE_CHAIN_FILE")
     if not certificates_path:
         raise ValueError("Certificate filepath variable has not been set. Cannot sign the provided file.")
 
