@@ -2,8 +2,9 @@ name: Linting and Testing
 
 on:
   push:
-    branches:
-      - '**'
+    branches-ignore:
+      - master
+      - release/**
     paths-ignore:
       - '**.md'
       - 'docs/**'
