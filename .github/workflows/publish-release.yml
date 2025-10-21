@@ -5,19 +5,16 @@ on:
     branches:
       - master
       - release/**
-  create:
-    branches:
-      - release/**
  
 permissions:
   contents: read
+  contents: write
 
 jobs:
   linting-and-testing:
     name: Linting and Testing
     uses: ./.github/workflows/lint-and-test.yml
     permissions:
-      contents: write
       packages: read
 
   release:
@@ -27,9 +24,6 @@ jobs:
     concurrency:
       group: ${{ github.workflow }}-release-${{ github.ref_name }}
       cancel-in-progress: false
-
-    permissions:
-      contents: write
 
     steps:
       - name: Checkout Repository on Release Branch
