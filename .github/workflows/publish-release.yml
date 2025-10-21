@@ -4,10 +4,9 @@ on:
   push:
     branches:
       - master
-      - release/**
+      - 'release/*'
  
 permissions:
-  contents: read
   contents: write
 
 jobs:
