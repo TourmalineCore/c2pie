@@ -6,7 +6,7 @@ on:
       - feature/*
 
 jobs:
-  execute-readme-steps:
+  sign-image-steps:
     runs-on: ubuntu-24.04
     container: python:3.9.2-buster
     steps:
@@ -42,3 +42,19 @@ jobs:
       with:
         name: signed_test_image
         path: signed_test_image.jpg
+  
+  verify-image-steps:
+    needs: sign-image-steps
+    runs-on: ubuntu-24.04
+    container: rust:1.90.0-bullseye
+    steps:
+    - name: Download Signed Image
+      uses: actions/download-artifact@v5
+      with:
+        name: signed_test_image
+        
+    - name: Install c2patool and Verify Signed Image
+      run: |
+        cargo install c2patool
+
+        c2patool signed_test_image.jpg
