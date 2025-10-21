@@ -15,6 +15,7 @@ jobs:
     uses: ./.github/workflows/lint-and-test.yml
     permissions:
       packages: read
+      contents: write
 
   release:
     name: Create and Publish Release
