@@ -35,6 +35,14 @@ def parse_arguments() -> argparse.Namespace:
         default=None,
         help="optional path to save the signed file. If omitted, the program saves to 'signed_' + input_file.",
     )
+    sign_parser.add_argument(
+        "-m",
+        "--manifest",
+        dest="schema_filepath",
+        type=Path,
+        default=None,
+        help="optional path to a the signature file. If omitted, the default signature is used.",
+    )
 
     sign_parser.set_defaults(func=sign)
     return global_parser.parse_args()
@@ -43,11 +51,13 @@ def parse_arguments() -> argparse.Namespace:
 def sign(arguments: argparse.Namespace) -> None:
     input_file_path = arguments.input_file
     output_file_path = arguments.output_file
+    schema_file_path = arguments.schema_filepath
 
     # sign the provided file
     sign_file(
         input_path=input_file_path,
         output_path=output_file_path,
+        schema_path=schema_file_path,
     )
 
 
