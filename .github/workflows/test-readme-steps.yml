@@ -30,7 +30,7 @@ jobs:
 
         pip install c2pie
 
-        wget https://github.com/TourmalineCore/c2pie/blob/master/example_app/test_files/test_image.jpg
+        wget https://raw.githubusercontent.com/TourmalineCore/c2pie/refs/heads/master/example_app/test_files/test_image.jpg
 
         export C2PIE_KEY_FILEPATH=./private-key-filename.pem
         export C2PIE_CERT_FILEPATH=./certificate-filename.pem
