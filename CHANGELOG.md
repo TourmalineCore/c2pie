@@ -2,14 +2,6 @@
 
 <!-- version list -->
 
-## v0.1.0-rc.2 (2025-10-21)
-
-### Features
-
-- **main**: Add version option to c2pie command
-  ([`8449489`](https://github.com/TourmalineCore/c2pie/commit/8449489f50f123edb3987ba1ce17513fd1cf8f4b))
-
-
 ## v0.1.0-rc.1 (2025-10-20)
 
 ### Documentation
