@@ -120,6 +120,7 @@ docker cp c2pie-test:signed_test_image.jpg .
 
 After being copied to host machine, signed files can then be validated using either of the methods from [Validation](#validation) section: [C2PA Verify Tool](https://contentcredentials.org/verify) or [c2patool](#validating-test-image-with-a-docker-container).
 
+<br>
 
 ## Running from your local environment using globally installed Python
 
@@ -188,6 +189,8 @@ If the file has been successfully signed, you'll see a message like this:
 Successfully signed the file tests/test_files/test_doc.pdf!
 The result was saved to tests/test_files/signed_test_doc.pdf.
 ```
+
+<br>
 
 ## Running example apps with Docker Compose
 
