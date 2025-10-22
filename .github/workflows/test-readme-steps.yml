@@ -12,28 +12,29 @@ jobs:
     steps:
     - name: Generate Certificates, Install c2pie, and Sign Image
       run: |
-        openssl genrsa \
-          -out ./private-key-filename.pem 2048
+        openssl genpkey \
+        -algorithm RSA-PSS \
+        -pkeyopt rsa_keygen_bits:2048 
+        -pkeyopt rsa_pss_keygen_md:sha256 \
+        -pkeyopt rsa_pss_keygen_mgf1_md:sha256 \
+        -pkeyopt rsa_pss_keygen_saltlen:32 \
+        -out private_key.key
 
-        openssl req \
-          -new \
-          -key ./private-key-filename.pem \
-          -subj "/C=PE/ST=Lima/L=Lima/O=Acme Inc. /OU=IT Department/CN=acme.com" \
-          -out ./csr.pem
-
-        openssl x509 \
-          -req \
-          -days 365 \
-          -in ./csr.pem \
-          -signkey  ./private-key-filename.pem \
-          -out ./certificate-filename.pem
+        openssl req -new -x509 \
+        -key private_key.key \
+        -sha256 -days 825 \
+        -subj "/C=US/ST=CA/L=Somewhere/O=C2PA Test Signing Cert/OU=FOR TESTING_ONLY/CN=C2PA PSS Signer/emailAddress=pie@example.com" \
+        -addext "basicConstraints=critical,CA:false" \
+        -addext "keyUsage=critical,digitalSignature,nonRepudiation" \
+        -addext "extendedKeyUsage=critical,emailProtection" \
+        -out certificate_chain.pem
 
         pip install c2pie
 
         wget https://raw.githubusercontent.com/TourmalineCore/c2pie/refs/heads/master/example_app/test_files/test_image.jpg
 
-        export C2PIE_KEY_FILEPATH=./private-key-filename.pem
-        export C2PIE_CERT_FILEPATH=./certificate-filename.pem
+        export C2PIE_PRIVATE_KEY_FILE=./private_key.key
+        export C2PIE_CERTIFICATE_CHAIN_FILE=./certificate_chain.pem
 
         c2pie sign --input_file ./test_image.jpg
 
