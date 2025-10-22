@@ -118,7 +118,7 @@ docker cp c2pie-test:signed_test_image.jpg .
 >
 >Once you exit the container, it will be deleted automatically.
 
-After being copied to host machine, signed files can then be validated using either of the methods from [Validation](#validation) section: [C2PA Verify Tool]((https://contentcredentials.org/verify)) or [c2patool](#validating-test-image-with-a-docker-container).
+After being copied to host machine, signed files can then be validated using either of the methods from [Validation](#validation) section: [C2PA Verify Tool](https://contentcredentials.org/verify) or [c2patool](#validating-test-image-with-a-docker-container).
 
 
 ## Running from your local environment using globally installed Python
@@ -272,7 +272,7 @@ Simply upload the file you'd like to verify.
 >The Content Credential issuer couldn’t be recognized. This file may not come from where it claims to.
 >```
 >
->Please proceed to [production credentials section](#-getting-credentials-for-production) to find out about generating verifiable credentials.
+>Please proceed to [production credentials section](#getting-credentials-for-production) to find out about generating verifiable credentials.
 
 ### c2patool 
 
