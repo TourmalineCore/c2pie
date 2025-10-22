@@ -33,15 +33,17 @@ For more detailed feature specification, please look at the [Features](#-feature
 
 ## Table of Contents
 + [🥧 Quick start](#-quick-start)
+  + [Running signing from a Docker container](#running-signing-from-a-docker-container)
   + [Running from your local environment using globally installed Python](#running-from-your-local-environment-using-globally-installed-python)
     + [Prerequisites](#prerequisites)
     + [Usage](#usage)
       + [Command Line Interface](#command-line-interface)
       + [Code](#code)
-    + [Validation](#validation)
-      + [C2PA Verify Tool](#c2pa-verify-tool)
-      + [c2patool](#c2patool)
   + [Running example apps with Docker Compose](#running-example-apps-with-docker-compose)
+  + [Validation](#validation)
+    + [C2PA Verify Tool](#c2pa-verify-tool)
+    + [c2patool](#c2patool)
+      + [Validating test image with a Docker container](#validating-test-image-with-a-docker-container)
 + [🥧 Certificates](#-certificates)
   + [Generating test credentials](#generating-test-credentials)
   + [Getting credentials for production](#getting-credentials-for-production)
@@ -63,14 +65,69 @@ For more detailed feature specification, please look at the [Features](#-feature
 
 # 🥧 Quick start
 
+## Running signing from a Docker container
+
+1) Run a Docker container from a Python image:
+```bash
+docker run --rm -it --entrypoint bash --name c2pie-test python:3.12   
+```
+
+2) Inside the container execute the following bash commands:
+
+```bash
+# Generate private key and certificate chain:
+openssl genpkey \
+-algorithm RSA-PSS \
+-pkeyopt rsa_keygen_bits:2048 \
+-pkeyopt rsa_pss_keygen_md:sha256 \
+-pkeyopt rsa_pss_keygen_mgf1_md:sha256 \
+-pkeyopt rsa_pss_keygen_saltlen:32 \
+-out private_key.key
+
+openssl req -new -x509 \
+-key private_key.key \
+-sha256 -days 825 \
+-subj "/C=US/ST=CA/L=Somewhere/O=C2PA Test Signing Cert/OU=FOR TESTING_ONLY/CN=C2PA PSS Signer/emailAddress=pie@example.com" \
+-addext "basicConstraints=critical,CA:false" \
+-addext "keyUsage=critical,digitalSignature,nonRepudiation" \
+-addext "extendedKeyUsage=critical,emailProtection" \
+-out certificate_chain.pem
+
+# Export created private key and certificate chain files into env variables:
+export C2PIE_PRIVATE_KEY_FILE=./private_key.key
+export C2PIE_CERTIFICATE_CHAIN_FILE=./certificate_chain.pem
+
+# Install package
+pip install c2pie 
+
+# Download test image from this repo
+wget https://raw.githubusercontent.com/TourmalineCore/c2pie/refs/heads/master/example_app/test_files/test_image.jpg
+
+# Sign downloaded image
+c2pie sign --input_file ./test_image.jpg
+```
+
+3) **In a separate terminal**, execute the following commands to copy the file from the container to the folder you're currently in:
+
+```bash
+docker cp c2pie-test:signed_test_image.jpg .
+```
+
+>[!NOTE]
+>You can use the `c2pie-test` container to experiment with other JPG/JPEG or PDF files.
+>
+>Once you exit the container, it will be deleted automatically.
+
+After being copied to host machine, signed files can then be validated using either of the methods from [Validation](#validation) section: [C2PA Verify Tool]((https://contentcredentials.org/verify)) or [c2patool](#validating-test-image-with-a-docker-container).
+
+
 ## Running from your local environment using globally installed Python
 
 ### Prerequisites
 
-1) Python environment. Currently supported Python versions: 3.9.2 - 3.14.0.
+1) Python environment. Currently supported Python versions: 3.9.2 - 3.14.0. Make sure to [create and activate virtual environment](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/) to avoid installing packages globally and any errors caused by that.
 
-2) Private key and certificate chain pair. The repo contains pre-generated mock credentials in `tests/credentials`. You can either use them for a quick start.You can go to [Certificates](#-certificates) for instructions on how to generate one.
-
+2) Private key and certificate chain pair. The repo contains pre-generated mock credentials in `tests/credentials`. You can either download and use them for a quick start or go to [Certificates](#-certificates) for instructions on how to generate a similar key-certificate pair.
 
 
 3) Key and certificate filepaths exported into the current environment with:
@@ -131,58 +188,6 @@ If the file has been successfully signed, you'll see a message like this:
 Successfully signed the file tests/test_files/test_doc.pdf!
 The result was saved to tests/test_files/signed_test_doc.pdf.
 ```
-
-### Validation
-
-#### C2PA Verify Tool
-
-You can verify signed files using [Verify tool](https://contentcredentials.org/verify).
-
-Simply upload the file you'd like to verify.
-
->[!IMPORTANT]
-> Files embedded with self-signed certificates (like the ones this repository contains) **won't be verified**. 
-> 
-> You'll get the following message:
->```
->The Content Credential issuer couldn’t be recognized. This file may not come from where it claims to.
->```
->
->Please proceed to [production credentials section](#-getting-credentials-for-production) to find out about generating verifiable credentials.
-
-#### c2patool 
-
-Output files can be validated with:
-```bash
-c2patool path/to/your_output.jpg
-c2patool path/to/your_output.pdf
-```
-
-If the file has been correctly signed and validation is successful, the results you'll see in the terminal will look similar to this:
-```bash
-c2patool_validation_results:
-{
-    "active_manifest": "urn:uuid:f0ce8560b76342d1bb3085cfbe6cc5e9",
-    "manifests": {
-    "urn:uuid:f0ce8560b76342d1bb3085cfbe6cc5e9": {
-        "claim_generator": "c2pie",
-    ................
-},
-"validation_results": {
-    "activeManifest": {
-    "success": [
-        {
-            "code": "claimSignature.insideValidity",
-            "url": "self#jumbf=/c2pa/urn:uuid:f0ce8560b76342d1bb3085cfbe6cc5e9/c2pa.signature",
-            "explanation": "claim signature valid"
-        },
-    ................
-    },
-    "validation_state": "Valid" 
-}
-```
-
-<br>
 
 ## Running example apps with Docker Compose
 
@@ -251,6 +256,117 @@ The existing `notebooks` directory already contains an example notebook with com
 
 <br>
 
+## Validation
+
+### C2PA Verify Tool
+
+You can verify signed files using [Verify tool](https://contentcredentials.org/verify).
+
+Simply upload the file you'd like to verify.
+
+>[!IMPORTANT]
+> Files embedded with self-signed certificates (like the ones this repository contains) **won't be verified**. 
+> 
+> You'll get the following message:
+>```
+>The Content Credential issuer couldn’t be recognized. This file may not come from where it claims to.
+>```
+>
+>Please proceed to [production credentials section](#-getting-credentials-for-production) to find out about generating verifiable credentials.
+
+### c2patool 
+
+[c2patool](https://github.com/contentauth/c2pa-rs/tree/main/cli) is a command line tool for working with C2PA manifests and media assets (audio, image or video files) provided by the C2PA Rust Library.
+
+If you already have Rust, install c2patool with:
+```bash
+cargo install c2patool
+```
+
+To validate files with c2patool, run:
+```bash
+c2patool path/to/your_output.jpg
+c2patool path/to/your_output.pdf
+```
+
+If the file has been correctly signed and validation is successful, the results you'll see in the terminal will look similar to this:
+```bash
+c2patool_validation_results:
+{
+    "active_manifest": "urn:uuid:f0ce8560b76342d1bb3085cfbe6cc5e9",
+    "manifests": {
+    "urn:uuid:f0ce8560b76342d1bb3085cfbe6cc5e9": {
+        "claim_generator": "c2pie",
+    ................
+},
+"validation_results": {
+    "activeManifest": {
+    "success": [
+        {
+            "code": "claimSignature.insideValidity",
+            "url": "self#jumbf=/c2pa/urn:uuid:f0ce8560b76342d1bb3085cfbe6cc5e9/c2pa.signature",
+            "explanation": "claim signature valid"
+        },
+    ................
+    },
+    "validation_state": "Valid" 
+}
+```
+
+#### Validating test image with a Docker container
+
+1. Run a container with Rust:
+```bash
+docker run --rm -it --entrypoint bash --name c2pie-validate rust:1.90.0-bullseye
+```
+
+2. Install c2patool in the container:
+```bash
+cargo install c2patool
+```
+
+1. To test the imaged [previously signed using a Docker container](#running-signing-from-a-docker-container)and copied to your working directory:
+   
+   **In a separate terminal**, copy it into the Rust container:
+    ```bash
+    docker cp ./signed_test_image.jpg c2pie-validate:signed_test_image.jpg
+    ```
+    Then validate the copied image with:
+    ```bash
+    c2patool signed_test_image.jpg
+    ```
+
+    If the validation was successful, you'll get an output similar to this:
+    ```bash
+    c2patool_validation_results:
+    {
+        "active_manifest": "urn:uuid:f0ce8560b76342d1bb3085cfbe6cc5e9",
+        "manifests": {
+        "urn:uuid:f0ce8560b76342d1bb3085cfbe6cc5e9": {
+            "claim_generator": "c2pie",
+        ................
+    },
+    "validation_results": {
+        "activeManifest": {
+        "success": [
+            {
+                "code": "claimSignature.insideValidity",
+                "url": "self#jumbf=/c2pa/urn:uuid:f0ce8560b76342d1bb3085cfbe6cc5e9/c2pa.signature",
+                "explanation": "claim signature valid"
+            },
+        ................
+        },
+        "validation_state": "Valid" 
+    }
+    ```
+
+>[!NOTE]
+>You can validate other files in the same `c2pie-validate` container. 
+>
+>Once you exit, the container will be deleted automatically.
+
+<br>
+
 # 🥧 Certificates
 
 Example certificate chain and key file are located in `tests/credentials`. 
@@ -264,32 +380,32 @@ You can generate your own private key and certificate chain pair for testing the
 
 1. Generate a private key:
     ```bash
-    openssl genrsa -out private-key.pem 2048
+    openssl genpkey \
+    -algorithm RSA-PSS \
+    -pkeyopt rsa_keygen_bits:2048 \
+    -pkeyopt rsa_pss_keygen_md:sha256 \
+    -pkeyopt rsa_pss_keygen_mgf1_md:sha256 \
+    -pkeyopt rsa_pss_keygen_saltlen:32 \
+    -out private_key.key
     ```
 
-2. Generate a Certificate Signing Request (CSR):
+2. Generate a Self-Signed Certificate:
     ```bash
-    openssl req -new \
-    -key private-key.pem \
-    -out csr.pem
-    ```
-
-3. Generate a Self-Signed Certificate:
-    ```bash
-    openssl x509 -req -days 365 \
-    -in csr.pem \
-    -signkey  private-key.pem \
-    -out certificate-chain.pem
+    openssl req -new -x509 \
+    -key private_key.key \
+    -sha256 -days 825 \
+    -subj "/C=US/ST=CA/L=Somewhere/O=C2PA Test Signing Cert/OU=FOR TESTING_ONLY/CN=C2PA PSS Signer/emailAddress=pie@example.com" \
+    -addext "basicConstraints=critical,CA:false" \
+    -addext "keyUsage=critical,digitalSignature,nonRepudiation" \
+    -addext "extendedKeyUsage=critical,emailProtection" \
+    -out certificate_chain.pem
     ```
 
 >[!IMPORTANT]
-> Remember to update environment variables to use your newly generated credentials.
->
+> Remember to update environment variables `C2PIE_PRIVATE_KEY_FILE` and `C2PIE_CERTIFICATE_CHAIN_FILE` to use your newly generated key (`private_key.key`) and certificate chain (`certificate_chain.pem`) files.
 
 >[!NOTE]
-> You can change certificate's validity period with --days option at the last step.
->
->Certificate Signing Request file (*csr.pem*) can be deleted after the certificate has been generated.
+> You can change certificate's validity period with -days option at the last step.
 
 
 ## Getting credentials for production
