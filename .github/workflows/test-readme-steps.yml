@@ -47,15 +47,17 @@ jobs:
   verify-image-steps:
     needs: sign-image-steps
     runs-on: ubuntu-24.04
-    container: rust:1.90.0-bullseye
     steps:
     - name: Download Signed Image
       uses: actions/download-artifact@v5
       with:
         name: signed_test_image
+    
+    - name: Install Rust toolchain and c2patool
+      uses: baptiste0928/cargo-install@v3
+      with:
+        crate: c2patool
         
-    - name: Install c2patool and Verify Signed Image
+    - name: Verify Signed Image
       run: |
-        cargo install c2patool
-
         c2patool signed_test_image.jpg
