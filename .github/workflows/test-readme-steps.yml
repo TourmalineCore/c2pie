@@ -60,6 +60,7 @@ jobs:
         
     - name: Validate Signed Image
       run: |
+        c2patool signed_test_image.jpg
         echo "$(c2patool signed_test_image.jpg)" >> validation_results.json
 
     - name: Download jq and Get validation results
@@ -68,6 +69,10 @@ jobs:
         sudo apt install jq
         echo "validation_results=$(jq -r .validation_state validation_results.json)" >> $GITHUB_OUTPUT
 
+    - name: Debug validation check 
+      run: |
+        echo "Validation result extracted from file: ${{ steps.validation_check.outputs.validation_results }}"
+        
     - name: Fail if validation failed
       if: ${{ steps.validation_check.outputs.validation_results == 'Invalid' }}
       run: |
