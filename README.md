@@ -408,7 +408,11 @@ You can generate your own private key and certificate chain pair for testing the
 > Remember to update environment variables `C2PIE_PRIVATE_KEY_FILE` and `C2PIE_CERTIFICATE_CHAIN_FILE` to use your newly generated key (`private_key.key`) and certificate chain (`certificate_chain.pem`) files.
 
 >[!NOTE]
-> You can change certificate's validity period with -days option at the last step.
+> You can change certificate's validity period with `-days` option at the last step.
+>
+> `-subj` option allows to set signature info used to sign the certificate. You can change the values to fit your info. Here's what each field letter code stands for:
+> 
+> **/C** - Counry Code, **/ST** - State or Province name, **/L** - Locality Name (e.g. city), **/O** - Organization Name, **/OU** - Organization Unit Name, **/CN** - Common Name (e.g. your name), **/emailAdress** - email adress
 
 
 ## Getting credentials for production
