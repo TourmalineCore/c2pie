@@ -14,7 +14,7 @@ jobs:
       run: |
         openssl genpkey \
         -algorithm RSA-PSS \
-        -pkeyopt rsa_keygen_bits:2048 
+        -pkeyopt rsa_keygen_bits:2048 \
         -pkeyopt rsa_pss_keygen_md:sha256 \
         -pkeyopt rsa_pss_keygen_mgf1_md:sha256 \
         -pkeyopt rsa_pss_keygen_saltlen:32 \
