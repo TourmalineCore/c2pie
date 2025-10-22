@@ -1,3 +1,3 @@
-C2PIE_KEY_FILEPATH=/example_app/credentials/ps256.pem
-C2PIE_CERT_FILEPATH=/example_app/credentials/ps256.pub
+C2PIE_PRIVATE_KEY_FILE=/example_app/credentials/private-key.pem
+C2PIE_CERTIFICATE_CHAIN_FILE=/example_app/credentials/certificate-chain.pub
 C2PIE_PACKAGE_VERSION=latest

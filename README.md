@@ -8,7 +8,7 @@
 
 [![CI](https://github.com/TourmalineCore/c2pie/actions/workflows/lint-and-test.yml/badge.svg)](https://github.com/TourmalineCore/c2pie/actions/workflows/lint-and-test.yml)
 [![c2pa](https://img.shields.io/badge/c2pa-v1.4-seagreen.svg)](https://c2pa.org/)
-[![coverage](https://img.shields.io/badge/coverage-92%25-forestgreen?logo=codecov&logoColor=ff9d1c)](https://github.com/TourmalineCore/c2pie/actions/workflows/lint-and-test.yml)
+[![coverage](https://img.shields.io/badge/coverage-91%25-forestgreen?logo=codecov&logoColor=ff9d1c)](https://github.com/TourmalineCore/c2pie/actions/workflows/lint-and-test.yml)
 [![latest](https://img.shields.io/pypi/v/c2pie?label=latest&colorB=fc8021)](https://pypi.org/project/c2pie/)
 
 <br>
@@ -33,15 +33,18 @@ For more detailed feature specification, please look at the [Features](#-feature
 
 ## Table of Contents
 + [🥧 Quick start](#-quick-start)
-  + [Running example apps with Docker Compose](#running-example-apps-with-docker-compose)
-  + [Running from your own environment](#running-from-your-own-environment)
+  + [Running from your local environment using globally installed Python](#running-from-your-local-environment-using-globally-installed-python)
     + [Prerequisites](#prerequisites)
     + [Usage](#usage)
       + [Command Line Interface](#command-line-interface)
       + [Code](#code)
     + [Validation](#validation)
-      + [c2patool](#c2patool)
       + [C2PA Verify Tool](#c2pa-verify-tool)
+      + [c2patool](#c2patool)
+  + [Running example apps with Docker Compose](#running-example-apps-with-docker-compose)
++ [🥧 Certificates](#-certificates)
+  + [Generating test credentials](#generating-test-credentials)
+  + [Getting credentials for production](#getting-credentials-for-production)
 + [🥧 For developers](#-for-developers)
   + [First steps](#first-steps)
     + [Using Dev Containers](#using-dev-containers)
@@ -52,9 +55,6 @@ For more detailed feature specification, please look at the [Features](#-feature
 + [🥧 Features](#-features)
   + [Workflow of test applications](#workflow-of-test-applications)
   + [Notes for PDF vs JPG/JPEG](#notes-for-pdf-vs-jpgjpeg)
-+ [🥧 Certificates](#-certificates)
-  + [Generating your own mock credentials](#generating-your-own-mock-credentials)
-  + [Getting credentials for production](#getting-credentials-for-production)
 + [🥧 Relevant links](#-relevant-links)
 + [🥧 Contributing](#-contributing)
 + [🥧 License](#-license)
@@ -62,6 +62,127 @@ For more detailed feature specification, please look at the [Features](#-feature
 <br>
 
 # 🥧 Quick start
+
+## Running from your local environment using globally installed Python
+
+### Prerequisites
+
+1) Python environment. Currently supported Python versions: 3.9.2 - 3.14.0.
+
+2) Private key and certificate chain pair. The repo contains pre-generated mock credentials in `tests/credentials`. You can either use them for a quick start.You can go to [Certificates](#-certificates) for instructions on how to generate one.
+
+
+
+3) Key and certificate filepaths exported into the current environment with:
+    ```bash
+    export C2PIE_PRIVATE_KEY_FILE=private-key.pem
+    export C2PIE_CERTIFICATE_CHAIN_FILE=certificate-chain.pub
+    ```
+
+4) c2pie package installed in your current environment:
+
+    ```bash
+    pip install c2pie
+    ```
+
+### Usage
+
+#### Command Line Interface
+
+You can run the following command to sign an input JPG or PDF file:
+```python
+c2pie sign --input_file path/to/input_file
+```
+
+By default, signed file will be saved to the same directory as the input file with the *signed_* prefix. 
+To explicitly set output path, use:
+```python
+c2pie sign --input_file path/to/input_file --output_file path/to/output_file
+```
+
+If the file has been successfully signed, you'll see a message like this: 
+```bash
+Successfully signed the file tests/test_files/test_doc.pdf!
+The result was saved to tests/test_files/signed_test_doc.pdf.
+```
+
+#### Code
+
+To sign a file and save the output to the same directory:
+
+```python
+from c2pie.signing import sign_file
+
+input_file_path = "path/to/file"
+sign_file(input_path=input_file_path)
+```
+
+To set a custom output path:
+```python
+from c2pie.signing import sign_file
+
+input_file_path = "path/to/file"
+output_file_path = "path/to/another/file/"
+sign_file(input_path=input_file_path, output_path=output_file_path)
+```
+
+If the file has been successfully signed, you'll see a message like this: 
+```bash
+Successfully signed the file tests/test_files/test_doc.pdf!
+The result was saved to tests/test_files/signed_test_doc.pdf.
+```
+
+### Validation
+
+#### C2PA Verify Tool
+
+You can verify signed files using [Verify tool](https://contentcredentials.org/verify).
+
+Simply upload the file you'd like to verify.
+
+>[!IMPORTANT]
+> Files embedded with self-signed certificates (like the ones this repository contains) **won't be verified**. 
+> 
+> You'll get the following message:
+>```
+>The Content Credential issuer couldn’t be recognized. This file may not come from where it claims to.
+>```
+>
+>Please proceed to [production credentials section](#-getting-credentials-for-production) to find out about generating verifiable credentials.
+
+#### c2patool 
+
+Output files can be validated with:
+```bash
+c2patool path/to/your_output.jpg
+c2patool path/to/your_output.pdf
+```
+
+If the file has been correctly signed and validation is successful, the results you'll see in the terminal will look similar to this:
+```bash
+c2patool_validation_results:
+{
+    "active_manifest": "urn:uuid:f0ce8560b76342d1bb3085cfbe6cc5e9",
+    "manifests": {
+    "urn:uuid:f0ce8560b76342d1bb3085cfbe6cc5e9": {
+        "claim_generator": "c2pie",
+    ................
+},
+"validation_results": {
+    "activeManifest": {
+    "success": [
+        {
+            "code": "claimSignature.insideValidity",
+            "url": "self#jumbf=/c2pa/urn:uuid:f0ce8560b76342d1bb3085cfbe6cc5e9/c2pa.signature",
+            "explanation": "claim signature valid"
+        },
+    ................
+    },
+    "validation_state": "Valid" 
+}
+```
+
+<br>
 
 ## Running example apps with Docker Compose
 
@@ -130,124 +251,56 @@ The existing `notebooks` directory already contains an example notebook with com
 
 <br>
 
-## Running from your own environment
+# 🥧 Certificates
 
-### Prerequisites
+Example certificate chain and key file are located in `tests/credentials`. 
 
-1) Python environment. Currently supported Python versions: 3.9.2 - 3.14.0.
-2) Private key and certificate chain pair. You can go to [Certificates](#-certificates) for instructions on how to generate one.
+>[!WARNING]
+>This repository's credentials are suitable for development only! 
 
-    The repo contains pre-generated mock credentials in `tests/credentials`. You can use them for a quick start.
+## Generating test credentials
 
-3) Key and certificate filepaths exported into the current environment with:
+You can generate your own private key and certificate chain pair for testing the package by following these steps:
+
+1. Generate a private key:
     ```bash
-    export C2PIE_KEY_FILEPATH=<path/to/private_key_file>
-    export C2PIE_CERT_FILEPATH=<path/to/certificate_chain_file>
+    openssl genrsa -out private-key.pem 2048
     ```
 
-4) c2pie package installed in your current environment:
-
+2. Generate a Certificate Signing Request (CSR):
     ```bash
-    pip install c2pie
+    openssl req -new \
+    -key private-key.pem \
+    -out csr.pem
     ```
 
-
-### Usage
-
-#### Command Line Interface
-
-You can run the following command to sign an input JPG or PDF file:
-```python
-c2pie sign --input_file <path/to/input_file>
-```
-
-By default, signed file will be saved to the same directory as the input file with the *signed_* prefix. 
-To explicitly set output path, use:
-```python
-c2pie sign --input_file <path/to/input_file> --output_file <path/to/output_file>
-```
-
-If the file has been successfully signed, you'll see a message like this: 
-```bash
-Successfully signed the file tests/test_files/test_doc.pdf!
-The result was saved to tests/test_files/signed_test_doc.pdf.
-```
-
-#### Code
-
-To sign a file and save the output to the same directory:
-
-```python
-from c2pie.signing import sign_file
-
-input_file_path = "path/to/file"
-sign_file(input_path=input_file_path)
-```
-
-To set a custom output path:
-```python
-from c2pie.signing import sign_file
-
-input_file_path = "path/to/file"
-output_file_path = "path/to/another/file/"
-sign_file(input_path=input_file_path, output_path=output_file_path)
-```
-
-If the file has been successfully signed, you'll see a message like this: 
-```bash
-Successfully signed the file tests/test_files/test_doc.pdf!
-The result was saved to tests/test_files/signed_test_doc.pdf.
-```
-
-### Validation
-
-#### c2patool 
-
-Output files can be validated with:
-```bash
-c2patool path/to/your_output.jpg
-c2patool path/to/your_output.pdf
-```
-
-If the file has been correctly signed and validation is successful, the results you'll see in the terminal will look similar to this:
-```bash
-c2patool_validation_results:
-{
-    "active_manifest": "urn:uuid:f0ce8560b76342d1bb3085cfbe6cc5e9",
-    "manifests": {
-    "urn:uuid:f0ce8560b76342d1bb3085cfbe6cc5e9": {
-        "claim_generator": "c2pie",
-    ................
-},
-"validation_results": {
-    "activeManifest": {
-    "success": [
-        {
-            "code": "claimSignature.insideValidity",
-            "url": "self#jumbf=/c2pa/urn:uuid:f0ce8560b76342d1bb3085cfbe6cc5e9/c2pa.signature",
-            "explanation": "claim signature valid"
-        },
-    ................
-    },
-    "validation_state": "Valid" 
-}
-```
-
-#### C2PA Verify Tool
-
-You can also verify signed files using [Verify tool](https://contentcredentials.org/verify).
-
-Simply upload the file you'd like to verify.
+3. Generate a Self-Signed Certificate:
+    ```bash
+    openssl x509 -req -days 365 \
+    -in csr.pem \
+    -signkey  private-key.pem \
+    -out certificate-chain.pem
+    ```
 
 >[!IMPORTANT]
-> Files embedded with self-signed certificates (like the ones this repository contains) **won't be verified**. 
-> 
-> You'll get the following message:
->```
->The Content Credential issuer couldn’t be recognized. This file may not come from where it claims to.
->```
+> Remember to update environment variables to use your newly generated credentials.
 >
->Please proceed to [production credentials section](#-getting-credentials-for-production) to find out about generating verifiable credentials.
+
+>[!NOTE]
+> You can change certificate's validity period with --days option at the last step.
+>
+>Certificate Signing Request file (*csr.pem*) can be deleted after the certificate has been generated.
+
+
+## Getting credentials for production
+
+🔸 Use a real document‑signing certificate (RSA‑PSS or ECDSA per C2PA);
+
+🔸 Provide a leaf + intermediates bundle (no root);  
+
+🔸 Configure trust anchors/allow‑lists in your validator environment. 
+
+For detailed information on signing and certificates please explore the [corresponding section in the Content Authenticity Initiative (CAI) documentation](https://opensource.contentauthenticity.org/docs/signing/).
 
 <br>
 
@@ -369,57 +422,6 @@ The latter option is also available via the VC Code task `Lint and Format`
 🔸 **JPG/JPEG**: we insert APP11 segments. The exclusion start is the APP11 insertion offset; the length is the final APP11 payload length (also computed iteratively).
 
 The library takes care of iterative sizing, so the `c2pa.hash.data` matches exactly, otherwise validators return `assertion.dataHash.mismatch`.
-
-<br>
-
-# 🥧 Certificates
-
-Example certificate and key are located in `tests/credentials`. 
-
->[!WARNING]
->This repository's credentials are suitable for development only! 
-
-## Generating your own mock credentials
-
-You can generate your own mock credentials for testing and developing the package follow these steps:
-
-1. Generate a private key:
-    ```bash
-    openssl genrsa -out credentials/<private-key-filename>.pem 2048
-    ```
-
-2. Generate a Certificate Signing Request (CSR):
-    ```bash
-    openssl req -new \
-    -key credentials/<private-key-filename>.pem \
-    -out csr.pem
-    ```
-
-3. Generate a Self-Signed Certificate:
-    ```bash
-    openssl x509 -req -days 365 \
-    -in csr.pem \
-    -signkey  credentials/<private-key-filename>.pem \
-    -out credentials/<certificate-filename>.pem
-    ```
->[!IMPORTANT]
-> Remember to update environment variables to use your newly generated credentials.
-
->[!NOTE]
-> You can change certificate's validity period with --days option at the last step.
->
->Certificate Signing Request file (*csr.pem*) can be deleted after the certificate has been generated.
-
-
-## Getting credentials for production
-
-🔸 Use a real document‑signing certificate (RSA‑PSS or ECDSA per C2PA);
-
-🔸 Provide a leaf + intermediates bundle (no root);  
-
-🔸 Configure trust anchors/allow‑lists in your validator environment. 
-
-For detailed information on signing and certificates please explore the [corresponding section in the Content Authenticity Initiative (CAI) documentation](https://opensource.contentauthenticity.org/docs/signing/).
 
 <br>
 

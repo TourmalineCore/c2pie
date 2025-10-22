@@ -1,4 +1,5 @@
 import argparse
+from importlib.metadata import version
 from pathlib import Path
 
 from c2pie.signing import sign_file
@@ -14,6 +15,8 @@ def parse_arguments() -> argparse.Namespace:
         f"into files with supported extensions.\nCurrently, the "
         f"supported extensions are: {supported_extensions}.",
     )
+
+    global_parser.add_argument("-V", "--version", action="version", version=f"c2pie {version('c2pie')}")
 
     subparsers = global_parser.add_subparsers(title="subcommands", help="commands")
 
