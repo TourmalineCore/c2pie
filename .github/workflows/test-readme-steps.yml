@@ -6,7 +6,7 @@ on:
       - feature/*
 
 jobs:
-  sign-files-steps:
+  sign-steps:
     runs-on: ubuntu-24.04
     container: python:3.9.2-buster
     steps:
@@ -57,8 +57,8 @@ jobs:
         name: signed_test_doc
         path: signed_test_doc.pdf
   
-  verify-image-steps:
-    needs: sign-files-steps
+  verify-steps:
+    needs: sign-steps
     runs-on: ubuntu-24.04
     steps:
     - name: Download Signed Image
