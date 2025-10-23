@@ -2,6 +2,52 @@
 
 <!-- version list -->
 
+## v0.1.0-rc.3 (2025-10-23)
+
+### Config
+
+- **semantic-releases**: Add alpha prereleases group
+  ([`5f31999`](https://github.com/TourmalineCore/c2pie/commit/5f319995f12a9d292cd13e864e7a44a452ecbf6f))
+
+### Documentation
+
+- Move contributing to its separate file
+  ([`cf468f3`](https://github.com/TourmalineCore/c2pie/commit/cf468f38f8722d6d8ab48fdd5e7d721b3af0d72b))
+
+- **readme**: Add empty line dividers
+  ([`b547982`](https://github.com/TourmalineCore/c2pie/commit/b5479820c157b4076d5c40fb3a94097410d5b1e1))
+
+- **readme**: Add instructions for switching between terminals
+  ([`b7a80ff`](https://github.com/TourmalineCore/c2pie/commit/b7a80ffef144c5f60a1e69bc4f5cabe4f3b6d7e3))
+
+- **readme**: Add note on customizing signature subject info
+  ([`1bab57b`](https://github.com/TourmalineCore/c2pie/commit/1bab57bccdddf9b5a5178dcd6d5c7f3bf322b501))
+
+- **readme**: Add notes on current package status
+  ([`13746d5`](https://github.com/TourmalineCore/c2pie/commit/13746d5e9167341d8d4b883b87681b8b06a200d7))
+
+- **readme**: Bring test coverage score up to date
+  ([`ca25434`](https://github.com/TourmalineCore/c2pie/commit/ca254343b110a5111b31539eea8a812dd45db5f8))
+
+- **readme**: Change days amount in signing certificate command
+  ([`2782d1d`](https://github.com/TourmalineCore/c2pie/commit/2782d1d95afaccfa905e7aa5e24aea448dac65eb))
+
+- **readme**: Clarify file placement
+  ([`70633e5`](https://github.com/TourmalineCore/c2pie/commit/70633e58d3f4a654570e6cb83f18fdf4d72c0148))
+
+- **readme**: Fix env vars filepaths to correspond with the example
+  ([`7c4a230`](https://github.com/TourmalineCore/c2pie/commit/7c4a230e5d7be13918f5b5f6c642c7f4eaea4e3f))
+
+- **readme**: Fix links
+  ([`df5fac4`](https://github.com/TourmalineCore/c2pie/commit/df5fac4b7998d621c6e9ab1893b18fb651b34c05))
+
+- **readme**: Fix numbers in list
+  ([`4b49d54`](https://github.com/TourmalineCore/c2pie/commit/4b49d540ccceeba6661a1b80a1137ece12e35237))
+
+- **readme**: Update python version for test container image
+  ([`a896642`](https://github.com/TourmalineCore/c2pie/commit/a896642edaabd947aa7152d182897ed69e212967))
+
+
 ## v0.1.0-rc.2 (2025-10-21)
 
 ### Features
