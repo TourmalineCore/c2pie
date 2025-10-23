@@ -13,15 +13,19 @@
 
 <br>
 
-**c2pie** is an open‑source Python library for constructing [C2PA](https://c2pa.org/) Content Credentials manifests that validate with [`c2patool`](https://github.com/contentauth/c2pa-rs) and other common C2PA consumers. 
+`c2pie` is an open‑source Python library for constructing [C2PA](https://c2pa.org/) Content Credentials manifests that validate with [`c2patool`](https://github.com/contentauth/c2pa-rs) and other common C2PA consumers.
 
-The package supports building claims, assertions, and COSE signatures and embedding the manifest store into JPG/JPEG and PDF files. 
+As far as we know, c2pie is **the world's first Python package** to implement signing PDF files according to the C2PA Standard.
+
+The package supports building claims, assertions, and COSE signatures and embedding the manifest store into JPG/JPEG and PDF files.
 
 🔸 **Supported file extensions**: `JPG`, `JPEG`, `PDF`
 
 🔸 **Supported Python versions**: `3.9.2 - 3.14.0`
 
-🔸 **C2PA Spec Version**: `1.4`
+🔸 **Supported C2PA Spec Versions**: `1.4`. 
+
+Support for C2PA 2.2 is planned for future releases.
 
 For more detailed feature specification, please look at the [Features](#-features) section.
 
