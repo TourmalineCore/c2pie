@@ -320,9 +320,10 @@ docker run --rm -it --entrypoint bash --name c2pie-validate rust:1.90.0-bullseye
 cargo install c2patool
 ```
 
-3. To test the imaged [previously signed using a Docker container](#running-signing-from-a-docker-container) and copied to your working directory:
+3. To validate the image [previously signed using a Docker container](#running-signing-from-a-docker-container) and copied to your working directory:
    
-   **In a separate terminal**, copy the signed image into the Rust container:
+   **In a separate terminal**, copy the signed image into the Rust container. 
+   > Make sure the signed file is in the same directory that you're running this `docker cp` from!
     ```bash
     docker cp ./signed_test_image.jpg c2pie-validate:signed_test_image.jpg
     ```
