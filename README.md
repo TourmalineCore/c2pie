@@ -131,10 +131,10 @@ After being copied to host machine, signed files can then be validated using eit
 2) Private key and certificate chain pair. The repo contains pre-generated mock credentials in `tests/credentials`. You can either download and use them for a quick start or go to [Certificates](#-certificates) for instructions on how to generate a similar key-certificate pair.
 
 
-3) Key and certificate filepaths exported into the current environment with:
+3) Key and certificate chain filepaths exported into the current environment with (pay attention to filenames):
     ```bash
-    export C2PIE_PRIVATE_KEY_FILE=private-key.pem
-    export C2PIE_CERTIFICATE_CHAIN_FILE=certificate-chain.pub
+    export C2PIE_PRIVATE_KEY_FILE=private_key.key
+    export C2PIE_CERTIFICATE_CHAIN_FILE=certificate_chain.pem
     ```
 
 4) c2pie package installed in your current environment:
