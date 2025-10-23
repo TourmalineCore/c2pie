@@ -86,7 +86,7 @@ openssl genpkey \
 
 openssl req -new -x509 \
 -key private_key.key \
--sha256 -days 825 \
+-sha256 -days 365 \
 -subj "/C=US/ST=CA/L=Somewhere/O=C2PA Test Signing Cert/OU=FOR TESTING_ONLY/CN=C2PA PSS Signer/emailAddress=pie@example.com" \
 -addext "basicConstraints=critical,CA:false" \
 -addext "keyUsage=critical,digitalSignature,nonRepudiation" \
@@ -396,7 +396,7 @@ You can generate your own private key and certificate chain pair for testing the
     ```bash
     openssl req -new -x509 \
     -key private_key.key \
-    -sha256 -days 825 \
+    -sha256 -days 365 \
     -subj "/C=US/ST=CA/L=Somewhere/O=C2PA Test Signing Cert/OU=FOR TESTING_ONLY/CN=C2PA PSS Signer/emailAddress=pie@example.com" \
     -addext "basicConstraints=critical,CA:false" \
     -addext "keyUsage=critical,digitalSignature,nonRepudiation" \
