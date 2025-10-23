@@ -69,7 +69,7 @@ For more detailed feature specification, please look at the [Features](#-feature
 
 1) Run a Docker container from a Python image:
 ```bash
-docker run --rm -it --entrypoint bash --name c2pie-test python:3.12   
+docker run --rm -it --entrypoint bash --name c2pie-test python:3.14
 ```
 
 2) Inside the container execute the following bash commands:
