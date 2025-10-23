@@ -3,6 +3,7 @@ name: Package Publishing
 on:
   release:
     types: [created, published, released]
+  workflow_dispatch:
 
 permissions:
   contents: write
