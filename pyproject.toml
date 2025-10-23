@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "c2pie"
-version = "0.1.0-alpha.6"
+version = "0.1.0-rc.3"
 
 [[tool.poetry.source]]
 name = "PyPI"
@@ -17,7 +17,7 @@ authors = [
 license = {file = 'LICENSE'}
 requires-python = '>=3.9.2'
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 5 - Production/Stable",
     "Natural Language :: English",
     "Operating System :: MacOS :: MacOS X",
     "Operating System :: POSIX :: Linux",
@@ -109,4 +109,9 @@ prerelease = false
 match = "^(release)/.+"
 prerelease = true
 prerelease_token = "rc"
+
+[tool.semantic_release.branches.alpha]
+match = "^(feat|fix|docs)/.+"
+prerelease = true
+prerelease_token = "alpha"
 

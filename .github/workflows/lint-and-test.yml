@@ -2,8 +2,9 @@ name: Linting and Testing
 
 on:
   push:
-    branches:
-      - '**'
+    branches-ignore:
+      - master
+      - release/**
     paths-ignore:
       - '**.md'
       - 'docs/**'
@@ -175,8 +176,8 @@ jobs:
             --cov=c2pie \
             -v
         env:
-          C2PIE_KEY_FILEPATH: ${{ vars.C2PIE_KEY_FILEPATH }}
-          C2PIE_CERT_FILEPATH: ${{ vars.C2PIE_CERT_FILEPATH }}
+          C2PIE_PRIVATE_KEY_FILE: ${{ vars.C2PIE_PRIVATE_KEY_FILE }}
+          C2PIE_CERTIFICATE_CHAIN_FILE: ${{ vars.C2PIE_CERTIFICATE_CHAIN_FILE }}
 
       - name: Upload coverage artifact
         if: (matrix.python-version == '3.12') && (matrix.os == 'ubuntu-latest')

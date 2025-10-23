@@ -1,0 +1,103 @@
+name: Execute Readme Steps
+
+on:
+  push:
+    branches:
+      - feature/*
+
+jobs:
+  sign-steps:
+    runs-on: ubuntu-24.04
+    container: python:3.9.2-buster
+    steps:
+    - name: Generate Certificates, Install c2pie, and Sign Image and PDF
+      run: |
+        # Generate private key and certificate chain:
+        openssl genpkey \
+        -algorithm RSA-PSS \
+        -pkeyopt rsa_keygen_bits:2048 \
+        -pkeyopt rsa_pss_keygen_md:sha256 \
+        -pkeyopt rsa_pss_keygen_mgf1_md:sha256 \
+        -pkeyopt rsa_pss_keygen_saltlen:32 \
+        -out private_key.key
+
+        openssl req -new -x509 \
+        -key private_key.key \
+        -sha256 -days 825 \
+        -subj "/C=US/ST=CA/L=Somewhere/O=C2PA Test Signing Cert/OU=FOR TESTING_ONLY/CN=C2PA PSS Signer/emailAddress=pie@example.com" \
+        -addext "basicConstraints=critical,CA:false" \
+        -addext "keyUsage=critical,digitalSignature,nonRepudiation" \
+        -addext "extendedKeyUsage=critical,emailProtection" \
+        -out certificate_chain.pem
+
+        # Export created private key and certificate chain files into env variables:
+        export C2PIE_PRIVATE_KEY_FILE=./private_key.key
+        export C2PIE_CERTIFICATE_CHAIN_FILE=./certificate_chain.pem
+
+        # Install package
+        pip install c2pie 
+
+        # Download test image and PDF from this repo
+        wget https://raw.githubusercontent.com/TourmalineCore/c2pie/refs/heads/master/example_app/test_files/test_image.jpg
+        wget https://raw.githubusercontent.com/TourmalineCore/c2pie/refs/heads/master/example_app/test_files/test_doc.pdf
+
+        # Sign files
+        c2pie sign --input_file ./test_image.jpg
+        c2pie sign --input_file ./test_doc.pdf
+
+    - name: Upload Signed Image
+      uses: actions/upload-artifact@v4
+      with:
+        name: signed_test_image
+        path: signed_test_image.jpg
+
+    - name: Upload Signed PDF
+      uses: actions/upload-artifact@v4
+      with:
+        name: signed_test_doc
+        path: signed_test_doc.pdf
+  
+  verify-steps:
+    needs: sign-steps
+    runs-on: ubuntu-24.04
+    steps:
+    - name: Download Signed Image
+      uses: actions/download-artifact@v5
+      with:
+        name: signed_test_image
+    
+    - name: Download Signed PDF
+      uses: actions/download-artifact@v5
+      with:
+        name: signed_test_doc
+    
+    - name: Install Rust toolchain and c2patool
+      uses: baptiste0928/cargo-install@v3
+      with:
+        crate: c2patool
+        
+    - name: Validate Signed Image and PDF
+      run: |
+        c2patool signed_test_image.jpg
+        echo "$(c2patool signed_test_image.jpg)" >> image_validation_results.json
+        c2patool signed_test_doc.pdf
+        echo "$(c2patool signed_test_doc.pdf)" >> pdf_validation_results.json
+        
+    - name: Download jq and Get validation results
+      id: validation_check
+      run: |
+        sudo apt install jq
+        echo "image_validation_results=$(jq -r .validation_state image_validation_results.json)" >> $GITHUB_OUTPUT
+        echo "pdf_validation_results=$(jq -r .validation_state pdf_validation_results.json)" >> $GITHUB_OUTPUT
+
+    - name: Debug validation check 
+      run: |
+        echo "Image validation result extracted from file: ${{ steps.validation_check.outputs.image_validation_results }}"
+        echo "PDF validation result extracted from file: ${{ steps.validation_check.outputs.pdf_validation_results }}"
+
+    - name: Fail if validation failed
+      if: ${{ steps.validation_check.outputs.image_validation_results == 'Invalid' || steps.validation_check.outputs.pdf_validation_results == 'Invalid' }} 
+      run: |
+        echo "Invalid C2PA signature in one of the files. Check logs of the previous step."
+        exit 1
+
