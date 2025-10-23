@@ -2,7 +2,7 @@ name: Package Publishing
 
 on:
   release:
-    types: [created, published]
+    types: [created, published, released]
 
 permissions:
   contents: write
