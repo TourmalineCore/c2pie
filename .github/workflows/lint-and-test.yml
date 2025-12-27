@@ -114,6 +114,7 @@ jobs:
         uses: dorny/test-reporter@v1
         if: always() 
         with:
+          name: Unit Tests Report
           path: test-report.xml
           reporter: python-xunit
 
