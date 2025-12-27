@@ -107,8 +107,15 @@ jobs:
           poetry run pytest \
             --cov=c2pie \
             -m "not e2e" \
-            --maxfail=1 \
+            --junit-xml=test-report.xml \
             -v
+
+      - name: Publish test report
+        uses: dorny/test-reporter@v1
+        if: always() 
+        with:
+          path: test-report.xml
+          reporter: python-xunit
 
       - name: Upload coverage artifact
         if: (matrix.python-version == '3.12') && (matrix.os == 'ubuntu-latest')
