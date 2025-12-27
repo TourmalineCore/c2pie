@@ -116,7 +116,7 @@ jobs:
         with:
           name: Unit Tests Report
           path: test-report.xml
-          reporter: python-xunit
+          reporter: java-junit
 
       - name: Upload coverage artifact
         if: (matrix.python-version == '3.12') && (matrix.os == 'ubuntu-latest')
