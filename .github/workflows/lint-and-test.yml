@@ -120,6 +120,8 @@ jobs:
           reporter: java-junit
           # Not set action as failed if test report contains any failed test
           fail-on-error: false 
+          # Allows generate only summary without all tests list for more clear results
+          only-summary: true
 
       - name: Upload coverage artifact
         if: (matrix.python-version == '3.12') && (matrix.os == 'ubuntu-latest')
