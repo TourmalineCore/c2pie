@@ -108,7 +108,7 @@ jobs:
           poetry run pytest \
             --cov=c2pie \
             -m "not e2e" \
-            --junit-xml=test-report.xml \
+            --junit-xml=test-report-${{ matrix.os }}-${{ matrix.python-version }}.xml \
             -v
 
       - name: Publish test report
@@ -116,7 +116,7 @@ jobs:
         if: always() 
         with:
           name: Unit Tests Report
-          path: test-report.xml
+          path: test-report-${{ matrix.os }}-${{ matrix.python-version }}.xml
           reporter: java-junit
 
       - name: Upload coverage artifact

@@ -13,7 +13,7 @@ def test_create_claim_with_label():
     )
 
     assert test_claim is not None
-    assert test_claim.claim_generator == "c2pie"
+    assert test_claim.claim_generator == "cpie"
     assert test_claim.manifest_label == "valid_manifest_label"
     assert test_claim.claim_signature_label == "self#jumbf=c2pa/valid_manifest_label/c2pa.signature"
 
