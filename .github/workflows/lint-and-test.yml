@@ -120,8 +120,8 @@ jobs:
           reporter: java-junit
           # Not set action as failed if test report contains any failed test
           fail-on-error: false 
-          # Allows generate only summary without all tests list for more clear results
-          only-summary: true
+          # # Allows generate only summary without all tests list for more clear results
+          # only-summary: true
           list-suites: failed
           list-tests: failed
 
