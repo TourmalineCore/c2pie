@@ -122,7 +122,7 @@ jobs:
           fail-on-error: false 
           # # Allows generate only summary without all tests list for more clear results
           # only-summary: true
-          list-suites: failed
+          # list-suites: failed
           list-tests: failed
 
       - name: Upload coverage artifact
