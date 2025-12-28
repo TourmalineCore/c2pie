@@ -116,7 +116,7 @@ jobs:
         if: always() 
         with:
           name: Unit Tests Report
-          path: test-report.xml
+          path: test-report-${{ matrix.os }}-${{ matrix.python-version }}.xml
           reporter: java-junit
 
       - name: Upload coverage artifact
