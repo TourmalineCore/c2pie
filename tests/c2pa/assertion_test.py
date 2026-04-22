@@ -1,4 +1,4 @@
-from c2pie.c2pa.assertion import Assertion, HashDataAssertion
+from c2pie.c2pa.assertion import Assertion, HashDataAssertion, IngredientAssertion
 from c2pie.utils.assertion_schemas import C2PA_AssertionTypes, cbor_to_bytes, json_to_bytes
 from c2pie.utils.content_types import jumbf_content_types
 
@@ -96,3 +96,42 @@ def test_additional_extensions_adding_for_hash_data_assertions():
     additional_exclusion = {"some_extension": 343}
     test_assertion = HashDataAssertion(cai_offset=124, hashed_data=b"", additional_exclusions=[additional_exclusion])
     assert additional_exclusion in test_assertion.schema["exclusions"]
+
+
+def test_create_ingredient_assertion():
+    test_assertion = IngredientAssertion(title="original.jpg", dc_format="image/jpeg")
+    assert test_assertion is not None
+
+
+def test_ingredient_assertion_content_type_is_cbor():
+    test_assertion = IngredientAssertion(title="original.jpg", dc_format="image/jpeg")
+    assert test_assertion.get_content_type() == jumbf_content_types["cbor"]
+
+
+def test_ingredient_assertion_label():
+    test_assertion = IngredientAssertion(title="original.jpg", dc_format="image/jpeg")
+    assert test_assertion.get_label() == "c2pa.ingredient.v2"
+
+
+def test_ingredient_assertion_relationship_is_parent_of():
+    test_assertion = IngredientAssertion(title="original.jpg", dc_format="image/jpeg")
+    assert test_assertion.schema["relationship"] == "parentOf"
+
+
+def test_ingredient_assertion_schema_fields():
+    test_assertion = IngredientAssertion(title="original.pdf", dc_format="application/pdf")
+    assert test_assertion.schema["dc:title"] == "original.pdf"
+    assert test_assertion.schema["dc:format"] == "application/pdf"
+
+
+def test_ingredient_assertion_content_boxes_not_empty():
+    test_assertion = IngredientAssertion(title="original.jpg", dc_format="image/jpeg")
+    assert len(test_assertion.content_boxes) != 0
+
+
+def test_ingredient_assertion_serializes_as_cbor():
+    test_assertion = IngredientAssertion(title="original.jpg", dc_format="image/jpeg")
+    expected_payload = cbor_to_bytes(
+        {"dc:title": "original.jpg", "dc:format": "image/jpeg", "relationship": "parentOf"}
+    )
+    assert test_assertion.content_boxes[0].payload == expected_payload
