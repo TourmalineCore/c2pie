@@ -6,11 +6,17 @@ import os
 from pathlib import Path
 from typing import Literal
 
+from c2pie.c2pa.raw_manifest import RawManifest
+from c2pie.c2pa_parsing.jumbf_reader import find_active_manifest, get_all_manifest_raw_bytes
+from c2pie.c2pa_parsing.jpg_reader import extract_manifest_store_bytes as _jpg_extract_store
+from c2pie.c2pa_parsing.jpg_reader import extract_raw_image_bytes
+from c2pie.c2pa_parsing.pdf_reader import extract_manifest_store_bytes as _pdf_extract_store
 from c2pie.interface import (
     C2PA_AssertionTypes,
     c2pie_EmplaceManifest,
     c2pie_GenerateAssertion,
     c2pie_GenerateHashDataAssertion,
+    c2pie_GenerateIngredientAssertion,
     c2pie_GenerateManifest,
 )
 from c2pie.utils.content_types import C2PA_ContentTypes
@@ -90,6 +96,21 @@ def _ensure_path_type_for_filepath(path: str | Path) -> Path:
 def _get_content_type_by_filepath(file_path: Path) -> C2PA_ContentTypes:
     file_content_type = C2PA_ContentTypes(file_path.suffix)
     return file_content_type
+
+
+_DC_FORMAT_BY_CONTENT_TYPE: dict[str, str] = {
+    "jpg": "image/jpeg",
+    "jpeg": "image/jpeg",
+    "pdf": "application/pdf",
+}
+
+
+def _detect_existing_c2pa(file_type: C2PA_ContentTypes, raw_bytes: bytes) -> bytes | None:
+    if file_type.name in ("jpg", "jpeg"):
+        return _jpg_extract_store(raw_bytes)
+    if file_type.name == "pdf":
+        return _pdf_extract_store(raw_bytes)
+    return None
 
 
 def _check_file_extension_is_supported(file_path: Path) -> None:
@@ -194,6 +215,23 @@ def sign_file(
 
     file_type: C2PA_ContentTypes = _get_content_type_by_filepath(file_path=input_path)
 
+    existing_store_bytes = _detect_existing_c2pa(file_type, raw_bytes)
+
+    c2pa_manifest_ref = None
+    prepend_manifests = None
+    content_for_hashing = raw_bytes
+
+    if existing_store_bytes:
+        active = find_active_manifest(existing_store_bytes)
+        c2pa_manifest_ref = {
+            "url": f"self#jumbf=c2pa/{active.label}",
+            "alg": "sha256",
+            "hash": hashlib.sha256(active.raw_bytes[8:]).digest(),
+        }
+        if file_type.name in ("jpg", "jpeg"):
+            content_for_hashing = extract_raw_image_bytes(raw_bytes)
+        prepend_manifests = [RawManifest(b) for b in get_all_manifest_raw_bytes(existing_store_bytes)]
+
     if file_type.name == "pdf":
         cai_offset = len(raw_bytes)
     else:
@@ -205,20 +243,27 @@ def sign_file(
     )
 
     hash_data_assertion = c2pie_GenerateHashDataAssertion(
-        cai_offset=cai_offset, hashed_data=hashlib.sha256(raw_bytes).digest()
+        cai_offset=cai_offset, hashed_data=hashlib.sha256(content_for_hashing).digest()
     )
 
-    assertions = [creative_work_assertion, hash_data_assertion]
+    ingredient_assertion = c2pie_GenerateIngredientAssertion(
+        title=input_path.name,
+        dc_format=_DC_FORMAT_BY_CONTENT_TYPE[file_type.name],
+        c2pa_manifest_ref=c2pa_manifest_ref,
+    )
+
+    assertions = [creative_work_assertion, hash_data_assertion, ingredient_assertion]
 
     manifest = c2pie_GenerateManifest(
         assertions=assertions,
         private_key=key,
         certificate_chain=certificates,
+        prepend_manifests=prepend_manifests,
     )
 
     signed_bytes = c2pie_EmplaceManifest(
         format_type=file_type,
-        content_bytes=raw_bytes,
+        content_bytes=content_for_hashing,
         c2pa_offset=cai_offset,
         manifests=manifest,
     )

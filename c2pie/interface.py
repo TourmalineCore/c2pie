@@ -2,7 +2,8 @@ from __future__ import annotations
 
 import uuid
 
-from c2pie.c2pa.assertion import Assertion, HashDataAssertion
+from c2pie.c2pa.assertion import Assertion, HashDataAssertion, IngredientAssertion
+from c2pie.c2pa.raw_manifest import RawManifest
 from c2pie.c2pa.assertion_store import AssertionStore
 from c2pie.c2pa.claim import Claim
 from c2pie.c2pa.claim_signature import ClaimSignature
@@ -23,10 +24,19 @@ def c2pie_GenerateHashDataAssertion(cai_offset: int, hashed_data: bytes) -> Hash
     return HashDataAssertion(cai_offset, hashed_data)
 
 
+def c2pie_GenerateIngredientAssertion(
+    title: str,
+    dc_format: str,
+    c2pa_manifest_ref: dict | None = None,
+) -> IngredientAssertion:
+    return IngredientAssertion(title=title, dc_format=dc_format, c2pa_manifest_ref=c2pa_manifest_ref)
+
+
 def c2pie_GenerateManifest(
     assertions: list,
     private_key: bytes,
     certificate_chain: bytes,
+    prepend_manifests: list | None = None,
 ) -> ManifestStore:
     """
     private_key: PKCS#8 PEM (RSA) bytes
@@ -53,7 +63,9 @@ def c2pie_GenerateManifest(
     )
     manifest.set_claim_signature(claim_signature)
 
-    return ManifestStore([manifest])
+    manifests_list = list(prepend_manifests) if prepend_manifests else []
+    manifests_list.append(manifest)
+    return ManifestStore(manifests_list)
 
 
 def c2pie_EmplaceManifest(

@@ -94,3 +94,22 @@ class HashDataAssertion(Assertion):
                 )
             ]
         self.sync_payload()
+
+
+class IngredientAssertion(Assertion):
+    """c2pa.ingredient.v2 asset-binding assertion."""
+
+    def __init__(
+        self,
+        title: str,
+        dc_format: str,
+        c2pa_manifest_ref: dict | None = None,
+    ):
+        schema: dict[str, Any] = {
+            "dc:title": title,
+            "dc:format": dc_format,
+            "relationship": "parentOf",
+        }
+        if c2pa_manifest_ref is not None:
+            schema["c2pa_manifest"] = c2pa_manifest_ref
+        super().__init__(C2PA_AssertionTypes.ingredient, schema)
