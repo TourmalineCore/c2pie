@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import uuid
 
-from c2pie.c2pa.assertion import Assertion, HashDataAssertion
+from c2pie.c2pa.assertion import Assertion, HashDataAssertion, IngredientAssertion
 from c2pie.c2pa.assertion_store import AssertionStore
 from c2pie.c2pa.claim import Claim
 from c2pie.c2pa.claim_signature import ClaimSignature
@@ -21,6 +21,10 @@ def c2pie_GenerateAssertion(assertion_type: C2PA_AssertionTypes, assertion_schem
 
 def c2pie_GenerateHashDataAssertion(cai_offset: int, hashed_data: bytes) -> HashDataAssertion:
     return HashDataAssertion(cai_offset, hashed_data)
+
+
+def c2pie_GenerateIngredientAssertion(title: str, dc_format: str) -> IngredientAssertion:
+    return IngredientAssertion(title=title, dc_format=dc_format)
 
 
 def c2pie_GenerateManifest(

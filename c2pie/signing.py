@@ -11,6 +11,7 @@ from c2pie.interface import (
     c2pie_EmplaceManifest,
     c2pie_GenerateAssertion,
     c2pie_GenerateHashDataAssertion,
+    c2pie_GenerateIngredientAssertion,
     c2pie_GenerateManifest,
 )
 from c2pie.utils.content_types import C2PA_ContentTypes
@@ -90,6 +91,13 @@ def _ensure_path_type_for_filepath(path: str | Path) -> Path:
 def _get_content_type_by_filepath(file_path: Path) -> C2PA_ContentTypes:
     file_content_type = C2PA_ContentTypes(file_path.suffix)
     return file_content_type
+
+
+_DC_FORMAT_BY_CONTENT_TYPE: dict[str, str] = {
+    "jpg": "image/jpeg",
+    "jpeg": "image/jpeg",
+    "pdf": "application/pdf",
+}
 
 
 def _check_file_extension_is_supported(file_path: Path) -> None:
@@ -208,7 +216,12 @@ def sign_file(
         cai_offset=cai_offset, hashed_data=hashlib.sha256(raw_bytes).digest()
     )
 
-    assertions = [creative_work_assertion, hash_data_assertion]
+    ingredient_assertion = c2pie_GenerateIngredientAssertion(
+        title=input_path.name,
+        dc_format=_DC_FORMAT_BY_CONTENT_TYPE[file_type.name],
+    )
+
+    assertions = [creative_work_assertion, hash_data_assertion, ingredient_assertion]
 
     manifest = c2pie_GenerateManifest(
         assertions=assertions,
