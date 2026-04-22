@@ -1,4 +1,4 @@
-from c2pie.c2pa.assertion import Assertion, HashDataAssertion
+from c2pie.c2pa.assertion import Assertion, HashDataAssertion, IngredientAssertion
 from c2pie.utils.assertion_schemas import C2PA_AssertionTypes, cbor_to_bytes, json_to_bytes
 from c2pie.utils.content_types import jumbf_content_types
 
@@ -96,3 +96,65 @@ def test_additional_extensions_adding_for_hash_data_assertions():
     additional_exclusion = {"some_extension": 343}
     test_assertion = HashDataAssertion(cai_offset=124, hashed_data=b"", additional_exclusions=[additional_exclusion])
     assert additional_exclusion in test_assertion.schema["exclusions"]
+
+
+def test_create_ingredient_assertion():
+    test_assertion = IngredientAssertion(title="original.jpg", dc_format="image/jpeg")
+    assert test_assertion is not None
+
+
+def test_ingredient_assertion_content_type_is_cbor():
+    test_assertion = IngredientAssertion(title="original.jpg", dc_format="image/jpeg")
+    assert test_assertion.get_content_type() == jumbf_content_types["cbor"]
+
+
+def test_ingredient_assertion_label():
+    test_assertion = IngredientAssertion(title="original.jpg", dc_format="image/jpeg")
+    assert test_assertion.get_label() == "c2pa.ingredient.v2"
+
+
+def test_ingredient_assertion_relationship_is_parent_of():
+    test_assertion = IngredientAssertion(title="original.jpg", dc_format="image/jpeg")
+    assert test_assertion.schema["relationship"] == "parentOf"
+
+
+def test_ingredient_assertion_schema_fields():
+    test_assertion = IngredientAssertion(title="original.pdf", dc_format="application/pdf")
+    assert test_assertion.schema["dc:title"] == "original.pdf"
+    assert test_assertion.schema["dc:format"] == "application/pdf"
+
+
+def test_ingredient_assertion_content_boxes_not_empty():
+    test_assertion = IngredientAssertion(title="original.jpg", dc_format="image/jpeg")
+    assert len(test_assertion.content_boxes) != 0
+
+
+def test_ingredient_assertion_serializes_as_cbor():
+    test_assertion = IngredientAssertion(title="original.jpg", dc_format="image/jpeg")
+    expected_payload = cbor_to_bytes(
+        {"dc:title": "original.jpg", "dc:format": "image/jpeg", "relationship": "parentOf"}
+    )
+    assert test_assertion.content_boxes[0].payload == expected_payload
+
+
+def test_ingredient_assertion_without_manifest_ref_no_c2pa_manifest_key():
+    test_assertion = IngredientAssertion(title="original.jpg", dc_format="image/jpeg")
+    assert "c2pa_manifest" not in test_assertion.schema
+
+
+def test_ingredient_assertion_with_manifest_ref_schema():
+    ref = {"url": "self#jumbf=c2pa/urn:uuid:abc", "alg": "sha256", "hash": b"\xde\xad"}
+    test_assertion = IngredientAssertion(title="original.jpg", dc_format="image/jpeg", c2pa_manifest_ref=ref)
+    assert test_assertion.schema["c2pa_manifest"] == ref
+    assert test_assertion.schema["c2pa_manifest"]["url"] == "self#jumbf=c2pa/urn:uuid:abc"
+    assert test_assertion.schema["c2pa_manifest"]["alg"] == "sha256"
+
+
+def test_ingredient_assertion_manifest_ref_present_in_cbor():
+    import cbor2
+
+    ref = {"url": "self#jumbf=c2pa/urn:uuid:xyz", "alg": "sha256", "hash": b"\xca\xfe"}
+    test_assertion = IngredientAssertion(title="f.jpg", dc_format="image/jpeg", c2pa_manifest_ref=ref)
+    decoded = cbor2.loads(test_assertion.content_boxes[0].payload)
+    assert "c2pa_manifest" in decoded
+    assert decoded["c2pa_manifest"]["url"] == "self#jumbf=c2pa/urn:uuid:xyz"
