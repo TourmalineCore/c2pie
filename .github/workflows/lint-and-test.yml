@@ -36,7 +36,9 @@ jobs:
       - name: Install Poetry
         uses: snok/install-poetry@v1
         with:
-          version: 'latest'
+          # If you use a version newer than 2.2.1, the Poetry installation will fail because, 
+          # starting with version 2.3.0, Poetry no longer supports Python 3.9
+          version: '2.2.1'
           virtualenvs-create: true
           virtualenvs-in-project: true
 
