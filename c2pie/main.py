@@ -27,6 +27,7 @@ def parse_arguments() -> argparse.Namespace:
         type=Path,
         help="path to the input file to sign.",
     )
+
     sign_parser.add_argument(
         "-o",
         "--output",
@@ -35,6 +36,7 @@ def parse_arguments() -> argparse.Namespace:
         default=None,
         help="optional path to save the signed file. If omitted, the program saves to 'signed_' + input_file.",
     )
+
     sign_parser.add_argument(
         "-m",
         "--manifest",
@@ -45,6 +47,7 @@ def parse_arguments() -> argparse.Namespace:
     )
 
     sign_parser.set_defaults(func=sign)
+
     return global_parser.parse_args()
 
 

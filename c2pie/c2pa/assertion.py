@@ -59,7 +59,9 @@ class HashDataAssertion(Assertion):
         hashed_data: bytes,
         additional_exclusions: list[dict[str, int]] | None = None,
     ):
+        # TODO: There will be problems when APP11 exceeds 65535 bytes
         exclusions: list[dict[str, int]] = [{"start": cai_offset, "length": 65535}]
+        
         if additional_exclusions:
             exclusions.extend(additional_exclusions)
 
@@ -70,6 +72,7 @@ class HashDataAssertion(Assertion):
             "hash": hashed_data,
             "pad": [],
         }
+
         super().__init__(C2PA_AssertionTypes.data_hash, schema)
 
     def set_hash_data_length(self, length: int) -> None:

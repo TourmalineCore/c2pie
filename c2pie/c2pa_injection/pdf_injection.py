@@ -82,6 +82,7 @@ def emplace_manifest_into_pdf(
     except ValueError:
         initial_content = _read_pdf_using_pypdf(initial_content=initial_content)
         info = _scan_pdf_to_get_its_data(initial_content)
+
     initial_length_of_file = len(initial_content)
     pointer_on_previous_xref = info.startxref
     starting_value = info.max_obj + 1
@@ -149,6 +150,7 @@ def emplace_manifest_into_pdf(
         offset_of_object_3 = offset_of_object_2 + len(object_2)
         offset_of_object_4 = offset_of_object_3 + len(object_3)
         offset_of_object_5 = offset_of_object_4 + len(object_4)
+
         if author_info_required:
             offset_of_object_6 = offset_of_object_5 + len(object_5)
             xref_pos = offset_of_object_6 + len(object_6)
@@ -164,6 +166,7 @@ def emplace_manifest_into_pdf(
             + _xref_entry(offset_of_object_4)
             + _xref_entry(offset_of_object_5)
         )
+
         if author_info_required:
             xref += _xref_entry(offset_of_object_6)
 
@@ -174,8 +177,10 @@ def emplace_manifest_into_pdf(
             + f"/Root {starting_value + 4} 0 R ".encode("ascii")
             + f"/Prev {pointer_on_previous_xref} ".encode("ascii")
         )
+
         if author_info_required:
             trailer += f"/Info {starting_value + 5} 0 R ".encode("ascii")
+
         trailer += b">>\n"
 
         tail = (
@@ -194,11 +199,15 @@ def emplace_manifest_into_pdf(
         )
 
         total_len = len(tail)
+
         if total_len == last:
             return initial_content + tail
+        
         last = total_len
         assumed_hash_data_len = total_len
 
+    # TODO: This looks like something that can be deleted
     manifests.set_hash_data_length_for_all(assumed_hash_data_len)
     store = manifests.serialize()
+
     return initial_content + tail

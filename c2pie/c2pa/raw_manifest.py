@@ -4,11 +4,10 @@ from c2pie.c2pa_parsing.jumbf_reader import parse_boxes, parse_description_box_p
 
 
 class RawManifest:
-    """Opaque wrapper for a serialized C2PA Manifest JUMBF box.
+    """
+    Opaque wrapper for a serialized C2PA Manifest JUMBF box.
 
     Preserves raw bytes verbatim so existing manifest hashes remain valid.
-    Full deserialization back into Manifest objects is reserved for future use —
-    see to_manifest().
     """
 
     def __init__(self, raw_bytes: bytes):

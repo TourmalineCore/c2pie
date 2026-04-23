@@ -7,17 +7,17 @@ from pathlib import Path
 from typing import Literal
 
 from c2pie.c2pa.raw_manifest import RawManifest
-from c2pie.c2pa_parsing.jumbf_reader import find_active_manifest, get_all_manifest_raw_bytes
 from c2pie.c2pa_parsing.jpg_reader import extract_manifest_store_bytes as _jpg_extract_store
 from c2pie.c2pa_parsing.jpg_reader import extract_raw_image_bytes
+from c2pie.c2pa_parsing.jumbf_reader import find_active_manifest, get_all_manifest_raw_bytes
 from c2pie.c2pa_parsing.pdf_reader import extract_manifest_store_bytes as _pdf_extract_store
 from c2pie.interface import (
     C2PA_AssertionTypes,
-    c2pie_EmplaceManifest,
+    c2pie_EmplaceManifestStore,
     c2pie_GenerateAssertion,
     c2pie_GenerateHashDataAssertion,
     c2pie_GenerateIngredientAssertion,
-    c2pie_GenerateManifest,
+    c2pie_GenerateManifestStore,
 )
 from c2pie.utils.content_types import C2PA_ContentTypes
 
@@ -84,17 +84,20 @@ def _load_signature_schema(schema_path: str | Path | None) -> dict[str]:
     validated_schema_path = _validate_general_filepath(file_path=schema_path)
     schema = _read_schema_from_file(schema_filepath=validated_schema_path)
     _validate_schema(schema=schema)
+
     return schema
 
 
 def _ensure_path_type_for_filepath(path: str | Path) -> Path:
     if isinstance(path, Path):
         return path
+
     return Path(path)
 
 
 def _get_content_type_by_filepath(file_path: Path) -> C2PA_ContentTypes:
     file_content_type = C2PA_ContentTypes(file_path.suffix)
+
     return file_content_type
 
 
@@ -108,14 +111,17 @@ _DC_FORMAT_BY_CONTENT_TYPE: dict[str, str] = {
 def _detect_existing_c2pa(file_type: C2PA_ContentTypes, raw_bytes: bytes) -> bytes | None:
     if file_type.name in ("jpg", "jpeg"):
         return _jpg_extract_store(raw_bytes)
-    if file_type.name == "pdf":
+    elif file_type.name == "pdf":
         return _pdf_extract_store(raw_bytes)
+
     return None
 
 
 def _check_file_extension_is_supported(file_path: Path) -> None:
     supported_extensions: list[str] = [_type.value for _type in C2PA_ContentTypes]
+
     file_extension = file_path.suffix
+
     if file_extension not in supported_extensions:
         raise ValueError(
             f"The file has an incorrect extension: {file_extension}"
@@ -163,6 +169,7 @@ def _validate_input_and_output_filepaths(
     # set output_file_path if not set
     if not output_file_path:
         name_of_input_file = validated_input_file_path.name
+
         validated_output_file_path = validated_input_file_path.with_name("signed_" + name_of_input_file)
 
     return validated_input_file_path, validated_output_file_path
@@ -185,6 +192,7 @@ def _load_certificates_and_key(
 
     with open(validated_key_path, "rb") as f:
         key = f.read()
+
     with open(validated_certificates_path, "rb") as f:
         certificates = f.read()
 
@@ -194,9 +202,9 @@ def _load_certificates_and_key(
 def sign_file(
     input_path: Path | str,
     output_path: Path | str | None = None,
+    schema_path: str | None = None,
     key_path: str | None = None,
     certificates_path: str | None = None,
-    schema_path: str | None = None,
 ) -> None:
     key, certificates = _load_certificates_and_key(
         key_path=key_path,
@@ -223,15 +231,27 @@ def sign_file(
 
     if existing_store_bytes:
         active = find_active_manifest(existing_store_bytes)
+
         c2pa_manifest_ref = {
             "url": f"self#jumbf=c2pa/{active.label}",
             "alg": "sha256",
-            "hash": hashlib.sha256(active.raw_bytes[8:]).digest(),
+            "hash": hashlib.sha256(active.raw_bytes[8:]).digest(),  # TODO: We can use `active.payload`
         }
+
+        # TODO: This could be the start of the functionality that excludes
+        # sections other than the original one from hashing.
         if file_type.name in ("jpg", "jpeg"):
             content_for_hashing = extract_raw_image_bytes(raw_bytes)
-        prepend_manifests = [RawManifest(b) for b in get_all_manifest_raw_bytes(existing_store_bytes)]
 
+        prepend_manifests = [
+            RawManifest(manifest_raw_bytes) for manifest_raw_bytes in get_all_manifest_raw_bytes(existing_store_bytes)
+        ]
+
+    # In the case of PDF, the C2PA structure is placed immediately after
+    # the original bytes in a new section (incremental update).
+    #
+    # In the case of JPG, the C2PA structure is placed at
+    # the beginning of the image, after the SOI marker (0xFFD8).
     if file_type.name == "pdf":
         cai_offset = len(raw_bytes)
     else:
@@ -254,21 +274,21 @@ def sign_file(
 
     assertions = [creative_work_assertion, hash_data_assertion, ingredient_assertion]
 
-    manifest = c2pie_GenerateManifest(
+    manifest_store = c2pie_GenerateManifestStore(
         assertions=assertions,
         private_key=key,
         certificate_chain=certificates,
         prepend_manifests=prepend_manifests,
     )
 
-    signed_bytes = c2pie_EmplaceManifest(
+    signed_file_bytes = c2pie_EmplaceManifestStore(
         format_type=file_type,
         content_bytes=content_for_hashing,
         c2pa_offset=cai_offset,
-        manifests=manifest,
+        manifest_store=manifest_store,
     )
 
     with open(output_path, "wb") as output_file:
-        output_file.write(signed_bytes)
+        output_file.write(signed_file_bytes)
 
     print(f"Successfully signed the file {input_path}!\nThe result was saved to {output_path}.")

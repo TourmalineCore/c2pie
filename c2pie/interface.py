@@ -3,7 +3,6 @@ from __future__ import annotations
 import uuid
 
 from c2pie.c2pa.assertion import Assertion, HashDataAssertion, IngredientAssertion
-from c2pie.c2pa.raw_manifest import RawManifest
 from c2pie.c2pa.assertion_store import AssertionStore
 from c2pie.c2pa.claim import Claim
 from c2pie.c2pa.claim_signature import ClaimSignature
@@ -32,7 +31,7 @@ def c2pie_GenerateIngredientAssertion(
     return IngredientAssertion(title=title, dc_format=dc_format, c2pa_manifest_ref=c2pa_manifest_ref)
 
 
-def c2pie_GenerateManifest(
+def c2pie_GenerateManifestStore(
     assertions: list,
     private_key: bytes,
     certificate_chain: bytes,
@@ -65,19 +64,21 @@ def c2pie_GenerateManifest(
 
     manifests_list = list(prepend_manifests) if prepend_manifests else []
     manifests_list.append(manifest)
+
     return ManifestStore(manifests_list)
 
 
-def c2pie_EmplaceManifest(
+def c2pie_EmplaceManifestStore(
     format_type: C2PA_ContentTypes,
     content_bytes: bytes,
     c2pa_offset: int,
-    manifests: ManifestStore,
+    manifest_store: ManifestStore,
 ) -> bytes:
-    if hasattr(manifests, "manifests"):
-        for manifest in manifests.manifests:
+    if hasattr(manifest_store, "manifests"):
+        for manifest in manifest_store.manifests:
             claim = getattr(manifest, "claim", None)
-            if claim is not None and hasattr(claim, "set_format"):
+
+            if claim is not None:
                 if format_type == C2PA_ContentTypes.jpg or format_type == C2PA_ContentTypes.jpeg:
                     claim.set_format("image/jpg")
                 elif format_type == C2PA_ContentTypes.pdf:
@@ -87,23 +88,29 @@ def c2pie_EmplaceManifest(
         assumed_hash_data_len = 0
         final_length = -1
         tail = b""
+
         for _ in range(RETRY_SIGNATURE):
-            manifests.set_hash_data_length_for_all(assumed_hash_data_len)
-            payload = manifests.serialize()
+            manifest_store.set_hash_data_length_for_all(assumed_hash_data_len)
+
+            payload = manifest_store.serialize()
             storage = JpgSegmentApp11Storage(
-                app11_segment_box_length=manifests.get_length(),
-                app11_segment_box_type=manifests.get_type(),
+                app11_segment_box_length=manifest_store.get_length(),
+                app11_segment_box_type=manifest_store.get_type(),
                 payload=payload,
             )
+
             tail = storage.serialize()
             total_len = len(tail)
+
             if total_len == final_length:
                 break
+
             final_length = total_len
             assumed_hash_data_len = total_len
+            
         return content_bytes[:c2pa_offset] + tail + content_bytes[c2pa_offset:]
 
     if format_type == C2PA_ContentTypes.pdf:
-        return emplace_manifest_into_pdf(content_bytes, manifests)
+        return emplace_manifest_into_pdf(content_bytes, manifest_store)
 
     raise ValueError(f"Unsupported content type {format_type}!")
