@@ -94,3 +94,19 @@ class HashDataAssertion(Assertion):
                 )
             ]
         self.sync_payload()
+
+
+class ActionsAssertion(Assertion):
+    """c2pa.actions.v2 asset-binding assertion."""
+
+    def __init__(
+        self,
+        action: str,
+        parameters: dict[str, list[dict[str, str]]] | None = None,
+    ):
+        schema: dict[str, Any] = {"actions": [{"action": action}]}
+
+        if parameters is not None:
+            schema["actions"][0]["parameters"] = parameters
+
+        super().__init__(C2PA_AssertionTypes.actions, schema)
