@@ -97,7 +97,7 @@ class HashDataAssertion(Assertion):
 
 
 class ActionsAssertion(Assertion):
-    """c2pa.actions.v2 asset-binding assertion."""
+    """c2pa.actions.v2 assertion of actions on an asset."""
 
     def __init__(
         self,
