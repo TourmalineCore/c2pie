@@ -23,8 +23,12 @@ def c2pie_GenerateHashDataAssertion(cai_offset: int, hashed_data: bytes) -> Hash
     return HashDataAssertion(cai_offset, hashed_data)
 
 
-def c2pie_GenerateIngredientAssertion(title: str, dc_format: str) -> IngredientAssertion:
-    return IngredientAssertion(title=title, dc_format=dc_format)
+def c2pie_GenerateIngredientAssertion(
+    title: str,
+    dc_format: str,
+    c2pa_manifest_ref: dict | None = None,
+) -> IngredientAssertion:
+    return IngredientAssertion(title=title, dc_format=dc_format, c2pa_manifest_ref=c2pa_manifest_ref)
 
 
 def c2pie_GenerateManifest(

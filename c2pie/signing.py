@@ -216,9 +216,14 @@ def sign_file(
         cai_offset=cai_offset, hashed_data=hashlib.sha256(raw_bytes).digest()
     )
 
+    # By this point, the c2pa_manifest_ref must have been generated.
+    # Since the parser functionality hasn't been added yet, it is currently `None`.
+    c2pa_manifest_ref = None
+
     ingredient_assertion = c2pie_GenerateIngredientAssertion(
         title=input_path.name,
         dc_format=_DC_FORMAT_BY_CONTENT_TYPE[file_type.name],
+        c2pa_manifest_ref=c2pa_manifest_ref,
     )
 
     assertions = [creative_work_assertion, hash_data_assertion, ingredient_assertion]
