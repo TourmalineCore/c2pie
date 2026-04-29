@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-import os
 import re
-from pathlib import Path
 from typing import Any
 
 import cbor2
@@ -54,9 +52,9 @@ class ClaimSignature(SuperBox):
         private_key: bytes,
         certificate_pem_bundle: bytes = None,
         certificate: bytes = None,
-        tsa_url: str | None = None,
-        require_tsa: bool = False,
-        tsa_log_dir: Path | str | None = None,
+        tsa_url: str | None,
+        require_tsa: bool,
+        tsa_log_dir: str | None,
     ):
         if certificate_pem_bundle is None and certificate is not None:
             certificate_pem_bundle = certificate
@@ -66,7 +64,7 @@ class ClaimSignature(SuperBox):
         self.certificate = certificate_pem_bundle
         self.tsa_url = tsa_url
         self.require_tsa = require_tsa
-        self.tsa_log_dir = Path(tsa_log_dir) if tsa_log_dir else None
+        self.tsa_log_dir = tsa_log_dir
 
         content_boxes = self._generate_payload()
 
@@ -94,35 +92,60 @@ class ClaimSignature(SuperBox):
         )
 
     def _generate_protected_header(self) -> bytes:
+        """
+        protected_header ; bstr
+
+        Signing algorithms
+        -7 - ES256 (ECDSA with SHA-256)
+        -37 - PS256 (RSASSA-PSS с SHA-256)
+        """
+        protected_header: dict[int, Any] = {1: -37}  # "alg": "PS256"
+
         certs_in_der_format = _split_pem_certs_to_der(self.certificate or b"")
-
-        # Signing algorithm
-        # -7 - ES256 (ECDSA with SHA-256)
-        # -37 - PS256 (RSASSA-PSS с SHA-256)
-        protected: dict[int, Any] = {1: -37}  # "alg": "PS256"
-
         if certs_in_der_format:
-            protected[33] = certs_in_der_format  # 33 - is label of x5chain
+            protected_header[33] = certs_in_der_format  # 33 - is label of x5chain
 
-        return cbor2.dumps(protected, canonical=True)
+        return cbor2.dumps(protected_header, canonical=True)
+
+    def _generate_unprotected_header(self, serialized_sig_structure: bytes) -> bytes:
+        """
+        unprotected_header ; CBOR-map
+        """
+        unprotected_header: dict[str, Any] = {}
+
+        if not self.tsa_url and self.require_tsa:
+            raise TSARequiredError("Signing without a timestamp is forbidden. Provide tsa_url or set C2PIE_TSA_URL.")
+
+        if self.tsa_url:
+            time_stamp_token_der = fetch_timestamp(
+                signature_bytes=serialized_sig_structure,
+                tsa_url=self.tsa_url,
+                tsa_log_dir=self.tsa_log_dir,
+            )
+
+            unprotected_header = {"sigTst": {"tstTokens": [{"val": time_stamp_token_der}]}}
+
+        return unprotected_header
 
     def _create_cose_sign1_tagged(self) -> bytes:
         """
         COSE_Sign1 = [
-          protected-header,
-          unprotected-header,
-          payload,
-          signature
+          protected_header,   ; bstr, headings that include in signature
+          unprotected_header, ; CBOR-map, headings that are`t included in signature
+          payload,            ; bstr, payload that will be signed (for C2PA - detached payload)
+          signature           ; bstr, signature
         ]
         """
         serialized_protected_header = self._generate_protected_header()
         claim_cbor = self.claim.get_cbor_payload()
 
         """
-        1 - context (for COSE_Sign1 - Signature1)
-        2 - protected headers
-        3 - external_add (for us - always empty)
-        4 - payload (CBOR-encoded with bstr Claim)
+        Sig_structure = [
+            context,           ; string, identifier
+            protected_header,  ; bstr, headings that include a signature
+            external_add,      ; bstr, external data (for C2PA - always empty)
+            payload.           ; bstr, payload that will be signed
+        ]
         """
         sig_structure = ["Signature1", serialized_protected_header, b"", claim_cbor]
         tsa_sig_structure = ["CounterSignature", serialized_protected_header, b"", claim_cbor]
@@ -130,31 +153,15 @@ class ClaimSignature(SuperBox):
         serialized_sig_signature = cbor2.dumps(sig_structure, canonical=True)
         serialized_tsa_sig_signature = cbor2.dumps(tsa_sig_structure, canonical=True)
 
-        key = serialization.load_pem_private_key(self.private_key, password=None)
+        private_key = serialization.load_pem_private_key(self.private_key, password=None)
 
-        signature = key.sign(  # type: ignore
+        signature = private_key.sign(  # type: ignore
             serialized_sig_signature,
             padding.PSS(mgf=padding.MGF1(hashes.SHA256()), salt_length=32),  # type: ignore
             hashes.SHA256(),  # type: ignore
         )
 
-        unprotected_header: dict[str, Any] = {}
-
-        resolved_tsa_url = self.tsa_url or os.getenv("C2PIE_TSA_URL")
-        resolved_require_tsa = self.require_tsa or (os.getenv("C2PIE_TSA_REQUIRED", "").lower() == "true")
-
-        if not resolved_tsa_url and resolved_require_tsa:
-            raise TSARequiredError("Signing without a timestamp is forbidden. Provide tsa_url or set C2PIE_TSA_URL.")
-
-        if resolved_tsa_url:
-            log_env = os.getenv("C2PIE_TSA_LOG_DIR")
-            resolved_log_dir = self.tsa_log_dir or (Path(log_env) if log_env else None)
-
-            time_stamp_token_der = fetch_timestamp(
-                serialized_tsa_sig_signature, resolved_tsa_url, log_dir=resolved_log_dir
-            )
-
-            unprotected_header = {"sigTst": {"tstTokens": [{"val": time_stamp_token_der}]}}
+        unprotected_header = self._generate_unprotected_header(serialized_sig_structure=serialized_tsa_sig_signature)
 
         cose_sign1 = [serialized_protected_header, unprotected_header, None, signature]
 

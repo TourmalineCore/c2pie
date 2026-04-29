@@ -176,6 +176,9 @@ def sign_file(
     key_path: str | None = None,
     certificates_path: str | None = None,
     schema_path: str | None = None,
+    tsa_url: str | None = None,
+    require_tsa: bool = False,
+    tsa_log_dir: str | None = None,
 ) -> None:
     key, certificates = _load_certificates_and_key(
         key_path=key_path,
@@ -214,6 +217,9 @@ def sign_file(
         assertions=assertions,
         private_key=key,
         certificate_chain=certificates,
+        tsa_url=tsa_url,
+        require_tsa=require_tsa,
+        tsa_log_dir=tsa_log_dir,
     )
 
     signed_bytes = c2pie_EmplaceManifest(

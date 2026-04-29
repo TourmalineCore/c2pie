@@ -57,7 +57,7 @@ def _save_file(directory: Path, name: str, data: bytes) -> None:
 def fetch_timestamp(
     signature_bytes: bytes,
     tsa_url: str,
-    log_dir: Path | None = None,
+    tsa_log_dir: str | None,
 ) -> bytes:
     time_stamp_req_der, nonce = _build_request(signature_bytes)
 
@@ -66,8 +66,9 @@ def fetch_timestamp(
     nonce_hex = f"{nonce & 0xFFFFFFFF:08x}"
     prefix = f"{ts}_{nonce_hex}"
 
-    if log_dir is not None:
-        _save_file(Path(log_dir), f"{prefix}_request.der", time_stamp_req_der)
+    if tsa_log_dir is not None:
+        _save_file(Path(tsa_log_dir), f"{prefix}_request.der", time_stamp_req_der)
+
 
     try:
         """
@@ -89,8 +90,8 @@ def fetch_timestamp(
 
     resp_bytes = response.content
 
-    if log_dir is not None:
-        _save_file(Path(log_dir), f"{prefix}_response.der", resp_bytes)
+    if tsa_log_dir is not None:
+        _save_file(Path(tsa_log_dir), f"{prefix}_response.der", resp_bytes)
 
     try:
         resp, _ = decoder.decode(resp_bytes, asn1Spec=rfc3161.TimeStampResp())
