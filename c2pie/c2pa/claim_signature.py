@@ -123,7 +123,7 @@ class ClaimSignature(SuperBox):
                 tsa_log_dir=self.tsa_log_dir,
             )
 
-            unprotected_header = {"sigTst": {"tstTokens": [{"val": time_stamp_token_der}]}}
+            unprotected_header = {"sigTst2": {"tstTokens": [{"val": time_stamp_token_der}]}}
 
         return unprotected_header
 
@@ -141,17 +141,14 @@ class ClaimSignature(SuperBox):
 
         """
         Sig_structure = [
-            context,           ; string, identifier
+            context,           ; string, identifier (for COSE_Sign1 - Signature1)
             protected_header,  ; bstr, headings that include a signature
             external_add,      ; bstr, external data (for C2PA - always empty)
-            payload.           ; bstr, payload that will be signed
+            payload            ; bstr, payload that will be signed
         ]
         """
         sig_structure = ["Signature1", serialized_protected_header, b"", claim_cbor]
-        tsa_sig_structure = ["CounterSignature", serialized_protected_header, b"", claim_cbor]
-
         serialized_sig_signature = cbor2.dumps(sig_structure, canonical=True)
-        serialized_tsa_sig_signature = cbor2.dumps(tsa_sig_structure, canonical=True)
 
         private_key = serialization.load_pem_private_key(self.private_key, password=None)
 
@@ -160,6 +157,19 @@ class ClaimSignature(SuperBox):
             padding.PSS(mgf=padding.MGF1(hashes.SHA256()), salt_length=32),  # type: ignore
             hashes.SHA256(),  # type: ignore
         )
+
+        """
+        Sig_structure = [
+            context,           ; string, identifier (for TSA - CounterSignature)
+            protected_header,  ; bstr, headings that include a signature
+            external_add,      ; bstr, external data (for C2PA - always empty)
+            payload            ; bstr, payload that will be signed
+        ]
+        """
+        tsa_sig_structure = ["CounterSignature", serialized_protected_header, b"", signature]
+        serialized_tsa_sig_signature = cbor2.dumps(tsa_sig_structure, canonical=True)
+
+        print("Hola-la-la")
 
         unprotected_header = self._generate_unprotected_header(serialized_sig_structure=serialized_tsa_sig_signature)
 

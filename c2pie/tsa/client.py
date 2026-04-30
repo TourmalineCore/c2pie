@@ -69,7 +69,6 @@ def fetch_timestamp(
     if tsa_log_dir is not None:
         _save_file(Path(tsa_log_dir), f"{prefix}_request.der", time_stamp_req_der)
 
-
     try:
         """
         TimeStampResp = {
