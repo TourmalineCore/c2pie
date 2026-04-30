@@ -7,12 +7,12 @@ from c2pie.utils.content_types import c2pa_content_types
 class Manifest(SuperBox):
     """
     C2PA Manifest: Assertion Store + Claim + Claim Signature.
-    The manifest label is compatible with c2patool: urn:uuid:<uuid-hex>
+    The manifest label is compatible with c2patool: urn:c2pa:<uuid-hex>
     """
 
     def __init__(
         self,
-        manifest_label: str = f"urn:uuid:{uuid.uuid4().hex}",
+        manifest_label: str | None  = f"urn:c2pa:{uuid.uuid4().hex}",
     ):
         self.manifest_label = manifest_label
         self.claim = None

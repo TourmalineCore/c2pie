@@ -39,14 +39,13 @@ def c2pie_GenerateManifest(
     certificate_chain: PEM bundle (leaf + intermediates, NO root) bytes
     """
 
-    manifest_label = f"urn:uuid:{uuid.uuid4().hex}"
+    manifest_label = f"urn:c2pa:{uuid.uuid4().hex}"
     manifest = Manifest(manifest_label=manifest_label)
 
     assertion_store = AssertionStore(assertions=assertions)
     manifest.set_assertion_store(assertion_store)
 
     claim = Claim(
-        claim_generator="c2pie",
         manifest_label=manifest.get_manifest_label(),
         assertion_store=assertion_store,
     )
