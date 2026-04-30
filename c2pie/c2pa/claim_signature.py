@@ -166,7 +166,7 @@ class ClaimSignature(SuperBox):
             payload            ; bstr, payload that will be signed
         ]
         """
-        tsa_sig_structure = ["CounterSignature", serialized_protected_header, b"", signature]
+        tsa_sig_structure = ["CounterSignature", serialized_protected_header, b"", cbor2.dumps(signature)]
         serialized_tsa_sig_signature = cbor2.dumps(tsa_sig_structure, canonical=True)
 
         print("Hola-la-la")

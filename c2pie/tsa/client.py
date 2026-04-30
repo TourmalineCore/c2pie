@@ -82,7 +82,7 @@ def fetch_timestamp(
             headers={"Content-Type": "application/timestamp-query"},
             timeout=30,
         )
-        
+
         response.raise_for_status()
     except http.exceptions.RequestException as exc:
         raise TSAConnectionError(f"TSA request to {tsa_url!r} failed: {exc}") from exc
