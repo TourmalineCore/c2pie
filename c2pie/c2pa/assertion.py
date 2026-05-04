@@ -106,7 +106,7 @@ class ActionsAssertion(Assertion):
     ):
         schema: dict[str, Any] = {"actions": [{"action": action}]}
 
-        if parameters is not None:
+        if parameters:
             schema["actions"][0]["parameters"] = parameters
 
         super().__init__(C2PA_AssertionTypes.actions, schema)
