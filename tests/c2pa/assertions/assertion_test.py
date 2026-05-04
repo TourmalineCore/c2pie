@@ -1,4 +1,4 @@
-from c2pie.c2pa.assertion import ActionsAssertion, Assertion, HashDataAssertion
+from c2pie.c2pa.assertion import Assertion, HashDataAssertion
 from c2pie.utils.assertion_schemas import C2PA_AssertionTypes, cbor_to_bytes, json_to_bytes
 from c2pie.utils.content_types import jumbf_content_types
 
