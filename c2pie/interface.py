@@ -24,7 +24,8 @@ def c2pie_GenerateHashDataAssertion(cai_offset: int, hashed_data: bytes) -> Hash
 
 
 def c2pie_GenerateActionsAssertion(
-    action: str, parameters: dict[str, list[dict[str, str]]] | None = None
+    action: str,
+    parameters: dict[str, list[dict[str, str]]] | None = None,
 ) -> ActionsAssertion:
     return ActionsAssertion(action, parameters)
 
