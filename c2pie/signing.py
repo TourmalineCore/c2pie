@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import hashlib
-import json
 import os
 from pathlib import Path
 from typing import Literal
@@ -15,71 +14,6 @@ from c2pie.interface import (
     c2pie_GenerateManifest,
 )
 from c2pie.utils.content_types import C2PA_ContentTypes
-
-
-def _read_schema_from_file(schema_filepath: Path) -> dict[str]:
-    try:
-        with open(schema_filepath) as schema_file:
-            schema = json.loads(schema_file.read())
-        return schema
-    except Exception as ex:
-        raise ex
-
-
-def _validate_schema(schema: dict[str]) -> None:
-    expected_items = {
-        "@context": "https://schema.org",
-        "@type": "CreativeWork",
-    }
-
-    # check whether the @context and @type properties match the expected values
-    for property in ["@context", "@type"]:
-        value = schema.get(property, None)
-        if value != expected_items[property]:
-            raise ValueError(
-                "Schema must include the following properties with these values: "
-                '{@context: "https://schema.org", "@type": "CreativeWork"}'
-            )
-
-    # check that "copyrightYear" and "copyrightHolder" exist
-    for property in ["copyrightYear", "copyrightHolder"]:
-        value = schema.get(property, None)
-        if not value:
-            raise ValueError('Schema must include "copyrightYear" and "copyrightHolder"')
-
-    # check that "author" is a non-empty list whose first item has "@type" and "name"
-    author = schema.get("author", None)
-    if not (isinstance(author, list) and author):
-        raise ValueError('author must be a non-empty list of objects with "@type" and "name"')
-    else:
-        author = author[0]
-
-    author_type = author.get("@type", None)
-    author_name = author.get("name", None)
-
-    if not author_type or not author_name:
-        raise ValueError('author[@"type"] and author[@"name"] must not be empty')
-
-    if author_type != "Organization" and author_type != "Person":
-        raise ValueError('author["@type"] must be "Organization" or "Person"')
-
-
-def _load_signature_schema(schema_path: str | Path | None) -> dict[str]:
-    default_schema = {
-        "@context": "https://schema.org",
-        "@type": "CreativeWork",
-        "author": [{"@type": "Organization", "name": "Tourmaline Core"}],
-        "copyrightYear": "2026",
-        "copyrightHolder": "c2pie",
-    }
-
-    if schema_path is None:
-        return default_schema
-
-    validated_schema_path = _validate_general_filepath(file_path=schema_path)
-    schema = _read_schema_from_file(schema_filepath=validated_schema_path)
-    _validate_schema(schema=schema)
-    return schema
 
 
 def _ensure_path_type_for_filepath(path: str | Path) -> Path:
@@ -188,8 +122,6 @@ def sign_file(
         output_file_path=output_path,
     )
 
-    schema = _load_signature_schema(schema_path=schema_path)
-
     with open(input_path, "rb") as f:
         raw_bytes = f.read()
 
@@ -200,11 +132,6 @@ def sign_file(
     else:
         cai_offset = 2
 
-    creative_work_assertion = c2pie_GenerateAssertion(
-        C2PA_AssertionTypes.creative_work,
-        schema,
-    )
-
     hash_data_assertion = c2pie_GenerateHashDataAssertion(
         cai_offset=cai_offset, hashed_data=hashlib.sha256(raw_bytes).digest()
     )
@@ -213,7 +140,7 @@ def sign_file(
     # functionality is available (example, action 'c2pa.opened' for Ingredient Assertion)
     actions_assertion = c2pie_GenerateActionsAssertion(action="c2pa.created")
 
-    assertions = [creative_work_assertion, hash_data_assertion, actions_assertion]
+    assertions = [hash_data_assertion, actions_assertion]
 
     manifest = c2pie_GenerateManifest(
         assertions=assertions,
