@@ -6,10 +6,8 @@ from pathlib import Path
 from typing import Literal
 
 from c2pie.interface import (
-    C2PA_AssertionTypes,
     c2pie_EmplaceManifest,
     c2pie_GenerateActionsAssertion,
-    c2pie_GenerateAssertion,
     c2pie_GenerateHashDataAssertion,
     c2pie_GenerateManifest,
 )
