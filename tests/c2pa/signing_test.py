@@ -16,6 +16,6 @@ def test_generate_hashed_uri_map_with_alg():
     result = _generate_hashed_uri_map(
         url="self#jumbf=c2pa.assertions/c2pa.ingredient.v3",
         hash_value=b"\x01\x02\x03",
-        alg="sha256",
+        hash_algorithm="sha256",
     )
     assert result["alg"] == "sha256"
