@@ -9,6 +9,7 @@ from typing import Literal
 from c2pie.interface import (
     C2PA_AssertionTypes,
     c2pie_EmplaceManifest,
+    c2pie_GenerateActionsAssertion,
     c2pie_GenerateAssertion,
     c2pie_GenerateHashDataAssertion,
     c2pie_GenerateManifest,
@@ -208,7 +209,11 @@ def sign_file(
         cai_offset=cai_offset, hashed_data=hashlib.sha256(raw_bytes).digest()
     )
 
-    assertions = [creative_work_assertion, hash_data_assertion]
+    # This section should be replaced with the content generation logic once the relevant
+    # functionality is available (example, action 'c2pa.opened' for Ingredient Assertion)
+    actions_assertion = c2pie_GenerateActionsAssertion(action="c2pa.created")
+
+    assertions = [creative_work_assertion, hash_data_assertion, actions_assertion]
 
     manifest = c2pie_GenerateManifest(
         assertions=assertions,
