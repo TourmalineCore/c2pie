@@ -3,7 +3,12 @@ from __future__ import annotations
 from pathlib import Path
 import uuid
 
-from c2pie.c2pa.assertion import ActionsAssertion, Assertion, HashDataAssertion
+from c2pie.c2pa.assertion import (
+    ActionsAssertion,
+    Assertion,
+    EmbeddedDataAssertion,
+    HashDataAssertion,
+)
 from c2pie.c2pa.assertion_store import AssertionStore
 from c2pie.c2pa.claim import Claim
 from c2pie.c2pa.claim_signature import ClaimSignature
@@ -29,6 +34,19 @@ def c2pie_GenerateActionsAssertion(
     parameters: dict[str, list[dict[str, str]]] | None = None,
 ) -> ActionsAssertion:
     return ActionsAssertion(action, parameters)
+
+
+# Currently not in use.
+# If APP11 exceeds the allowed size (65,535 bytes), an error will occur.
+# It is necessary to add logic to handle this case by splitting APP11.
+def c2pie_GenerateThumbnailAssertion(
+    media_type: str,
+    image_data: bytes,
+) -> EmbeddedDataAssertion:
+    return EmbeddedDataAssertion(
+        media_type=media_type,
+        image_data=image_data,
+    )
 
 
 def c2pie_GenerateManifest(
