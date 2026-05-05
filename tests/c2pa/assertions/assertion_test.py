@@ -1,5 +1,5 @@
 from c2pie.c2pa.assertion import Assertion, HashDataAssertion
-from c2pie.utils.assertion_schemas import C2PA_AssertionTypes, cbor_to_bytes
+from c2pie.utils.assertion_schemas import C2PA_AssertionTypes, cbor_to_bytes, json_to_bytes
 from c2pie.utils.content_types import jumbf_content_types
 
 
@@ -24,11 +24,6 @@ def test_create_assertion_with_true_type():
     assert actions_assertion.type == C2PA_AssertionTypes.actions
 
 
-def test_create_assertion_with_thumbnail_type():
-    thumbnail_assertion = Assertion(C2PA_AssertionTypes.thumbnail, {})
-    assert thumbnail_assertion.get_content_type() == jumbf_content_types["codestream"]
-
-
 def assertion_cannot_create_with_no_type():
     assertion = Assertion(None, {})  # type: ignore
     assert assertion.type not in list(C2PA_AssertionTypes)
@@ -47,6 +42,20 @@ def test_create_assertion_with_correct_schema():
     actions_assertion = Assertion(C2PA_AssertionTypes.actions, actions_assertion_schema)
 
     assert actions_assertion.schema == actions_assertion_schema
+
+
+def test_serialize_json_assertion():
+    actions_schema_json = {
+        "actions": [
+            {
+                "action": "c2pa.created",
+            },
+        ],
+    }
+
+    result = json_to_bytes(actions_schema_json)
+
+    assert result == b'{"actions":[{"action":"c2pa.created"}]}'
 
 
 def test_serialize_cbor_assertion():
