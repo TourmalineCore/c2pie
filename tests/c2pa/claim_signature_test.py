@@ -11,7 +11,8 @@ def test_create_claim_signature_with_empty_claim():
     claim_signature = ClaimSignature(
         claim=Claim(
             assertion_store=assertion_store,
-            manifest_label="valid_manifest_label",
+            manifest_label="urn:c2pa:test-uuid",
+            dc_title="test.jpg",
         ),
         private_key=b"",
         certificate_pem_bundle=b"",
@@ -37,8 +38,9 @@ def test_create_claim_signature_with_non_empty_claim():
     assertions = [actions_assertion, actions_assertion]
     assertion_store = AssertionStore(assertions=assertions)
     claim = Claim(
-        manifest_label="valid_manifest_label",
+        manifest_label="urn:c2pa:test-uuid",
         assertion_store=assertion_store,
+        dc_title="test.jpg",
     )
 
     claim_signature = ClaimSignature(claim=claim, private_key=key, certificate=certificate)

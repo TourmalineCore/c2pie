@@ -9,13 +9,14 @@ from c2pie.utils.content_types import c2pa_content_types
 
 def test_create_claim_with_label():
     claim = Claim(
-        manifest_label="valid_manifest_label",
+        manifest_label="urn:c2pa:test-uuid",
         assertion_store=AssertionStore([]),
+        dc_title="test.jpg",
     )
 
     assert claim is not None
-    assert claim.manifest_label == "valid_manifest_label"
-    assert claim.claim_signature_label == "self#jumbf=c2pa/valid_manifest_label/c2pa.signature"
+    assert claim.manifest_label == "urn:c2pa:test-uuid"
+    assert claim.claim_signature_label == "self#jumbf=c2pa/urn:c2pa:test-uuid/c2pa.signature"
 
 
 def create_claim_with_label_and_assertion_store():
@@ -25,8 +26,9 @@ def create_claim_with_label_and_assertion_store():
     assertion_store = AssertionStore(assertions=assertions)
 
     claim = Claim(
-        manifest_label="valid_manifest_label",
+        manifest_label="urn:c2pa:test-uuid",
         assertion_store=assertion_store,
+        dc_title="test.jpg",
     )
 
     assert len(claim.assertion_store.assertions) != 0
@@ -39,20 +41,22 @@ def test_create_claim_with_jumbf_type():
     assertion_store = AssertionStore(assertions=assertions)
 
     claim = Claim(
-        manifest_label="valid_manifest_label",
+        manifest_label="urn:c2pa:test-uuid",
         assertion_store=assertion_store,
+        dc_title="test.jpg",
     )
 
     assert claim.t_box == b"jumb".hex()
     assert claim.get_content_type() == c2pa_content_types["claim"]
-    assert claim.get_manifest_label() == "valid_manifest_label"
+    assert claim.get_manifest_label() == "urn:c2pa:test-uuid"
     assert claim.content_boxes[0].get_type() == b"cbor".hex()
 
 
 def test_create_claim_with_none_as_assertion_store():
     claim = Claim(
-        manifest_label="valid_manifest_label",
+        manifest_label="urn:c2pa:test-uuid",
         assertion_store=None,
+        dc_title="test.jpg",
     )  # type: ignore
 
     payload = cbor2.loads(claim.content_boxes[0].get_payload())
