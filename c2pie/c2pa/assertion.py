@@ -135,6 +135,7 @@ class EmbeddedDataAssertion(Assertion):
         self,
         media_type: str,
         image_data: bytes,
+        assertion_type: C2PA_AssertionTypes = C2PA_AssertionTypes.embedded_data,
     ):
         # 0000 000x - Filename present? (0 - false, 1 - true)
         # 0000 00x0 - What's inside bidb? (0 - binary data, 1 - URI)
@@ -147,7 +148,7 @@ class EmbeddedDataAssertion(Assertion):
         payload = toggles_bytes + media_type_bytes
 
         super().__init__(
-            assertion_type=C2PA_AssertionTypes.thumbnail,
+            assertion_type=assertion_type,
             schema={},
             content_boxes=[
                 ContentBox(

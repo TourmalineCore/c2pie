@@ -46,6 +46,7 @@ def c2pie_GenerateThumbnailAssertion(
     return EmbeddedDataAssertion(
         media_type=media_type,
         image_data=image_data,
+        assertion_type=C2PA_AssertionTypes.thumbnail
     )
 
 

@@ -9,8 +9,9 @@ from c2pie.utils.content_types import jumbf_content_types
 
 class C2PA_AssertionTypes(enum.Enum):
     data_hash = 0
-    thumbnail = 1
-    actions = 2
+    embedded_data = 1
+    thumbnail = 2
+    actions = 3
 
 
 def json_to_bytes(json_object: dict[str, Any]) -> bytes:
@@ -26,6 +27,8 @@ def get_assertion_content_type(assertion_type: C2PA_AssertionTypes) -> bytes:
         return jumbf_content_types["cbor"]
     elif assertion_type == C2PA_AssertionTypes.actions:
         return jumbf_content_types["cbor"]
+    elif assertion_type == C2PA_AssertionTypes.embedded_data:
+        return jumbf_content_types["embedded_file"]
     elif assertion_type == C2PA_AssertionTypes.thumbnail:
         return jumbf_content_types["embedded_file"]
     else:
@@ -46,6 +49,8 @@ def get_assertion_label(assertion_type: C2PA_AssertionTypes) -> str:
         return "c2pa.hash.data"
     elif assertion_type == C2PA_AssertionTypes.actions:
         return "c2pa.actions.v2"
+    elif assertion_type == C2PA_AssertionTypes.embedded_data:
+        return "c2pa.embedded-data"
     elif assertion_type == C2PA_AssertionTypes.thumbnail:
         return "c2pa.thumbnail.claim"
     else:
