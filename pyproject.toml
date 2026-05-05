@@ -56,8 +56,8 @@ ruff = "^0.13.2"
 python-semantic-release = "^10.4.1"
 
 [build-system]
-requires = ["poetry-core>=1.8.3"]
-build-backend = "poetry.core.masonry.api"
+requires = ["poetry>=1.8.3"]
+build-backend = "poetry.masonry.api"
 
 [tool.pytest.ini_options]
 markers = [

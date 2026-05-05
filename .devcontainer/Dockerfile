@@ -16,9 +16,12 @@ ENV RUSTUP_HOME=/home/vscode/.rustup \
 RUN curl -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable && \
     cargo install c2patool --locked
 
-COPY . /c2pie/
+# If the configuration files are not copied, it will not 
+# be possible to install dependencies using poetry install
+COPY . /workspaces/c2pie/
+WORKDIR /workspaces/c2pie/
 
-WORKDIR c2pie
-
+# --no-interaction - installing in non-interactive mode
+# --no-ansi - disable ANSI codes
 RUN poetry config virtualenvs.create false \
   && poetry lock && poetry install --no-interaction --no-ansi

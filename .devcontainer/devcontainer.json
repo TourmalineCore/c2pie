@@ -32,5 +32,4 @@
 	"runArgs": [
         "--env-file", "${localWorkspaceFolder}/.env",
     ],
-	"postCreateCommand": "pip install -e /workspaces/c2pie",
 }
