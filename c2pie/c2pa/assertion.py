@@ -119,8 +119,8 @@ class EmbeddedDataAssertion(Assertion):
     Embedded Data assertion, contains embedded data within the JUMBF Box.
 
     Can be used for the following assertions:
-    - c2pa.thumbnail.claim, 
-    - c2pa.ingredient, 
+    - c2pa.thumbnail.claim,
+    - c2pa.ingredient,
     - c2pa.ingredient.thumbnail
     - c2pa.embedded-data
 
