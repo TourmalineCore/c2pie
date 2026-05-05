@@ -108,7 +108,6 @@ def sign_file(
     output_path: Path | str | None = None,
     key_path: str | None = None,
     certificates_path: str | None = None,
-    schema_path: str | None = None,
 ) -> None:
     key, certificates = _load_certificates_and_key(
         key_path=key_path,
