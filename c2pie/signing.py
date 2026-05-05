@@ -131,14 +131,18 @@ def sign_file(
         cai_offset = 2
 
     hash_data_assertion = c2pie_GenerateHashDataAssertion(
-        cai_offset=cai_offset, hashed_data=hashlib.sha256(raw_bytes).digest()
+        cai_offset=cai_offset,
+        hashed_data=hashlib.sha256(raw_bytes).digest(),
     )
 
     # This section should be replaced with the content generation logic once the relevant
     # functionality is available (example, action 'c2pa.opened' for Ingredient Assertion)
     actions_assertion = c2pie_GenerateActionsAssertion(action="c2pa.created")
 
-    assertions = [hash_data_assertion, actions_assertion]
+    assertions = [
+        hash_data_assertion,
+        actions_assertion,
+    ]
 
     manifest = c2pie_GenerateManifest(
         assertions=assertions,
