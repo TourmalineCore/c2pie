@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import uuid
+from pathlib import Path
 from typing import Any
 
 import cbor2
@@ -25,13 +26,14 @@ class Claim(SuperBox):
         self,
         assertion_store: AssertionStore,
         manifest_label: str,
-        dc_format: str = None,
+        dc_title: Path,
     ):
         self.manifest_label = manifest_label
         self.assertion_store = assertion_store
-        self.dc_format = dc_format
+        self.dc_title = dc_title
+
         self.claim_signature_label = f"self#jumbf=c2pa/{self.manifest_label}/c2pa.signature"
-        self._instance_id = f"xmp:iid:{uuid.uuid4()}"
+        self.instance_id = f"xmp:iid:{uuid.uuid4()}"
 
         cbor_payload = self._build_cbor_payload()
 
@@ -61,13 +63,9 @@ class Claim(SuperBox):
         self.assertion_store = assertion_store
         self._rebuild_payload()
 
-    def set_format(self, dc_format: str | None) -> None:
-        self.dc_format = dc_format
-        self._rebuild_payload()
-
     def _build_assertions_array(self) -> list[dict[str, Any]]:
         """
-        Build the claim["created_assertions"] array from the current AssertionStore:
+        Build the claim["created_assertions"] and claim["gathered_assertions"] arrays from the current AssertionStore:
           - url:  self#jumbf=/c2pa/<manifest_label>/c2pa.assertions/<label>
           - alg:  sha256
           - hash: sha256( JUMBF-superbox-content = description + content_boxes ) for this assertion
@@ -121,16 +119,18 @@ class Claim(SuperBox):
           - claim_generator_info
           - instanceID (stable for the object)
           - signature (reference to c2pa.signature)
-          - optional dc:format
-          - optional assertions (if there is an assertion_store)
+          - optional created_assertions (if there is an assertion_store)
+          - optional gathered_assertions (if there is an assertion_store)
+          - optional dc:title
         """
         claim: dict[str, Any] = {
             "claim_generator_info": {
                 "name": "c2pie",
                 "specVersion": "2.4.0",
             },
-            "instanceID": self._instance_id,
+            "instanceID": self.instance_id,
             "signature": self.claim_signature_label,
+            "dc:title": self.dc_title,
             "alg": "sha256",
         }
 

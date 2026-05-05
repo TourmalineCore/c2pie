@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from pathlib import Path
 import uuid
 
 from c2pie.c2pa.assertion import ActionsAssertion, Assertion, HashDataAssertion
@@ -34,6 +35,7 @@ def c2pie_GenerateManifest(
     assertions: list,
     private_key: bytes,
     certificate_chain: bytes,
+    file_name: Path,
 ) -> ManifestStore:
     """
     private_key: PKCS#8 PEM (RSA) bytes
@@ -49,6 +51,7 @@ def c2pie_GenerateManifest(
     claim = Claim(
         manifest_label=manifest.get_manifest_label(),
         assertion_store=assertion_store,
+        dc_title=file_name,
     )
     manifest.set_claim(claim)
 

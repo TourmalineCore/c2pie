@@ -144,6 +144,7 @@ def sign_file(
         assertions=assertions,
         private_key=key,
         certificate_chain=certificates,
+        file_name=output_path.name,
     )
 
     signed_bytes = c2pie_EmplaceManifest(
