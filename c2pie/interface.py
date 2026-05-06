@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import uuid
-from pathlib import Path
 
 from c2pie.c2pa.assertion import (
     ActionsAssertion,
@@ -44,8 +43,8 @@ def c2pie_GenerateThumbnailAssertion(
     image_data: bytes,
 ) -> EmbeddedDataAssertion:
     return EmbeddedDataAssertion(
-        media_type=media_type, 
-        image_data=image_data, 
+        media_type=media_type,
+        image_data=image_data,
         assertion_type=C2PA_AssertionTypes.thumbnail,
     )
 
