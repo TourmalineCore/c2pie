@@ -4,95 +4,83 @@ from c2pie.utils.content_types import jumbf_content_types
 
 
 def test_create_assertion():
-    test_assertion = Assertion(C2PA_AssertionTypes.creative_work, {})
-
-    assert test_assertion is not None
+    actions_assertion = Assertion(C2PA_AssertionTypes.actions, {})
+    assert actions_assertion is not None
 
 
 def test_create_assertion_with_jumbf_type():
-    test_assertion = Assertion(C2PA_AssertionTypes.creative_work, {})
-    assert test_assertion.t_box == b"jumb".hex()
-    assert test_assertion.get_content_type() == jumbf_content_types["json"]
+    actions_assertion = Assertion(C2PA_AssertionTypes.actions, {})
+    assert actions_assertion.t_box == b"jumb".hex()
+    assert actions_assertion.get_content_type() == jumbf_content_types["cbor"]
 
 
 def test_create_assertion_with_correct_label():
-    test_assertion = Assertion(C2PA_AssertionTypes.creative_work, {})
-    assert test_assertion.get_label() == "stds.schema-org.CreativeWork"
+    actions_assertion = Assertion(C2PA_AssertionTypes.actions, {})
+    assert actions_assertion.get_label() == "c2pa.actions.v2"
 
 
 def test_create_assertion_with_true_type():
-    test_assertion = Assertion(C2PA_AssertionTypes.creative_work, {})
-
-    assert test_assertion.type == C2PA_AssertionTypes.creative_work
-
-
-def test_create_assertion_with_thumbnail_type():
-    test_assertion = Assertion(C2PA_AssertionTypes.thumbnail, {})
-
-    assert test_assertion.get_content_type() == jumbf_content_types["codestream"]
+    actions_assertion = Assertion(C2PA_AssertionTypes.actions, {})
+    assert actions_assertion.type == C2PA_AssertionTypes.actions
 
 
 def test_assertion_cannot_create_with_no_type():
-    test_assertion = Assertion(None, {})  # type: ignore
-
-    assert test_assertion.type not in list(C2PA_AssertionTypes)
-    assert test_assertion.get_content_type() == b""
+    assertion = Assertion(None, {})  # type: ignore
+    assert assertion.type not in list(C2PA_AssertionTypes)
+    assert assertion.get_content_type() == b""
 
 
 def test_create_assertion_with_correct_schema():
-    creative_work_schema = {
-        "@context": "https://schema.org",
-        "@type": "CreativeWork",
-        "author": [{"@type": "Person", "name": "Tourmaline Core"}],
-        "copyrightYear": "2024",
-        "copyrightHolder": "c2pie",
+    actions_assertion_schema: dict[str, list[dict[str, str]]] = {
+        "actions": [
+            {
+                "action": "c2pa.created",
+            },
+        ],
     }
 
-    test_assertion = Assertion(C2PA_AssertionTypes.creative_work, creative_work_schema)
+    actions_assertion = Assertion(C2PA_AssertionTypes.actions, actions_assertion_schema)
 
-    assert test_assertion.schema == creative_work_schema
+    assert actions_assertion.schema == actions_assertion_schema
 
 
 def test_serialize_json_assertion():
-    creative_work_schema = {
-        "@context": "https://schema.org",
-        "@type": "CreativeWork",
-        "author": [{"@type": "Person", "name": "Tourmaline Core"}],
-        "copyrightYear": "2024",
-        "copyrightHolder": "c2pie",
+    actions_schema_json = {
+        "actions": [
+            {
+                "action": "c2pa.created",
+            },
+        ],
     }
 
-    test_serialized_json_assertion = json_to_bytes(creative_work_schema)
+    result = json_to_bytes(actions_schema_json)
 
-    assert (
-        test_serialized_json_assertion
-        == b'{"@context":"https://schema.org","@type":"CreativeWork","author":[{"@type":"Person","name":"Tourmaline Core"}],"copyrightYear":"2024","copyrightHolder":"c2pie"}'  # noqa: E501
-    )
+    assert result == b'{"actions":[{"action":"c2pa.created"}]}'
 
 
 def test_serialize_cbor_assertion():
-    actions_schema_cbor = {"actions": [{"action": "c2pa.edited", "parameters": "gradient"}]}
+    actions_schema_cbor = {
+        "actions": [
+            {
+                "action": "c2pa.edited",
+                "parameters": "gradient",
+            },
+        ],
+    }
 
-    test_serialized_cbor_assertion = cbor_to_bytes(actions_schema_cbor)
+    test_serialized_cbor_actions_assertion = cbor_to_bytes(actions_schema_cbor)
 
-    assert test_serialized_cbor_assertion == b"\xa1gactions\x81\xa2factionkc2pa.editedjparametershgradient"
+    assert test_serialized_cbor_actions_assertion == b"\xa1gactions\x81\xa2factionkc2pa.editedjparametershgradient"
 
 
 def test_assertion_content_boxes_not_empty():  # noqa: F811
-    creative_work_schema = {
-        "@context": "https://schema.org",
-        "@type": "CreativeWork",
-        "author": [{"@type": "Person", "name": "Tourmaline Core"}],
-        "copyrightYear": "2024",
-        "copyrightHolder": "c2pie",
-    }
-
-    test_assertion = Assertion(C2PA_AssertionTypes.creative_work, creative_work_schema)
-
-    assert len(test_assertion.content_boxes) != 0
+    actions_assertion = Assertion(C2PA_AssertionTypes.actions, {})
+    assert len(actions_assertion.content_boxes) != 0
 
 
 def test_additional_extensions_adding_for_hash_data_assertions():
     additional_exclusion = {"some_extension": 343}
-    test_assertion = HashDataAssertion(cai_offset=124, hashed_data=b"", additional_exclusions=[additional_exclusion])
-    assert additional_exclusion in test_assertion.schema["exclusions"]
+    data_hash_assertion = HashDataAssertion(
+        cai_offset=124, hashed_data=b"", additional_exclusions=[additional_exclusion]
+    )
+    assert additional_exclusion in data_hash_assertion.schema["exclusions"]
