@@ -13,13 +13,13 @@ def test_create_claim_signature_with_empty_claim():
             assertion_store=assertion_store,
             manifest_label="urn:c2pa:test-uuid",
             dc_title="test.jpg",
-            tsa_url=None,
-            require_tsa=False,
-            tsa_log_dir=None,
         ),
         private_key=b"",
         certificate_pem_bundle=b"",
         certificate=None,
+        tsa_url=None,
+        require_tsa=False,
+        tsa_log_dir=None,
     )
 
     assert claim_signature is not None
