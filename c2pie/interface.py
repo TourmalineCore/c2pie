@@ -5,8 +5,8 @@ import uuid
 from c2pie.c2pa.assertion import (
     ActionsAssertion,
     Assertion,
-    EmbeddedDataAssertion,
     HashDataAssertion,
+    ThumbnailAssertion,
 )
 from c2pie.c2pa.assertion_store import AssertionStore
 from c2pie.c2pa.claim import Claim
@@ -41,11 +41,10 @@ def c2pie_GenerateActionsAssertion(
 def c2pie_GenerateThumbnailAssertion(
     media_type: str,
     image_data: bytes,
-) -> EmbeddedDataAssertion:
-    return EmbeddedDataAssertion(
+) -> ThumbnailAssertion:
+    return ThumbnailAssertion(
         media_type=media_type,
         image_data=image_data,
-        assertion_type=C2PA_AssertionTypes.thumbnail,
     )
 
 
