@@ -43,7 +43,7 @@ def parse_arguments() -> argparse.Namespace:
         type=str,
         default=None,
         help="RFC 3161 TSA URL for timestamping (e.g. http://timestamp.digicert.com). "
-             "Falls back to C2PIE_TSA_URL env variable.",
+        "Falls back to C2PIE_TSA_URL env variable.",
     )
 
     sign_parser.add_argument(
@@ -77,7 +77,7 @@ def sign(arguments: argparse.Namespace) -> None:
         output_path=output_file_path,
         tsa_url=tsa_url,
         require_tsa=require_tsa,
-        tsa_log_dir=tsa_log_dir
+        tsa_log_dir=tsa_log_dir,
     )
 
 

@@ -40,7 +40,7 @@ class Claim(SuperBox):
             box_type=b"cbor".hex(),
             payload=cbor_payload,
         )
-        
+
         super().__init__(
             content_type=c2pa_content_types["claim"],
             label="c2pa.claim.v2",
