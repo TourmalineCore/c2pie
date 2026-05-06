@@ -1,6 +1,11 @@
 from c2pie.c2pa.assertion import ActionsAssertion
-from c2pie.utils.assertion_schemas import cbor_to_bytes
+from c2pie.utils.assertion_schemas import C2PA_AssertionTypes, cbor_to_bytes
 from c2pie.utils.content_types import jumbf_content_types
+
+
+def test_actions_assertion_has_correct_type():
+    actions_assertion = ActionsAssertion(action="c2pa.created")
+    assert actions_assertion.type == C2PA_AssertionTypes.actions
 
 
 def test_actions_assertion_content_type_is_cbor():

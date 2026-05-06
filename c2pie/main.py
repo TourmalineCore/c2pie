@@ -39,15 +39,6 @@ def parse_arguments() -> argparse.Namespace:
     )
 
     sign_parser.add_argument(
-        "-m",
-        "--manifest",
-        dest="schema_filepath",
-        type=Path,
-        default=None,
-        help="optional path to a the signature file. If omitted, the default signature is used.",
-    )
-
-    sign_parser.add_argument(
         "--tsa_url",
         type=str,
         default=None,
@@ -77,7 +68,6 @@ def parse_arguments() -> argparse.Namespace:
 def sign(arguments: argparse.Namespace) -> None:
     input_file_path = arguments.input_file
     output_file_path = arguments.output_file
-    schema_file_path = arguments.schema_filepath
     tsa_url = arguments.tsa_url or os.getenv("C2PIE_TSA_URL")
     require_tsa = arguments.require_tsa or (os.getenv("C2PIE_TSA_REQUIRED", "").lower() == "true")
     tsa_log_dir = arguments.tsa_log_dir or os.getenv("C2PIE_TSA_LOG_DIR")
@@ -85,7 +75,6 @@ def sign(arguments: argparse.Namespace) -> None:
     sign_file(
         input_path=input_file_path,
         output_path=output_file_path,
-        schema_path=schema_file_path,
         tsa_url=tsa_url,
         require_tsa=require_tsa,
         tsa_log_dir=tsa_log_dir

@@ -32,9 +32,9 @@ def mock_claim():
     assertion_store = AssertionStore([actions_assertion])
 
     return Claim(
-        claim_generator="c2pie",
-        manifest_label="urn:uuid:test-label",
+        manifest_label="urn:c2pa:test-uuid",
         assertion_store=assertion_store,
+        dc_title="test.jpg",
     )
 
 
