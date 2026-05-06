@@ -26,7 +26,7 @@ class Claim(SuperBox):
         self,
         assertion_store: AssertionStore,
         manifest_label: str,
-        dc_title: Path,
+        dc_title: str,
     ):
         self.manifest_label = manifest_label
         self.assertion_store = assertion_store

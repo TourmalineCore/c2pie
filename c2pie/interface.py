@@ -52,7 +52,7 @@ def c2pie_GenerateManifest(
     assertions: list,
     private_key: bytes,
     certificate_chain: bytes,
-    file_name: Path,
+    file_name: str,
 ) -> ManifestStore:
     """
     private_key: PKCS#8 PEM (RSA) bytes
