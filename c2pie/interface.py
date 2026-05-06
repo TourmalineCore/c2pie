@@ -2,7 +2,12 @@ from __future__ import annotations
 
 import uuid
 
-from c2pie.c2pa.assertion import Assertion, HashDataAssertion
+from c2pie.c2pa.assertion import (
+    ActionsAssertion,
+    Assertion,
+    HashDataAssertion,
+    ThumbnailAssertion,
+)
 from c2pie.c2pa.assertion_store import AssertionStore
 from c2pie.c2pa.claim import Claim
 from c2pie.c2pa.claim_signature import ClaimSignature
@@ -23,26 +28,47 @@ def c2pie_GenerateHashDataAssertion(cai_offset: int, hashed_data: bytes) -> Hash
     return HashDataAssertion(cai_offset, hashed_data)
 
 
+def c2pie_GenerateActionsAssertion(
+    action: str,
+    parameters: dict[str, list[dict[str, str]]] | None = None,
+) -> ActionsAssertion:
+    return ActionsAssertion(action, parameters)
+
+
+# Currently not in use.
+# If APP11 exceeds the allowed size (65,535 bytes), an error will occur.
+# It is necessary to add logic to handle this case by splitting APP11.
+def c2pie_GenerateThumbnailAssertion(
+    media_type: str,
+    image_data: bytes,
+) -> ThumbnailAssertion:
+    return ThumbnailAssertion(
+        media_type=media_type,
+        image_data=image_data,
+    )
+
+
 def c2pie_GenerateManifest(
     assertions: list,
     private_key: bytes,
     certificate_chain: bytes,
+    file_name: str,
 ) -> ManifestStore:
     """
     private_key: PKCS#8 PEM (RSA) bytes
     certificate_chain: PEM bundle (leaf + intermediates, NO root) bytes
     """
 
-    manifest_label = f"urn:uuid:{uuid.uuid4().hex}"
+    manifest_label = f"urn:c2pa:{uuid.uuid4().hex}"
     manifest = Manifest(manifest_label=manifest_label)
 
     assertion_store = AssertionStore(assertions=assertions)
     manifest.set_assertion_store(assertion_store)
 
     claim = Claim(
-        claim_generator="c2pie",
         manifest_label=manifest.get_manifest_label(),
         assertion_store=assertion_store,
+        dc_title=file_name,
     )
     manifest.set_claim(claim)
 

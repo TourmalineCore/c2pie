@@ -8,13 +8,20 @@ from c2pie.utils.content_types import c2pa_content_types
 
 def test_create_claim_signature_with_empty_claim():
     assertion_store = AssertionStore(assertions=[])
-    test_claim_signature = ClaimSignature(
-        claim=Claim(assertion_store=assertion_store), private_key=b"", certificate_pem_bundle=b"", certificate=None
+    claim_signature = ClaimSignature(
+        claim=Claim(
+            assertion_store=assertion_store,
+            manifest_label="urn:c2pa:test-uuid",
+            dc_title="test.jpg",
+        ),
+        private_key=b"",
+        certificate_pem_bundle=b"",
+        certificate=None,
     )
 
-    assert test_claim_signature is not None
-    assert test_claim_signature.get_label() == "c2pa.signature"
-    assert test_claim_signature.get_content_type() == c2pa_content_types["claim_signature"]
+    assert claim_signature is not None
+    assert claim_signature.get_label() == "c2pa.signature"
+    assert claim_signature.get_content_type() == c2pa_content_types["claim_signature"]
 
 
 def test_create_claim_signature_with_non_empty_claim():
@@ -27,21 +34,16 @@ def test_create_claim_signature_with_non_empty_claim():
     with open(cert_filepath, "rb") as f:
         certificate = f.read()
 
-    creative_work_schema = {
-        "@context": "https://schema.org",
-        "@type": "CreativeWork",
-        "author": [{"@type": "Person", "name": "Tourmaline Core"}],
-        "copyrightYear": "2024",
-        "copyrightHolder": "c2pie",
-    }
-    test_assertion = Assertion(assertion_type=C2PA_AssertionTypes.creative_work, schema=creative_work_schema)
-    test_assertions = [test_assertion, test_assertion]
-    test_assertion_store = AssertionStore(assertions=test_assertions)
-    test_claim = Claim(
-        claim_generator="c2pie", manifest_label="valid_manifest_label", assertion_store=test_assertion_store
+    actions_assertion = Assertion(assertion_type=C2PA_AssertionTypes.actions, schema={})
+    assertions = [actions_assertion, actions_assertion]
+    assertion_store = AssertionStore(assertions=assertions)
+    claim = Claim(
+        manifest_label="urn:c2pa:test-uuid",
+        assertion_store=assertion_store,
+        dc_title="test.jpg",
     )
 
-    test_claim_signature = ClaimSignature(claim=test_claim, private_key=key, certificate=certificate)
+    claim_signature = ClaimSignature(claim=claim, private_key=key, certificate=certificate)
 
-    assert test_claim_signature.claim is not None  # noqa: B015
-    assert test_claim_signature.content_boxes[0].get_type() == b"cbor".hex()  # noqa: B015
+    assert claim_signature.claim is not None  # noqa: B015
+    assert claim_signature.content_boxes[0].get_type() == b"cbor".hex()  # noqa: B015
