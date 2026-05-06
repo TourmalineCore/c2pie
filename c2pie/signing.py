@@ -171,6 +171,22 @@ def _load_certificates_and_key(
     return key, certificates
 
 
+def _generate_hashed_uri_map(
+    url: str,
+    hash_value: bytes,
+    hash_algorithm: str | None = None,
+) -> dict[str, str | bytes]:
+    result: dict[str, str | bytes] = {
+        "url": url,
+        "hash": hash_value,
+    }
+
+    if hash_algorithm:
+        result["alg"] = hash_algorithm
+
+    return result
+
+
 def sign_file(
     input_path: Path | str,
     output_path: Path | str | None = None,
