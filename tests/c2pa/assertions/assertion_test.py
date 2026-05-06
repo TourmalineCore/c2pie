@@ -24,7 +24,7 @@ def test_create_assertion_with_true_type():
     assert actions_assertion.type == C2PA_AssertionTypes.actions
 
 
-def assertion_cannot_create_with_no_type():
+def test_assertion_cannot_create_with_no_type():
     assertion = Assertion(None, {})  # type: ignore
     assert assertion.type not in list(C2PA_AssertionTypes)
     assert assertion.get_content_type() == b""
@@ -73,7 +73,7 @@ def test_serialize_cbor_assertion():
     assert test_serialized_cbor_actions_assertion == b"\xa1gactions\x81\xa2factionkc2pa.editedjparametershgradient"
 
 
-def assertion_content_boxes_not_empty():  # noqa: F811
+def test_assertion_content_boxes_not_empty():  # noqa: F811
     actions_assertion = Assertion(C2PA_AssertionTypes.actions, {})
     assert len(actions_assertion.content_boxes) != 0
 

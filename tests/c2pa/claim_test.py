@@ -19,7 +19,7 @@ def test_create_claim_with_label():
     assert claim.claim_signature_label == "self#jumbf=c2pa/urn:c2pa:test-uuid/c2pa.signature"
 
 
-def create_claim_with_label_and_assertion_store():
+def test_create_claim_with_label_and_assertion_store():
     actions_assertion = Assertion(assertion_type=C2PA_AssertionTypes.actions, schema={})
     assertions = [actions_assertion, actions_assertion]
 
