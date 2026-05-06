@@ -61,10 +61,10 @@ def fetch_timestamp(
 ) -> bytes:
     time_stamp_req_der, nonce = _build_request(signature_bytes)
 
-    ts = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H%M%S")
+    timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H%M%S")
 
     nonce_hex = f"{nonce & 0xFFFFFFFF:08x}"
-    prefix = f"{ts}_{nonce_hex}"
+    prefix = f"{timestamp}_{nonce_hex}"
 
     if tsa_log_dir is not None:
         _save_file(Path(tsa_log_dir), f"{prefix}_request.der", time_stamp_req_der)

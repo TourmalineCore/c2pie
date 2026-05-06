@@ -42,7 +42,7 @@ def parse_arguments() -> argparse.Namespace:
         "--tsa_url",
         type=str,
         default=None,
-        help="RFC 3161 TSA URL for timestamping (e.g. http://timestamp.digicert.com). "
+        help="TimeStamp Authority URL for timestamping (e.g. http://timestamp.digicert.com). "
         "Falls back to C2PIE_TSA_URL env variable.",
     )
 
@@ -50,14 +50,16 @@ def parse_arguments() -> argparse.Namespace:
         "--require_tsa",
         action="store_true",
         default=False,
-        help="abort signing if no TSA URL is available.",
+        help="abort signing if no TSA URL is available. "
+        "Falls back to C2PIE_TSA_REQUIRED env variable.",
     )
 
     sign_parser.add_argument(
         "--tsa_log_dir",
         type=Path,
         default=None,
-        help="directory to save TSA request/response DER files for debugging.",
+        help="directory to save TSA request/response DER files."
+        "Falls back to C2PIE_TSA_LOG_DIR env variable.",
     )
 
     sign_parser.set_defaults(func=sign)
