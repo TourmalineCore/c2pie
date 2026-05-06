@@ -123,7 +123,15 @@ class ClaimSignature(SuperBox):
                 tsa_log_dir=self.tsa_log_dir,
             )
 
-            unprotected_header = {"sigTst2": {"tstTokens": [{"val": time_stamp_token_der}]}}
+            unprotected_header = {
+                "sigTst2": {
+                    "tstTokens": [
+                        {
+                            "val": time_stamp_token_der,
+                        },
+                    ],
+                },
+            }
 
         return unprotected_header
 
@@ -168,8 +176,6 @@ class ClaimSignature(SuperBox):
         """
         tsa_sig_structure = ["CounterSignature", serialized_protected_header, b"", cbor2.dumps(signature)]
         serialized_tsa_sig_signature = cbor2.dumps(tsa_sig_structure, canonical=True)
-
-        print("Hola-la-la")
 
         unprotected_header = self._generate_unprotected_header(serialized_sig_structure=serialized_tsa_sig_signature)
 
