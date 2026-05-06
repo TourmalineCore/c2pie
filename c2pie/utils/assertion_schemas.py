@@ -11,6 +11,7 @@ class C2PA_AssertionTypes(enum.Enum):
     creative_work = 0
     data_hash = 1
     thumbnail = 2
+    actions = 3
 
 
 def json_to_bytes(json_object: dict[str, Any]) -> bytes:
@@ -28,6 +29,8 @@ def get_assertion_content_type(assertion_type: C2PA_AssertionTypes) -> bytes:
         return jumbf_content_types["cbor"]
     elif assertion_type == C2PA_AssertionTypes.thumbnail:
         return jumbf_content_types["codestream"]
+    elif assertion_type == C2PA_AssertionTypes.actions:
+        return jumbf_content_types["cbor"]
     else:
         return b""
 
@@ -39,6 +42,8 @@ def get_assertion_content_box_type(assertion_type: C2PA_AssertionTypes) -> str:
         return b"cbor".hex()
     elif assertion_type == C2PA_AssertionTypes.thumbnail:
         return b"codestream".hex()  # figure out which content type should be
+    elif assertion_type == C2PA_AssertionTypes.actions:
+        return b"cbor".hex()
     else:
         return b"".hex()
 
@@ -50,5 +55,7 @@ def get_assertion_label(assertion_type: C2PA_AssertionTypes) -> str:
         return "c2pa.hash.data"
     elif assertion_type == C2PA_AssertionTypes.thumbnail:
         return "c2pa.thumbnail.claim.jpg"
+    elif assertion_type == C2PA_AssertionTypes.actions:
+        return "c2pa.actions.v2"
     else:
         return ""
