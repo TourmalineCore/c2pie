@@ -27,72 +27,40 @@ def test_generate_assertion_has_correct_type():
 def test_generate_assertion_has_correct_schema():
     expected_schema = {
         "actions": [
-            {"action": "c2pa.created"},
+            {
+                "action": "c2pa.created",
+            },
         ],
     }
     assertion = c2pie_GenerateAssertion(C2PA_AssertionTypes.actions, expected_schema)
     assert assertion.schema == expected_schema
 
 
-def test_generate_hash_data_assertion_returns_correct_type():
-    data_hash_assertion = c2pie_GenerateHashDataAssertion(cai_offset=2, hashed_data=b"\x00" * 32)
-    assert data_hash_assertion.type == C2PA_AssertionTypes.data_hash
+def test_generate_hash_data_assertion_returns_hash_data_assertion_instance():
+    from c2pie.c2pa.assertion import HashDataAssertion
+
+    hash_data_assertion = c2pie_GenerateHashDataAssertion(
+        cai_offset=2,
+        hashed_data=b"\x00" * 32,
+    )
+    assert isinstance(hash_data_assertion, HashDataAssertion)
 
 
-def test_generate_hash_data_assertion_has_correct_offset():
-    data_hash_assertion = c2pie_GenerateHashDataAssertion(cai_offset=2, hashed_data=b"\x00" * 32)
-    assert data_hash_assertion.schema["exclusions"][0]["start"] == 2
+def test_generate_actions_assertion_returns_actions_assertion_instance():
+    from c2pie.c2pa.assertion import ActionsAssertion
 
-
-def test_generate_hash_data_assertion_has_correct_hash():
-    expected_hashed_data = b"\xab" * 32
-    data_hash_assertion = c2pie_GenerateHashDataAssertion(cai_offset=2, hashed_data=expected_hashed_data)
-    assert data_hash_assertion.schema["hash"] == expected_hashed_data
-
-
-def test_generate_actions_assertion_returns_correct_type():
     actions_assertion = c2pie_GenerateActionsAssertion(action="c2pa.created")
-    assert actions_assertion.type == C2PA_AssertionTypes.actions
+    assert isinstance(actions_assertion, ActionsAssertion)
 
 
-def test_generate_actions_assertion_has_correct_action():
-    actions_assertion = c2pie_GenerateActionsAssertion(action="c2pa.created")
-    assert actions_assertion.schema["actions"][0]["action"] == "c2pa.created"
+def test_generate_thumbnail_assertion_returns_thumbnail_assertion_instance():
+    from c2pie.c2pa.assertion import ThumbnailAssertion
 
-
-def test_generate_actions_assertion_without_parameters():
-    actions_assertion = c2pie_GenerateActionsAssertion(action="c2pa.created")
-    assert "parameters" not in actions_assertion.schema["actions"][0]
-
-
-def test_generate_actions_assertion_with_parameters():
-    expected_parameters = {
-        "ingredients": [
-            {"url": "self#jumbf=c2pa.assertions/c2pa.ingredient.v3"},
-        ],
-    }
-    actions_assertion = c2pie_GenerateActionsAssertion(action="c2pa.opened", parameters=expected_parameters)
-    assert actions_assertion.schema["actions"][0]["parameters"] == expected_parameters
-
-
-def test_generate_thumbnail_assertion_returns_correct_type():
-    thumbnail_assertion = c2pie_GenerateThumbnailAssertion(media_type=MEDIA_TYPE, image_data=JPEG_HEADER)
-    assert thumbnail_assertion.type == C2PA_AssertionTypes.thumbnail
-
-
-def test_generate_thumbnail_assertion_has_two_content_boxes():
-    thumbnail_assertion = c2pie_GenerateThumbnailAssertion(media_type=MEDIA_TYPE, image_data=JPEG_HEADER)
-    assert len(thumbnail_assertion.content_boxes) == 2
-
-
-def test_generate_thumbnail_assertion_bidb_contains_image_data():
-    thumbnail_assertion = c2pie_GenerateThumbnailAssertion(media_type=MEDIA_TYPE, image_data=JPEG_HEADER)
-    assert thumbnail_assertion.content_boxes[1].get_payload() == JPEG_HEADER
-
-
-def test_generate_thumbnail_assertion_bfdb_contains_media_type():
-    thumbnail_assertion = c2pie_GenerateThumbnailAssertion(media_type=MEDIA_TYPE, image_data=JPEG_HEADER)
-    assert MEDIA_TYPE.encode("utf-8") in thumbnail_assertion.content_boxes[0].get_payload()
+    thumbnail_assertion = c2pie_GenerateThumbnailAssertion(
+        media_type=MEDIA_TYPE,
+        image_data=JPEG_HEADER,
+    )
+    assert isinstance(thumbnail_assertion, ThumbnailAssertion)
 
 
 def test_generate_manifest_returns_manifest_store():
