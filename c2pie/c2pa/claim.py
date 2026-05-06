@@ -139,7 +139,7 @@ class Claim(SuperBox):
         if created_assertions:
             claim["created_assertions"] = created_assertions
 
-        if gathered_assertions is not None:
+        if gathered_assertions:
             claim["gathered_assertions"] = gathered_assertions
 
         return cbor2.dumps(claim, canonical=True)
