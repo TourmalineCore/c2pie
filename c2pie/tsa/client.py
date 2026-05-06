@@ -77,7 +77,7 @@ def fetch_timestamp(
         }
         """
         response = http.post(
-            tsa_url,
+            url=tsa_url,
             data=time_stamp_req_der,
             headers={"Content-Type": "application/timestamp-query"},
             timeout=30,

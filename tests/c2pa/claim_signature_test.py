@@ -9,7 +9,13 @@ from c2pie.utils.content_types import c2pa_content_types
 def test_create_claim_signature_with_empty_claim():
     assertion_store = AssertionStore(assertions=[])
     test_claim_signature = ClaimSignature(
-        claim=Claim(assertion_store=assertion_store), private_key=b"", certificate_pem_bundle=b"", certificate=None
+        claim=Claim(assertion_store=assertion_store),
+        private_key=b"",
+        certificate_pem_bundle=b"",
+        certificate=None,
+        tsa_url=None,
+        require_tsa=False,
+        tsa_log_dir=None,
     )
 
     assert test_claim_signature is not None
@@ -41,7 +47,14 @@ def test_create_claim_signature_with_non_empty_claim():
         claim_generator="c2pie", manifest_label="valid_manifest_label", assertion_store=test_assertion_store
     )
 
-    test_claim_signature = ClaimSignature(claim=test_claim, private_key=key, certificate=certificate)
+    test_claim_signature = ClaimSignature(
+        claim=test_claim,
+        private_key=key,
+        certificate=certificate,
+        tsa_url=None,
+        require_tsa=False,
+        tsa_log_dir=None,
+    )
 
     assert test_claim_signature.claim is not None  # noqa: B015
     assert test_claim_signature.content_boxes[0].get_type() == b"cbor".hex()  # noqa: B015
