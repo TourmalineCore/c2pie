@@ -174,6 +174,7 @@ class EmbeddedDataAssertion(Assertion):
 
 class ThumbnailAssertion(EmbeddedDataAssertion):
     """An assertion (c2pa.thumbnail.claim) containing an asset thumbnail"""
+
     def __init__(
         self,
         media_type: str,
