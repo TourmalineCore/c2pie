@@ -14,6 +14,8 @@ from c2pie.utils.assertion_schemas import (
 )
 from c2pie.utils.content_types import jumbf_content_types
 
+_ALLOWED_ACTIONS = ["c2pa.created", "c2pa.opened"]
+
 
 class Assertion(SuperBox):
     """Universal assertion superbox (one content box)."""
@@ -22,28 +24,30 @@ class Assertion(SuperBox):
         self,
         assertion_type: C2PA_AssertionTypes,
         schema: dict[str, Any],
+        content_boxes: list[ContentBox] | None = None,
     ):
         self.type = assertion_type
         self.schema = schema
 
-        payload = self.get_payload_from_schema()
-        box_type_hex = get_assertion_content_box_type(self.type)
-        content_box = ContentBox(box_type=box_type_hex, payload=payload)
+        if content_boxes is None:
+            payload = self.get_payload_from_schema()
+            box_type_hex = get_assertion_content_box_type(self.type)
+            content_boxes = [ContentBox(box_type=box_type_hex, payload=payload)]
 
         super().__init__(
             content_type=get_assertion_content_type(self.type),
             label=get_assertion_label(self.type),
-            content_boxes=[content_box],
+            content_boxes=content_boxes,
         )
 
     def get_payload_from_schema(self) -> bytes:
         ctype = get_assertion_content_type(self.type)
+
         if ctype == jumbf_content_types["json"]:
             return json_to_bytes(self.schema)
-        if ctype == jumbf_content_types["cbor"]:
+        elif ctype == jumbf_content_types["cbor"]:
             return cbor_to_bytes(self.schema)
-        if ctype == jumbf_content_types["codestream"]:
-            return self.schema.get("payload", b"")
+
         return b""
 
     def get_data_for_signing(self) -> bytes:
@@ -96,6 +100,91 @@ class HashDataAssertion(Assertion):
         self.sync_payload()
 
 
+class ActionsAssertion(Assertion):
+    """c2pa.actions.v2 assertion of actions on an asset."""
+
+    def __init__(
+        self,
+        action: str,
+        parameters: dict[str, list[dict[str, Any]]] | None = None,
+    ):
+        if action not in _ALLOWED_ACTIONS:
+            raise ValueError(f"Invalid action {action!r}. Must be one of: {_ALLOWED_ACTIONS}")
+
+        schema: dict[str, Any] = {
+            "actions": [
+                {"action": action},
+            ],
+        }
+
+        if parameters:
+            schema["actions"][0]["parameters"] = parameters
+
+        super().__init__(C2PA_AssertionTypes.actions, schema)
+
+
+class EmbeddedDataAssertion(Assertion):
+    """
+    Embedded Data assertion, contains embedded data within the JUMBF Box.
+
+    Can be used for the following assertions:
+    - c2pa.thumbnail.claim,
+    - c2pa.ingredient,
+    - c2pa.ingredient.thumbnail
+    - c2pa.embedded-data
+
+    Structure:
+    JUMBF Super Box (jumb)
+    -> JUMBF Description Box (jumd)
+    -> Embedded File Description Box (bfdb)
+    -> Binary Data Box (bidb)
+    """
+
+    def __init__(
+        self,
+        media_type: str,
+        image_data: bytes,
+        assertion_type: C2PA_AssertionTypes = C2PA_AssertionTypes.embedded_data,
+    ):
+        # 0000 000x - Filename present? (0 - false, 1 - true)
+        # 0000 00x0 - What's inside bidb? (0 - binary data, 1 - URI)
+        # xxxx xx00- reserved
+        toggles_bytes = b"\x00"
+
+        # IANA media type + null-terminate
+        media_type_bytes = media_type.encode("utf-8") + b"\x00"
+
+        payload = toggles_bytes + media_type_bytes
+
+        super().__init__(
+            assertion_type=assertion_type,
+            schema={},
+            content_boxes=[
+                ContentBox(
+                    box_type=b"bfdb".hex(),  # UUID Type of Embedded File Description Box
+                    payload=payload,
+                ),
+                ContentBox(
+                    box_type=b"bidb".hex(),  # UUID Type of Binary Data Box
+                    payload=image_data,
+                ),
+            ],
+        )
+
+
+class ThumbnailAssertion(EmbeddedDataAssertion):
+    """An assertion (c2pa.thumbnail.claim) containing an asset thumbnail"""
+
+    def __init__(
+        self,
+        media_type: str,
+        image_data: bytes,
+    ):
+        super().__init__(
+            media_type=media_type,
+            image_data=image_data,
+            assertion_type=C2PA_AssertionTypes.thumbnail,
+        )
 class IngredientAssertion(Assertion):
     """c2pa.ingredient.v2 asset-binding assertion."""
 
