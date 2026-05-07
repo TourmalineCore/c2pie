@@ -48,6 +48,8 @@ class Box:
         )
         t_box = data[offset + LBOX_SIZE : offset + HEADER_SIZE].hex()
 
+        # If the length of the box is unknown, the encoders may set the LBox value to 0.
+        # In this case, you must read until the end of the available bytes.
         if l_box == 0:
             end = len(data)
         else:
@@ -58,7 +60,6 @@ class Box:
 
         payload = data[offset + HEADER_SIZE : end]
         box = cls(t_box, payload)
-        box.l_box = l_box
         return box, end
 
 
