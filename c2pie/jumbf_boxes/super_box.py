@@ -22,7 +22,10 @@ class SuperBox(Box):
         super().__init__(b"jumb".hex(), payload=payload)
 
     @classmethod
-    def from_box(cls, box: Box) -> SuperBox:
+    def from_box(
+        cls,
+        box: Box,
+    ) -> SuperBox:
         if box.get_type() != JUMB_TYPE:
             raise ValueError("Box is not a JUMBF superbox")
 

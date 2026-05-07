@@ -23,13 +23,16 @@ class DescriptionBox(Box):
         super().__init__(b"jumd".hex(), payload=payload)
 
     @classmethod
-    def from_box(cls, box: Box) -> "DescriptionBox":
+    def from_box(
+        cls,
+        box: Box,
+    ) -> "DescriptionBox":
         payload = box.get_payload()
         if len(payload) < LABEL_OFFSET + 1:
             raise ValueError("JUMD payload is too short")
 
-        zero_index = payload.find(b"\x00", LABEL_OFFSET)
-        if zero_index == -1:
+        null_terminator = payload.find(b"\x00", LABEL_OFFSET)
+        if null_terminator == -1:
             raise ValueError("JUMD label is not null-terminated")
 
         instance = cls.__new__(cls)
@@ -39,7 +42,7 @@ class DescriptionBox(Box):
 
         instance.content_type = payload[:CONTENT_TYPE_SIZE]
         instance.toggle = payload[CONTENT_TYPE_SIZE]
-        instance.label = payload[LABEL_OFFSET:zero_index].decode("utf-8")
+        instance.label = payload[LABEL_OFFSET:null_terminator].decode("utf-8")
         return instance
 
     def get_label(self) -> str:

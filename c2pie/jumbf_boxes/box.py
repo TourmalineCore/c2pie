@@ -34,7 +34,11 @@ class Box:
         return l_box + t_box + self.payload
 
     @classmethod
-    def parse_from_bytes(cls, data: bytes, offset: int = 0) -> tuple["Box", int]:
+    def parse_from_bytes(
+        cls,
+        data: bytes,
+        offset: int = 0,
+    ) -> tuple["Box", int]:
         if offset + HEADER_SIZE > len(data):
             raise ValueError("Not enough data for box header")
 

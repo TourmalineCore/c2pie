@@ -72,5 +72,9 @@ _EXTRACTORS: dict[C2PA_ContentTypes, Callable[[bytes], bytes | None]] = {
 
 
 def extract_manifest_store_bytes(content_type: C2PA_ContentTypes, raw_data: bytes) -> bytes | None:
+def extract_manifest_store_bytes(
+    content_type: C2PA_ContentTypes,
+    raw_data: bytes,
+) -> bytes | None:
     extractor = _EXTRACTORS[content_type]
     return extractor(raw_data)

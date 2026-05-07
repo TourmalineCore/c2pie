@@ -19,14 +19,18 @@ def jumd_label(payload: bytes) -> str | None:
         return None
 
     raw_label = payload[LABEL_OFFSET:]
-    zero = raw_label.find(b"\x00")
-    if zero == -1:
+    null_terminator = raw_label.find(b"\x00")
+
+    if null_terminator == -1:
         return None
 
-    return raw_label[:zero].decode("utf-8")
+    return raw_label[:null_terminator].decode("utf-8")
 
 
-def find_box_by_label(data: bytes, wanted_label: str) -> Box | None:
+def find_box_by_label(
+    data: bytes,
+    wanted_label: str,
+) -> Box | None:
     """
     Searches the JUMBF box tree for the first superbox whose JUMD label
     matches `wanted_label`.
@@ -41,7 +45,10 @@ def find_box_by_label(data: bytes, wanted_label: str) -> Box | None:
     return None
 
 
-def _find_in_box(box: Box, wanted_label: str) -> Box | None:
+def _find_in_box(
+    box: Box,
+    wanted_label: str,
+) -> Box | None:
     """
     Recursively searches inside a single superbox for a JUMD label match.
 
@@ -75,25 +82,25 @@ def get_active_manifest_uuid(manifest_store_bytes: bytes) -> str | None:
     Returns None if the data is not a valid JUMBF box or contains no manifests.
     """
     try:
-        store, _ = Box.parse_from_bytes(manifest_store_bytes, 0)
+        manifest_store_box, _ = Box.parse_from_bytes(manifest_store_bytes, 0)
     except ValueError:
         return None
 
-    if store.get_type() != JUMB_TYPE:
+    if manifest_store_box.get_type() != JUMB_TYPE:
         return None
 
-    active_urn: str | None = None
+    active_manifest_urn: str | None = None
 
-    for child in iter_boxes(store.get_payload()):
+    for child in iter_boxes(manifest_store_box.get_payload()):
         if child.get_type() != JUMB_TYPE:
             continue
 
-        inner = list(iter_boxes(child.get_payload()))
-        if not inner or inner[0].get_type() != JUMD_TYPE:
+        manifest = list(iter_boxes(child.get_payload()))
+        if not manifest or manifest[0].get_type() != JUMD_TYPE:
             continue
 
-        label = jumd_label(inner[0].get_payload())
+        label = jumd_label(manifest[0].get_payload())
         if label:
-            active_urn = label
+            active_manifest_urn = label
 
-    return active_urn
+    return active_manifest_urn
