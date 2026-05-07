@@ -36,16 +36,16 @@ def extract_manifest_store_bytes_from_jpeg(jpeg_bytes: bytes) -> bytes | None:
     """
     app11_chunks: dict[int, list[tuple[int, bytes]]] = defaultdict(list)
 
-    i = 2 # Jump forward 2 bytes to skip the SOI marker (0xFF, 0xD8)
+    i = 2  # Jump forward 2 bytes to skip the SOI marker (0xFF, 0xD8)
     while i + 3 < len(jpeg_bytes):
         if jpeg_bytes[i] != 0xFF:
-            next_ff = jpeg_bytes.find(b"\xff", i + 1) 
+            next_ff = jpeg_bytes.find(b"\xff", i + 1)
 
-            if next_ff == -1:                                                                                                                             
-                break      
+            if next_ff == -1:
+                break
 
-            i = next_ff                                                                                                                                   
-            continue   
+            i = next_ff
+            continue
 
         marker = jpeg_bytes[i + 1]
 
