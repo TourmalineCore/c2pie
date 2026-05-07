@@ -45,8 +45,6 @@ def _decode_cose_sign1(claim_signature: ClaimSignature):
     tagged = cbor2.loads(raw)
     protected_header, unprotected_header, payload, sig = tagged.value
 
-    assert tagged.tag == 18
-
     return protected_header, unprotected_header, payload, sig
 
 

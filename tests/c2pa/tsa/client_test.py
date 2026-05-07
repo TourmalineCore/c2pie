@@ -63,15 +63,17 @@ class TestFetchTimestampSuccess:
     def test_returns_encoded_token_bytes(self):
         fake_token = b"timestamp_der_encoded_token"
 
-        with patch("c2pie.tsa.client.http.post") as mock_post, patch(
-            "c2pie.tsa.client.decoder.decode"
-        ) as mock_decode, patch("c2pie.tsa.client.encoder.encode", return_value=fake_token):
+        with (
+            patch("c2pie.tsa.client.http.post") as mock_post,
+            patch("c2pie.tsa.client.decoder.decode") as mock_decode,
+            patch("c2pie.tsa.client.encoder.encode", return_value=fake_token),
+        ):
             mock_post.return_value = _make_http_response()
             mock_decode.return_value = (_make_granted_asn1_resp(), b"")
 
             result = fetch_timestamp(
-                b"signature",
-                "http://tsa.example.com",
+                signature_bytes=b"signature",
+                tsa_url="http://tsa.example.com",
                 tsa_log_dir=None,
             )
 
@@ -80,15 +82,17 @@ class TestFetchTimestampSuccess:
     def test_sends_post_to_tsa_url(self):
         tsa_url = "http://tsa.example.com"
 
-        with patch("c2pie.tsa.client.http.post") as mock_post, patch(
-            "c2pie.tsa.client.decoder.decode"
-        ) as mock_decode, patch("c2pie.tsa.client.encoder.encode"):
+        with (
+            patch("c2pie.tsa.client.http.post") as mock_post,
+            patch("c2pie.tsa.client.decoder.decode") as mock_decode,
+            patch("c2pie.tsa.client.encoder.encode"),
+        ):
             mock_post.return_value = _make_http_response()
             mock_decode.return_value = (_make_granted_asn1_resp(), b"")
 
             fetch_timestamp(
-                b"signature",
-                tsa_url,
+                signature_bytes=b"signature",
+                tsa_url="http://tsa.example.com",
                 tsa_log_dir=None,
             )
 
@@ -96,15 +100,17 @@ class TestFetchTimestampSuccess:
         assert call_args.kwargs.get("url") == tsa_url
 
     def test_sends_timestamp_query_content_type(self):
-        with patch("c2pie.tsa.client.http.post") as mock_post, patch(
-            "c2pie.tsa.client.decoder.decode"
-        ) as mock_decode, patch("c2pie.tsa.client.encoder.encode"):
+        with (
+            patch("c2pie.tsa.client.http.post") as mock_post,
+            patch("c2pie.tsa.client.decoder.decode") as mock_decode,
+            patch("c2pie.tsa.client.encoder.encode"),
+        ):
             mock_post.return_value = _make_http_response()
             mock_decode.return_value = (_make_granted_asn1_resp(), b"")
 
             fetch_timestamp(
-                b"signature",
-                "http://tsa.example.com",
+                signature_bytes=b"signature",
+                tsa_url="http://tsa.example.com",
                 tsa_log_dir=None,
             )
 
@@ -112,15 +118,17 @@ class TestFetchTimestampSuccess:
         assert headers.get("Content-Type") == "application/timestamp-query"
 
     def test_uses_30_second_timeout(self):
-        with patch("c2pie.tsa.client.http.post") as mock_post, patch(
-            "c2pie.tsa.client.decoder.decode"
-        ) as mock_decode, patch("c2pie.tsa.client.encoder.encode"):
+        with (
+            patch("c2pie.tsa.client.http.post") as mock_post,
+            patch("c2pie.tsa.client.decoder.decode") as mock_decode,
+            patch("c2pie.tsa.client.encoder.encode"),
+        ):
             mock_post.return_value = _make_http_response()
             mock_decode.return_value = (_make_granted_asn1_resp(), b"")
 
             fetch_timestamp(
-                b"signature",
-                "http://tsa.example.com",
+                signature_bytes=b"signature",
+                tsa_url="http://tsa.example.com",
                 tsa_log_dir=None,
             )
 
@@ -134,8 +142,8 @@ class TestFetchTimestampErrors:
 
             with pytest.raises(TSAConnectionError):
                 fetch_timestamp(
-                    b"signature",
-                    "http://tsa.example.com",
+                    signature_bytes=b"signature",
+                    tsa_url="http://tsa.example.com",
                     tsa_log_dir=None,
                 )
 
@@ -145,8 +153,8 @@ class TestFetchTimestampErrors:
 
             with pytest.raises(TSAConnectionError):
                 fetch_timestamp(
-                    b"signature",
-                    "http://tsa.example.com",
+                    signature_bytes=b"signature",
+                    tsa_url="http://tsa.example.com",
                     tsa_log_dir=None,
                 )
 
@@ -158,8 +166,8 @@ class TestFetchTimestampErrors:
 
             with pytest.raises(TSAConnectionError):
                 fetch_timestamp(
-                    b"signature",
-                    "http://tsa.example.com",
+                    signature_bytes=b"signature",
+                    tsa_url="http://tsa.example.com",
                     tsa_log_dir=None,
                 )
 
@@ -170,8 +178,8 @@ class TestFetchTimestampErrors:
 
             with pytest.raises(TSAResponseError):
                 fetch_timestamp(
-                    b"signature",
-                    "http://tsa.example.com",
+                    signature_bytes=b"signature",
+                    tsa_url="http://tsa.example.com",
                     tsa_log_dir=None,
                 )
 
@@ -182,8 +190,8 @@ class TestFetchTimestampErrors:
 
             with pytest.raises(TSAResponseError):
                 fetch_timestamp(
-                    b"signature",
-                    "http://tsa.example.com",
+                    signature_bytes=b"signature",
+                    tsa_url="http://tsa.example.com",
                     tsa_log_dir=None,
                 )
 
@@ -194,8 +202,8 @@ class TestFetchTimestampErrors:
 
             with pytest.raises(TSAResponseError):
                 fetch_timestamp(
-                    b"signature",
-                    "http://tsa.example.com",
+                    signature_bytes=b"signature",
+                    tsa_url="http://tsa.example.com",
                     tsa_log_dir=None,
                 )
 
@@ -204,15 +212,17 @@ class TestFetchTimestampLogging:
     def test_log_dir_creates_request_and_response_files(self, tmp_path):
         log_dir = tmp_path / "tsa_logs"
 
-        with patch("c2pie.tsa.client.http.post") as mock_post, patch(
-            "c2pie.tsa.client.decoder.decode"
-        ) as mock_decode, patch("c2pie.tsa.client.encoder.encode", return_value=_FAKE_TST_DER):
+        with (
+            patch("c2pie.tsa.client.http.post") as mock_post,
+            patch("c2pie.tsa.client.decoder.decode") as mock_decode,
+            patch("c2pie.tsa.client.encoder.encode", return_value=_FAKE_TST_DER),
+        ):
             mock_post.return_value = _make_http_response()
             mock_decode.return_value = (_make_granted_asn1_resp(), b"")
 
             fetch_timestamp(
-                b"signature",
-                "http://tsa.example.com",
+                signature_bytes=b"signature",
+                tsa_url="http://tsa.example.com",
                 tsa_log_dir=str(log_dir),
             )
 
@@ -226,15 +236,17 @@ class TestFetchTimestampLogging:
     def test_log_files_share_timestamp_nonce_prefix(self, tmp_path):
         log_dir = tmp_path / "logs"
 
-        with patch("c2pie.tsa.client.http.post") as mock_post, patch(
-            "c2pie.tsa.client.decoder.decode"
-        ) as mock_decode, patch("c2pie.tsa.client.encoder.encode", return_value=_FAKE_TST_DER):
+        with (
+            patch("c2pie.tsa.client.http.post") as mock_post,
+            patch("c2pie.tsa.client.decoder.decode") as mock_decode,
+            patch("c2pie.tsa.client.encoder.encode", return_value=_FAKE_TST_DER),
+        ):
             mock_post.return_value = _make_http_response()
             mock_decode.return_value = (_make_granted_asn1_resp(), b"")
 
             fetch_timestamp(
-                b"signature",
-                "http://tsa.example.com",
+                signature_bytes=b"signature",
+                tsa_url="http://tsa.example.com",
                 tsa_log_dir=str(log_dir),
             )
 
@@ -248,15 +260,17 @@ class TestFetchTimestampLogging:
         log_dir = tmp_path / "logs"
         response_content = b"raw_tsa_response_content"
 
-        with patch("c2pie.tsa.client.http.post") as mock_post, patch(
-            "c2pie.tsa.client.decoder.decode"
-        ) as mock_decode, patch("c2pie.tsa.client.encoder.encode", return_value=_FAKE_TST_DER):
+        with (
+            patch("c2pie.tsa.client.http.post") as mock_post,
+            patch("c2pie.tsa.client.decoder.decode") as mock_decode,
+            patch("c2pie.tsa.client.encoder.encode", return_value=_FAKE_TST_DER),
+        ):
             mock_post.return_value = _make_http_response(content=response_content)
             mock_decode.return_value = (_make_granted_asn1_resp(), b"")
 
             fetch_timestamp(
-                b"signature",
-                "http://tsa.example.com",
+                signature_bytes=b"signature",
+                tsa_url="http://tsa.example.com",
                 tsa_log_dir=str(log_dir),
             )
 
@@ -265,15 +279,17 @@ class TestFetchTimestampLogging:
         assert response_files[0].read_bytes() == response_content
 
     def test_no_log_dir_creates_no_files(self, tmp_path):
-        with patch("c2pie.tsa.client.http.post") as mock_post, patch(
-            "c2pie.tsa.client.decoder.decode"
-        ) as mock_decode, patch("c2pie.tsa.client.encoder.encode", return_value=_FAKE_TST_DER):
+        with (
+            patch("c2pie.tsa.client.http.post") as mock_post,
+            patch("c2pie.tsa.client.decoder.decode") as mock_decode,
+            patch("c2pie.tsa.client.encoder.encode", return_value=_FAKE_TST_DER),
+        ):
             mock_post.return_value = _make_http_response()
             mock_decode.return_value = (_make_granted_asn1_resp(), b"")
 
             fetch_timestamp(
-                b"signature",
-                "http://tsa.example.com",
+                signature_bytes=b"signature",
+                tsa_url="http://tsa.example.com",
                 tsa_log_dir=None,
             )
 
@@ -283,15 +299,17 @@ class TestFetchTimestampLogging:
         nested_log_dir = tmp_path / "a" / "b" / "tsa_logs"
         assert not nested_log_dir.exists()
 
-        with patch("c2pie.tsa.client.http.post") as mock_post, patch(
-            "c2pie.tsa.client.decoder.decode"
-        ) as mock_decode, patch("c2pie.tsa.client.encoder.encode", return_value=_FAKE_TST_DER):
+        with (
+            patch("c2pie.tsa.client.http.post") as mock_post,
+            patch("c2pie.tsa.client.decoder.decode") as mock_decode,
+            patch("c2pie.tsa.client.encoder.encode", return_value=_FAKE_TST_DER),
+        ):
             mock_post.return_value = _make_http_response()
             mock_decode.return_value = (_make_granted_asn1_resp(), b"")
 
             fetch_timestamp(
-                b"signature",
-                "http://tsa.example.com",
+                signature_bytes=b"signature",
+                tsa_url="http://tsa.example.com",
                 tsa_log_dir=str(nested_log_dir),
             )
 

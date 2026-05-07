@@ -49,7 +49,11 @@ def _build_request(signature_bytes: bytes) -> tuple[bytes, int]:
     return encoder.encode(req), nonce
 
 
-def _save_file(directory: Path, name: str, data: bytes) -> None:
+def _save_file(
+    directory: Path,
+    name: str,
+    data: bytes,
+) -> None:
     directory.mkdir(parents=True, exist_ok=True)
     (directory / name).write_bytes(data)
 

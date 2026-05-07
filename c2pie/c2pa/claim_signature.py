@@ -40,7 +40,7 @@ class ClaimSignature(SuperBox):
     """
     COSE_Sign1 (PS256), detached:
       - protected: {1:-37, 33:[x5chain DER...]}
-      - unprotected: {} or {"sigTst": ...} when TSA is configured
+      - unprotected: {} or {"sigTst2": ...} when TSA is configured
       - COSE payload = nil
       - Sig_structure payload = bstr(Claim CBOR)
     """
