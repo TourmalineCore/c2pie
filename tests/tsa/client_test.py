@@ -37,6 +37,16 @@ def _mock_make_rejected_asn1_resp() -> MagicMock:
     return mock_resp
 
 
+def _mock_load_timestamp_with_parameters(tsa_log_dir: str | None = None):
+    """Call `fetch_timestamp` with fixed parameters values, varying only the `log_dir`."""
+
+    return fetch_timestamp(
+        signature_bytes=b"signature",
+        tsa_url="http://tsa.example.com",
+        tsa_log_dir=tsa_log_dir,
+    )
+
+
 class TestBuildRequest:
     def test_returns_bytes_and_int_nonce(self):
         time_stamp_req_der, nonce = _build_request(b"test_input")
@@ -71,11 +81,7 @@ class TestFetchTimestampSuccess:
             mock_post.return_value = _mock_make_http_response()
             mock_decode.return_value = (_mock_make_granted_asn1_resp(), b"")
 
-            actual_token = fetch_timestamp(
-                signature_bytes=b"signature",
-                tsa_url="http://tsa.example.com",
-                tsa_log_dir=None,
-            )
+            actual_token = _mock_load_timestamp_with_parameters()
 
         assert actual_token == expected_token
 
@@ -90,11 +96,7 @@ class TestFetchTimestampSuccess:
             mock_post.return_value = _mock_make_http_response()
             mock_decode.return_value = (_mock_make_granted_asn1_resp(), b"")
 
-            fetch_timestamp(
-                signature_bytes=b"signature",
-                tsa_url="http://tsa.example.com",
-                tsa_log_dir=None,
-            )
+            _mock_load_timestamp_with_parameters()
 
         call_args = mock_post.call_args
         assert call_args.kwargs.get("url") == tsa_url
@@ -108,11 +110,7 @@ class TestFetchTimestampSuccess:
             mock_post.return_value = _mock_make_http_response()
             mock_decode.return_value = (_mock_make_granted_asn1_resp(), b"")
 
-            fetch_timestamp(
-                signature_bytes=b"signature",
-                tsa_url="http://tsa.example.com",
-                tsa_log_dir=None,
-            )
+            _mock_load_timestamp_with_parameters()
 
         headers = mock_post.call_args.kwargs.get("headers")
         assert headers.get("Content-Type") == "application/timestamp-query"
@@ -126,11 +124,7 @@ class TestFetchTimestampSuccess:
             mock_post.return_value = _mock_make_http_response()
             mock_decode.return_value = (_mock_make_granted_asn1_resp(), b"")
 
-            fetch_timestamp(
-                signature_bytes=b"signature",
-                tsa_url="http://tsa.example.com",
-                tsa_log_dir=None,
-            )
+            _mock_load_timestamp_with_parameters()
 
         assert mock_post.call_args.kwargs.get("timeout") == 30
 
@@ -141,22 +135,14 @@ class TestFetchTimestampErrors:
             mock_post.side_effect = requests.exceptions.ConnectionError("refused")
 
             with pytest.raises(TSAConnectionError):
-                fetch_timestamp(
-                    signature_bytes=b"signature",
-                    tsa_url="http://tsa.example.com",
-                    tsa_log_dir=None,
-                )
+                _mock_load_timestamp_with_parameters()
 
     def test_timeout_raises_tsa_connection_error(self):
         with patch("c2pie.tsa.client.http.post") as mock_post:
             mock_post.side_effect = requests.exceptions.Timeout("timed out")
 
             with pytest.raises(TSAConnectionError):
-                fetch_timestamp(
-                    signature_bytes=b"signature",
-                    tsa_url="http://tsa.example.com",
-                    tsa_log_dir=None,
-                )
+                _mock_load_timestamp_with_parameters()
 
     def test_http_error_status_raises_tsa_connection_error(self):
         with patch("c2pie.tsa.client.http.post") as mock_post:
@@ -165,11 +151,7 @@ class TestFetchTimestampErrors:
             mock_post.return_value = mock_resp
 
             with pytest.raises(TSAConnectionError):
-                fetch_timestamp(
-                    signature_bytes=b"signature",
-                    tsa_url="http://tsa.example.com",
-                    tsa_log_dir=None,
-                )
+                _mock_load_timestamp_with_parameters()
 
     def test_unparseable_response_raises_tsa_response_error(self):
         with patch("c2pie.tsa.client.http.post") as mock_post, patch("c2pie.tsa.client.decoder.decode") as mock_decode:
@@ -177,11 +159,7 @@ class TestFetchTimestampErrors:
             mock_decode.side_effect = Exception("ASN.1 parse error")
 
             with pytest.raises(TSAResponseError):
-                fetch_timestamp(
-                    signature_bytes=b"signature",
-                    tsa_url="http://tsa.example.com",
-                    tsa_log_dir=None,
-                )
+                _mock_load_timestamp_with_parameters()
 
     def test_rejection_status_raises_tsa_response_error(self):
         with patch("c2pie.tsa.client.http.post") as mock_post, patch("c2pie.tsa.client.decoder.decode") as mock_decode:
@@ -189,11 +167,7 @@ class TestFetchTimestampErrors:
             mock_decode.return_value = (_mock_make_rejected_asn1_resp(), b"")
 
             with pytest.raises(TSAResponseError):
-                fetch_timestamp(
-                    signature_bytes=b"signature",
-                    tsa_url="http://tsa.example.com",
-                    tsa_log_dir=None,
-                )
+                _mock_load_timestamp_with_parameters()
 
     def test_granted_without_token_raises_tsa_response_error(self):
         with patch("c2pie.tsa.client.http.post") as mock_post, patch("c2pie.tsa.client.decoder.decode") as mock_decode:
@@ -201,11 +175,7 @@ class TestFetchTimestampErrors:
             mock_decode.return_value = (_mock_make_granted_asn1_resp(token_has_value=False), b"")
 
             with pytest.raises(TSAResponseError):
-                fetch_timestamp(
-                    signature_bytes=b"signature",
-                    tsa_url="http://tsa.example.com",
-                    tsa_log_dir=None,
-                )
+                _mock_load_timestamp_with_parameters()
 
 
 class TestFetchTimestampLogging:
@@ -220,11 +190,7 @@ class TestFetchTimestampLogging:
             mock_post.return_value = _mock_make_http_response()
             mock_decode.return_value = (_mock_make_granted_asn1_resp(), b"")
 
-            fetch_timestamp(
-                signature_bytes=b"signature",
-                tsa_url="http://tsa.example.com",
-                tsa_log_dir=str(log_dir),
-            )
+            _mock_load_timestamp_with_parameters(tsa_log_dir=str(log_dir))
 
         files = list(log_dir.iterdir())
         names = {f.name for f in files}
@@ -244,11 +210,7 @@ class TestFetchTimestampLogging:
             mock_post.return_value = _mock_make_http_response()
             mock_decode.return_value = (_mock_make_granted_asn1_resp(), b"")
 
-            fetch_timestamp(
-                signature_bytes=b"signature",
-                tsa_url="http://tsa.example.com",
-                tsa_log_dir=str(log_dir),
-            )
+            _mock_load_timestamp_with_parameters(tsa_log_dir=str(log_dir))
 
         files = sorted(file.name for file in log_dir.iterdir())
         prefix_a = files[0].rsplit("_", 1)[0]
@@ -268,11 +230,7 @@ class TestFetchTimestampLogging:
             mock_post.return_value = _mock_make_http_response(content=response_content)
             mock_decode.return_value = (_mock_make_granted_asn1_resp(), b"")
 
-            fetch_timestamp(
-                signature_bytes=b"signature",
-                tsa_url="http://tsa.example.com",
-                tsa_log_dir=str(log_dir),
-            )
+            _mock_load_timestamp_with_parameters(tsa_log_dir=str(log_dir))
 
         response_files = [file for file in log_dir.iterdir() if "response" in file.name]
 
@@ -287,11 +245,7 @@ class TestFetchTimestampLogging:
             mock_post.return_value = _mock_make_http_response()
             mock_decode.return_value = (_mock_make_granted_asn1_resp(), b"")
 
-            fetch_timestamp(
-                signature_bytes=b"signature",
-                tsa_url="http://tsa.example.com",
-                tsa_log_dir=None,
-            )
+            _mock_load_timestamp_with_parameters()
 
         assert list(tmp_path.iterdir()) == []
 
@@ -307,10 +261,6 @@ class TestFetchTimestampLogging:
             mock_post.return_value = _mock_make_http_response()
             mock_decode.return_value = (_mock_make_granted_asn1_resp(), b"")
 
-            fetch_timestamp(
-                signature_bytes=b"signature",
-                tsa_url="http://tsa.example.com",
-                tsa_log_dir=str(nested_log_dir),
-            )
+            _mock_load_timestamp_with_parameters(tsa_log_dir=str(nested_log_dir))
 
         assert nested_log_dir.exists()
