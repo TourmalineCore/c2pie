@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+import hashlib
 from unittest.mock import MagicMock, patch
 
 import pytest
 import requests
+from pyasn1.codec.der import decoder
+from pyasn1_modules import rfc3161
 
 from c2pie.tsa.client import _build_request, fetch_timestamp
 from c2pie.tsa.exceptions import TSAConnectionError, TSAResponseError
@@ -75,6 +78,30 @@ class TestBuildRequest:
         _, nonce2 = _build_request(b"input_one")
         assert nonce1 != nonce2
 
+    def test_message_imprint_contains_sha256_of_input(self):
+        input_bytes = b"test_input"
+        der_bytes, _ = _build_request(input_bytes)
+
+        req, _ = decoder.decode(der_bytes, asn1Spec=rfc3161.TimeStampReq())
+
+        expected_hash = hashlib.sha256(input_bytes).digest()
+        actual_hash = bytes(req["messageImprint"]["hashedMessage"])
+        assert actual_hash == expected_hash
+
+    def test_nonce_in_der_matches_returned_nonce(self):
+        der_bytes, nonce = _build_request(b"test_input")
+
+        req, _ = decoder.decode(der_bytes, asn1Spec=rfc3161.TimeStampReq())
+
+        assert int(req["nonce"]) == nonce
+
+    def test_cert_req_is_true(self):
+        der_bytes, _ = _build_request(b"test_input")
+
+        req, _ = decoder.decode(der_bytes, asn1Spec=rfc3161.TimeStampReq())
+
+        assert bool(req["certReq"]) is True
+
 
 class TestFetchTimestampSuccess:
     def test_returns_encoded_token_bytes(self):
@@ -94,6 +121,7 @@ class TestFetchTimestampSuccess:
 
     def test_sends_post_to_tsa_url(self):
         tsa_url = "http://tsa.example.com"
+        expected_timeout = 30
 
         with (
             patch("c2pie.tsa.client.http.post") as mock_post,
@@ -105,24 +133,12 @@ class TestFetchTimestampSuccess:
 
             _mock_load_timestamp_with_parameters()
 
-        call_args = mock_post.call_args
-        assert call_args.kwargs.get("url") == tsa_url
+        call_kwargs = mock_post.call_args.kwargs
+        assert call_kwargs.get("url") == tsa_url
+        assert call_kwargs.get("headers").get("Content-Type") == "application/timestamp-query"
+        assert call_kwargs.get("timeout") == expected_timeout
 
-    def test_sends_timestamp_query_content_type(self):
-        with (
-            patch("c2pie.tsa.client.http.post") as mock_post,
-            patch("c2pie.tsa.client.decoder.decode") as mock_decode,
-            patch("c2pie.tsa.client.encoder.encode"),
-        ):
-            mock_post.return_value = _mock_make_http_response()
-            mock_decode.return_value = (_mock_make_granted_asn1_resp(), b"")
-
-            _mock_load_timestamp_with_parameters()
-
-        headers = mock_post.call_args.kwargs.get("headers")
-        assert headers.get("Content-Type") == "application/timestamp-query"
-
-    def test_uses_30_second_timeout(self):
+    def test_uses_expected_timeout(self):
         with (
             patch("c2pie.tsa.client.http.post") as mock_post,
             patch("c2pie.tsa.client.decoder.decode") as mock_decode,
