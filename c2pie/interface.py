@@ -101,38 +101,35 @@ def c2pie_EmplaceManifest(
     format_type: C2PA_ContentTypes,
     content_bytes: bytes,
     c2pa_offset: int,
-    manifests: ManifestStore,
+    manifest_store: ManifestStore,
 ) -> bytes:
-    if hasattr(manifests, "manifests"):
-        for manifest in manifests.manifests:
-            claim = getattr(manifest, "claim", None)
-            if claim is not None and hasattr(claim, "set_format"):
-                if format_type == C2PA_ContentTypes.jpg or format_type == C2PA_ContentTypes.jpeg:
-                    claim.set_format("image/jpg")
-                elif format_type == C2PA_ContentTypes.pdf:
-                    claim.set_format("application/pdf")
-
     if format_type == C2PA_ContentTypes.jpg or format_type == C2PA_ContentTypes.jpeg:
         assumed_hash_data_len = 0
         final_length = -1
         tail = b""
+
         for _ in range(RETRY_SIGNATURE):
-            manifests.set_hash_data_length_for_all(assumed_hash_data_len)
-            payload = manifests.serialize()
+            manifest_store.set_hash_data_length_for_all(assumed_hash_data_len)
+
+            payload = manifest_store.serialize()
             storage = JpgSegmentApp11Storage(
-                app11_segment_box_length=manifests.get_length(),
-                app11_segment_box_type=manifests.get_type(),
+                app11_segment_box_length=manifest_store.get_length(),
+                app11_segment_box_type=manifest_store.get_type(),
                 payload=payload,
             )
+
             tail = storage.serialize()
             total_len = len(tail)
+
             if total_len == final_length:
                 break
+
             final_length = total_len
             assumed_hash_data_len = total_len
+
         return content_bytes[:c2pa_offset] + tail + content_bytes[c2pa_offset:]
 
     if format_type == C2PA_ContentTypes.pdf:
-        return emplace_manifest_into_pdf(content_bytes, manifests)
+        return emplace_manifest_into_pdf(content_bytes, manifest_store)
 
     raise ValueError(f"Unsupported content type {format_type}!")

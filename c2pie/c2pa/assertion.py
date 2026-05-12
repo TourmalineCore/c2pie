@@ -76,12 +76,18 @@ class HashDataAssertion(Assertion):
         }
         super().__init__(C2PA_AssertionTypes.data_hash, schema)
 
-    def set_hash_data_length(self, length: int) -> None:
+    def set_hash_data_length(
+        self,
+        length: int,
+    ) -> None:
         if self.schema.get("name") != "jumbf manifest":
             raise ValueError("c2pa.hash.data: jumbf manifest is missing")
+
         exclusions = self.schema.get("exclusions", [])
+
         if not exclusions:
             raise ValueError("c2pa.hash.data: exclusions are missing")
+
         exclusions[0]["length"] = int(length)
 
         payload = self.get_payload_from_schema()
@@ -97,6 +103,7 @@ class HashDataAssertion(Assertion):
                     payload=payload,
                 )
             ]
+
         self.sync_payload()
 
 
