@@ -61,7 +61,7 @@ class TestBuildRequest:
 
 class TestFetchTimestampSuccess:
     def test_returns_encoded_token_bytes(self):
-        fake_token = b"timestamp_der_encoded_token"
+        expected_token = b"timestamp_der_encoded_token"
 
         with (
             patch("c2pie.tsa.client.http.post") as mock_post,
@@ -71,13 +71,13 @@ class TestFetchTimestampSuccess:
             mock_post.return_value = _mock_make_http_response()
             mock_decode.return_value = (_mock_make_granted_asn1_resp(), b"")
 
-            result = fetch_timestamp(
+            actual_token = fetch_timestamp(
                 signature_bytes=b"signature",
                 tsa_url="http://tsa.example.com",
                 tsa_log_dir=None,
             )
 
-        assert result == fake_token
+        assert actual_token == expected_token
 
     def test_sends_post_to_tsa_url(self):
         tsa_url = "http://tsa.example.com"
