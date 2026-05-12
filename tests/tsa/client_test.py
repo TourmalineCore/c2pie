@@ -11,7 +11,7 @@ from c2pie.tsa.exceptions import TSAConnectionError, TSAResponseError
 _FAKE_TST_DER = b"\x30\x82\x01\x00"
 
 
-def _make_http_response(content: bytes = b"TimeStampResp") -> MagicMock:
+def _mock_make_http_response(content: bytes = b"TimeStampResp") -> MagicMock:
     """Return a mock decoded TimeStampResp with status=0 (granted)."""
 
     mock = MagicMock()
@@ -20,7 +20,7 @@ def _make_http_response(content: bytes = b"TimeStampResp") -> MagicMock:
     return mock
 
 
-def _make_granted_asn1_resp(token_has_value: bool = True) -> MagicMock:
+def _mock_make_granted_asn1_resp(token_has_value: bool = True) -> MagicMock:
     """Return a mock decoded TimeStampResp with status=0 (granted)."""
 
     mock_resp = MagicMock()
@@ -29,7 +29,7 @@ def _make_granted_asn1_resp(token_has_value: bool = True) -> MagicMock:
     return mock_resp
 
 
-def _make_rejected_asn1_resp() -> MagicMock:
+def _mock_make_rejected_asn1_resp() -> MagicMock:
     """Return a mock decoded TimeStampResp with status=2 (rejected)."""
 
     mock_resp = MagicMock()
@@ -68,8 +68,8 @@ class TestFetchTimestampSuccess:
             patch("c2pie.tsa.client.decoder.decode") as mock_decode,
             patch("c2pie.tsa.client.encoder.encode", return_value=fake_token),
         ):
-            mock_post.return_value = _make_http_response()
-            mock_decode.return_value = (_make_granted_asn1_resp(), b"")
+            mock_post.return_value = _mock_make_http_response()
+            mock_decode.return_value = (_mock_make_granted_asn1_resp(), b"")
 
             result = fetch_timestamp(
                 signature_bytes=b"signature",
@@ -87,8 +87,8 @@ class TestFetchTimestampSuccess:
             patch("c2pie.tsa.client.decoder.decode") as mock_decode,
             patch("c2pie.tsa.client.encoder.encode"),
         ):
-            mock_post.return_value = _make_http_response()
-            mock_decode.return_value = (_make_granted_asn1_resp(), b"")
+            mock_post.return_value = _mock_make_http_response()
+            mock_decode.return_value = (_mock_make_granted_asn1_resp(), b"")
 
             fetch_timestamp(
                 signature_bytes=b"signature",
@@ -105,8 +105,8 @@ class TestFetchTimestampSuccess:
             patch("c2pie.tsa.client.decoder.decode") as mock_decode,
             patch("c2pie.tsa.client.encoder.encode"),
         ):
-            mock_post.return_value = _make_http_response()
-            mock_decode.return_value = (_make_granted_asn1_resp(), b"")
+            mock_post.return_value = _mock_make_http_response()
+            mock_decode.return_value = (_mock_make_granted_asn1_resp(), b"")
 
             fetch_timestamp(
                 signature_bytes=b"signature",
@@ -123,8 +123,8 @@ class TestFetchTimestampSuccess:
             patch("c2pie.tsa.client.decoder.decode") as mock_decode,
             patch("c2pie.tsa.client.encoder.encode"),
         ):
-            mock_post.return_value = _make_http_response()
-            mock_decode.return_value = (_make_granted_asn1_resp(), b"")
+            mock_post.return_value = _mock_make_http_response()
+            mock_decode.return_value = (_mock_make_granted_asn1_resp(), b"")
 
             fetch_timestamp(
                 signature_bytes=b"signature",
@@ -160,7 +160,7 @@ class TestFetchTimestampErrors:
 
     def test_http_error_status_raises_tsa_connection_error(self):
         with patch("c2pie.tsa.client.http.post") as mock_post:
-            mock_resp = _make_http_response()
+            mock_resp = _mock_make_http_response()
             mock_resp.raise_for_status.side_effect = requests.exceptions.HTTPError("500 Server Error")
             mock_post.return_value = mock_resp
 
@@ -173,7 +173,7 @@ class TestFetchTimestampErrors:
 
     def test_unparseable_response_raises_tsa_response_error(self):
         with patch("c2pie.tsa.client.http.post") as mock_post, patch("c2pie.tsa.client.decoder.decode") as mock_decode:
-            mock_post.return_value = _make_http_response()
+            mock_post.return_value = _mock_make_http_response()
             mock_decode.side_effect = Exception("ASN.1 parse error")
 
             with pytest.raises(TSAResponseError):
@@ -185,8 +185,8 @@ class TestFetchTimestampErrors:
 
     def test_rejection_status_raises_tsa_response_error(self):
         with patch("c2pie.tsa.client.http.post") as mock_post, patch("c2pie.tsa.client.decoder.decode") as mock_decode:
-            mock_post.return_value = _make_http_response()
-            mock_decode.return_value = (_make_rejected_asn1_resp(), b"")
+            mock_post.return_value = _mock_make_http_response()
+            mock_decode.return_value = (_mock_make_rejected_asn1_resp(), b"")
 
             with pytest.raises(TSAResponseError):
                 fetch_timestamp(
@@ -197,8 +197,8 @@ class TestFetchTimestampErrors:
 
     def test_granted_without_token_raises_tsa_response_error(self):
         with patch("c2pie.tsa.client.http.post") as mock_post, patch("c2pie.tsa.client.decoder.decode") as mock_decode:
-            mock_post.return_value = _make_http_response()
-            mock_decode.return_value = (_make_granted_asn1_resp(token_has_value=False), b"")
+            mock_post.return_value = _mock_make_http_response()
+            mock_decode.return_value = (_mock_make_granted_asn1_resp(token_has_value=False), b"")
 
             with pytest.raises(TSAResponseError):
                 fetch_timestamp(
@@ -217,8 +217,8 @@ class TestFetchTimestampLogging:
             patch("c2pie.tsa.client.decoder.decode") as mock_decode,
             patch("c2pie.tsa.client.encoder.encode", return_value=_FAKE_TST_DER),
         ):
-            mock_post.return_value = _make_http_response()
-            mock_decode.return_value = (_make_granted_asn1_resp(), b"")
+            mock_post.return_value = _mock_make_http_response()
+            mock_decode.return_value = (_mock_make_granted_asn1_resp(), b"")
 
             fetch_timestamp(
                 signature_bytes=b"signature",
@@ -241,8 +241,8 @@ class TestFetchTimestampLogging:
             patch("c2pie.tsa.client.decoder.decode") as mock_decode,
             patch("c2pie.tsa.client.encoder.encode", return_value=_FAKE_TST_DER),
         ):
-            mock_post.return_value = _make_http_response()
-            mock_decode.return_value = (_make_granted_asn1_resp(), b"")
+            mock_post.return_value = _mock_make_http_response()
+            mock_decode.return_value = (_mock_make_granted_asn1_resp(), b"")
 
             fetch_timestamp(
                 signature_bytes=b"signature",
@@ -265,8 +265,8 @@ class TestFetchTimestampLogging:
             patch("c2pie.tsa.client.decoder.decode") as mock_decode,
             patch("c2pie.tsa.client.encoder.encode", return_value=_FAKE_TST_DER),
         ):
-            mock_post.return_value = _make_http_response(content=response_content)
-            mock_decode.return_value = (_make_granted_asn1_resp(), b"")
+            mock_post.return_value = _mock_make_http_response(content=response_content)
+            mock_decode.return_value = (_mock_make_granted_asn1_resp(), b"")
 
             fetch_timestamp(
                 signature_bytes=b"signature",
@@ -284,8 +284,8 @@ class TestFetchTimestampLogging:
             patch("c2pie.tsa.client.decoder.decode") as mock_decode,
             patch("c2pie.tsa.client.encoder.encode", return_value=_FAKE_TST_DER),
         ):
-            mock_post.return_value = _make_http_response()
-            mock_decode.return_value = (_make_granted_asn1_resp(), b"")
+            mock_post.return_value = _mock_make_http_response()
+            mock_decode.return_value = (_mock_make_granted_asn1_resp(), b"")
 
             fetch_timestamp(
                 signature_bytes=b"signature",
@@ -304,8 +304,8 @@ class TestFetchTimestampLogging:
             patch("c2pie.tsa.client.decoder.decode") as mock_decode,
             patch("c2pie.tsa.client.encoder.encode", return_value=_FAKE_TST_DER),
         ):
-            mock_post.return_value = _make_http_response()
-            mock_decode.return_value = (_make_granted_asn1_resp(), b"")
+            mock_post.return_value = _mock_make_http_response()
+            mock_decode.return_value = (_mock_make_granted_asn1_resp(), b"")
 
             fetch_timestamp(
                 signature_bytes=b"signature",
