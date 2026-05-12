@@ -37,13 +37,20 @@ def _mock_make_rejected_asn1_resp() -> MagicMock:
     return mock_resp
 
 
-def _mock_load_timestamp_with_parameters(tsa_log_dir: str | None = None):
-    """Call `fetch_timestamp` with fixed parameters values, varying only the `log_dir`."""
+def _mock_load_timestamp_with_parameters(
+    tsa_log_dir: str | None = None,
+    tsa_response_timeout: int = 30,
+):
+    """
+    Call fetch_timestamp with fixed parameters values,
+    changing log_dir and tsa_response_timeout if it necessary.
+    """
 
     return fetch_timestamp(
         signature_bytes=b"signature",
         tsa_url="http://tsa.example.com",
         tsa_log_dir=tsa_log_dir,
+        tsa_response_timeout=tsa_response_timeout,
     )
 
 
@@ -124,9 +131,9 @@ class TestFetchTimestampSuccess:
             mock_post.return_value = _mock_make_http_response()
             mock_decode.return_value = (_mock_make_granted_asn1_resp(), b"")
 
-            _mock_load_timestamp_with_parameters()
+            _mock_load_timestamp_with_parameters(tsa_response_timeout=10)
 
-        assert mock_post.call_args.kwargs.get("timeout") == 30
+        assert mock_post.call_args.kwargs.get("timeout") == 10
 
 
 class TestFetchTimestampErrors:
