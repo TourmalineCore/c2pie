@@ -66,7 +66,7 @@ class TestFetchTimestampSuccess:
         with (
             patch("c2pie.tsa.client.http.post") as mock_post,
             patch("c2pie.tsa.client.decoder.decode") as mock_decode,
-            patch("c2pie.tsa.client.encoder.encode", return_value=fake_token),
+            patch("c2pie.tsa.client.encoder.encode", return_value=expected_token),
         ):
             mock_post.return_value = _mock_make_http_response()
             mock_decode.return_value = (_mock_make_granted_asn1_resp(), b"")
