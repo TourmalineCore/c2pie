@@ -52,24 +52,26 @@ def c2pie_GenerateThumbnailAssertion(
 def c2pie_GenerateIngredientAssertion(
     title: str,
     dc_format: str,
-    c2pa_manifest_ref: dict | None = None,
+    active_manifest: dict | None = None,
 ) -> IngredientAssertion:
     return IngredientAssertion(
         title=title,
         dc_format=dc_format,
-        c2pa_manifest_ref=c2pa_manifest_ref,
+        active_manifest=active_manifest,
     )
 
 
-def c2pie_GenerateManifest(
+def c2pie_GenerateManifestStore(
     assertions: list,
     private_key: bytes,
     certificate_chain: bytes,
     file_name: str,
+    previous_manifest_boxes: list[Manifest] | None = None,
 ) -> ManifestStore:
     """
     private_key: PKCS#8 PEM (RSA) bytes
     certificate_chain: PEM bundle (leaf + intermediates, NO root) bytes
+    previous_manifest_boxes: raw JUMBF bytes of manifests from a previous signing (preserved in the store)
     """
 
     manifest_label = f"urn:c2pa:{uuid.uuid4().hex}"
@@ -92,7 +94,7 @@ def c2pie_GenerateManifest(
     )
     manifest.set_claim_signature(claim_signature)
 
-    return ManifestStore([manifest])
+    return ManifestStore([*(previous_manifest_boxes or []), manifest])
 
 
 def c2pie_EmplaceManifest(

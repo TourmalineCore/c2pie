@@ -5,12 +5,15 @@ import os
 from pathlib import Path
 from typing import Literal
 
+from c2pie.c2pa_injection.jpg_injection import strip_c2pa_app11
+from c2pie.c2pa_parsing.jumbf_parsing import extract_manifest_boxes, get_active_manifest_uuid
+from c2pie.c2pa_parsing.manifest_extractor import extract_manifest_store_bytes
 from c2pie.interface import (
     c2pie_EmplaceManifest,
     c2pie_GenerateActionsAssertion,
     c2pie_GenerateHashDataAssertion,
     c2pie_GenerateIngredientAssertion,
-    c2pie_GenerateManifest,
+    c2pie_GenerateManifestStore,
 )
 from c2pie.utils.content_types import C2PA_ContentTypes
 
@@ -148,6 +151,24 @@ def sign_file(
 
     file_type: C2PA_ContentTypes = _get_content_type_by_filepath(file_path=input_path)
 
+    manifest_store_bytes = extract_manifest_store_bytes(file_type, raw_bytes)
+    active_manifest = None
+    previous_manifest_boxes = None
+
+    if manifest_store_bytes:
+        urn = get_active_manifest_uuid(manifest_store_bytes)
+
+        previous_manifest_boxes = extract_manifest_boxes(manifest_store_bytes)
+        print(previous_manifest_boxes[-1].get_label())
+
+        if urn:
+            manifest_hash = hashlib.sha256(previous_manifest_boxes[-1].payload).digest()
+            active_manifest = _generate_hashed_uri_map(
+                url=urn,
+                hash_value=manifest_hash,
+                hash_algorithm="sha256",
+            )
+
     if file_type.name == "pdf":
         cai_offset = len(raw_bytes)
     else:
@@ -162,14 +183,10 @@ def sign_file(
     # functionality is available (example, action 'c2pa.opened' for Ingredient Assertion)
     actions_assertion = c2pie_GenerateActionsAssertion(action="c2pa.created")
 
-    # By this point, the c2pa_manifest_ref must have been generated.
-    # Since the parser functionality hasn't been added yet, it is currently `None`.
-    c2pa_manifest_ref = None
-
     ingredient_assertion = c2pie_GenerateIngredientAssertion(
         title=input_path.name,
         dc_format=_DC_FORMAT_BY_CONTENT_TYPE[file_type.name],
-        c2pa_manifest_ref=c2pa_manifest_ref,
+        active_manifest=active_manifest,
     )
 
     assertions = [
@@ -178,18 +195,19 @@ def sign_file(
         ingredient_assertion,
     ]
 
-    manifest = c2pie_GenerateManifest(
+    manifest_store = c2pie_GenerateManifestStore(
         assertions=assertions,
         private_key=key,
         certificate_chain=certificates,
         file_name=output_path.name,
+        previous_manifest_boxes=previous_manifest_boxes,
     )
 
     signed_bytes = c2pie_EmplaceManifest(
         format_type=file_type,
         content_bytes=raw_bytes,
         c2pa_offset=cai_offset,
-        manifests=manifest,
+        manifest_store=manifest_store,
     )
 
     with open(output_path, "wb") as output_file:

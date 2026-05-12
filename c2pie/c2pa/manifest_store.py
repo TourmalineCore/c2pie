@@ -12,7 +12,8 @@ class ManifestStore(SuperBox):
     """
 
     def __init__(self, manifests: list | None = None):
-        self.manifests: list = [] if manifests is None else manifests
+        self.manifests: list[Manifest] = [] if manifests is None else manifests
+
         super().__init__(
             content_type=c2pa_content_types["manifest_store"],
             label="c2pa",
@@ -26,8 +27,8 @@ class ManifestStore(SuperBox):
         self,
         length: int,
     ) -> None:
-        for manifest in self.manifests:
-            manifest.set_hash_data_length(length)
+        self.manifests[-1].set_hash_data_length(length)
+
         super().sync_payload()
 
     def serialize(self) -> bytes:

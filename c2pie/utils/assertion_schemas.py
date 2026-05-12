@@ -59,6 +59,6 @@ def get_assertion_label(assertion_type: C2PA_AssertionTypes) -> str:
     elif assertion_type == C2PA_AssertionTypes.thumbnail:
         return "c2pa.thumbnail.claim"
     elif assertion_type == C2PA_AssertionTypes.ingredient:
-        return "c2pa.ingredient.v2"
+        return "c2pa.ingredient.v3"
     else:
         return ""

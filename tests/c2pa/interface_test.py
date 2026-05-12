@@ -6,7 +6,7 @@ from c2pie.interface import (
     c2pie_GenerateActionsAssertion,
     c2pie_GenerateAssertion,
     c2pie_GenerateHashDataAssertion,
-    c2pie_GenerateManifest,
+    c2pie_GenerateManifestStore,
     c2pie_GenerateThumbnailAssertion,
 )
 from c2pie.utils.assertion_schemas import C2PA_AssertionTypes
@@ -70,7 +70,7 @@ def test_generate_manifest_returns_manifest_store():
         cert = f.read()
 
     assertions = [c2pie_GenerateActionsAssertion(action="c2pa.created")]
-    manifest_store = c2pie_GenerateManifest(
+    manifest_store = c2pie_GenerateManifestStore(
         assertions=assertions,
         private_key=key,
         certificate_chain=cert,
@@ -87,7 +87,7 @@ def test_generate_manifest_contains_one_manifest():
         cert = f.read()
 
     assertions = [c2pie_GenerateActionsAssertion(action="c2pa.created")]
-    manifest_store = c2pie_GenerateManifest(
+    manifest_store = c2pie_GenerateManifestStore(
         assertions=assertions,
         private_key=key,
         certificate_chain=cert,
@@ -104,7 +104,7 @@ def test_generate_manifest_label_follows_urn_c2pa_format():
         cert = f.read()
 
     assertions = [c2pie_GenerateActionsAssertion(action="c2pa.created")]
-    manifest_store = c2pie_GenerateManifest(
+    manifest_store = c2pie_GenerateManifestStore(
         assertions=assertions,
         private_key=key,
         certificate_chain=cert,
@@ -128,7 +128,7 @@ def test_emplace_manifest_returns_bytes_with_jpeg_signature():
         c2pie_GenerateActionsAssertion(action="c2pa.created"),
     ]
 
-    manifest_store = c2pie_GenerateManifest(
+    manifest_store = c2pie_GenerateManifestStore(
         assertions=assertions,
         private_key=key,
         certificate_chain=cert,

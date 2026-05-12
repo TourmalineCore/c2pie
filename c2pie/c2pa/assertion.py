@@ -185,22 +185,84 @@ class ThumbnailAssertion(EmbeddedDataAssertion):
             image_data=image_data,
             assertion_type=C2PA_AssertionTypes.thumbnail,
         )
+
+
 class IngredientAssertion(Assertion):
-    """c2pa.ingredient.v2 asset-binding assertion."""
+    """c2pa.ingredient.v3 asset-binding assertion."""
 
     def __init__(
         self,
         title: str,
         dc_format: str,
-        c2pa_manifest_ref: dict | None = None,
+        active_manifest: dict | None = None,
     ):
         schema: dict[str, Any] = {
             "dc:title": title,
             "dc:format": dc_format,
             "relationship": "parentOf",
+            "validationResults": {
+                "activeManifest": {
+                    "success": [
+                        {
+                            "code": "claimSignature.insideValidity",
+                            "url": "self#jumbf=/c2pa/urn:c2pa:4fd76c2c02ac401eae072fdc4cf75376/c2pa.signature",
+                            "explanation": "claim signature valid",
+                        },
+                        {
+                            "code": "claimSignature.validated",
+                            "url": "self#jumbf=/c2pa/urn:c2pa:4fd76c2c02ac401eae072fdc4cf75376/c2pa.signature",
+                            "explanation": "claim signature valid",
+                        },
+                        {
+                            "code": "assertion.hashedURI.match",
+                            "url": "self#jumbf=/c2pa/urn:c2pa:4fd76c2c02ac401eae072fdc4cf75376/c2pa.assertions/c2pa.hash.data",
+                            "explanation": "hashed uri matched: self#jumbf=/c2pa/urn:c2pa:4fd76c2c02ac401eae072fdc4cf75376/c2pa.assertions/c2pa.hash.data",
+                        },
+                        {
+                            "code": "assertion.hashedURI.match",
+                            "url": "self#jumbf=/c2pa/urn:c2pa:4fd76c2c02ac401eae072fdc4cf75376/c2pa.assertions/c2pa.actions.v2",
+                            "explanation": "hashed uri matched: self#jumbf=/c2pa/urn:c2pa:4fd76c2c02ac401eae072fdc4cf75376/c2pa.assertions/c2pa.actions.v2",
+                        },
+                        {
+                            "code": "assertion.hashedURI.match",
+                            "url": "self#jumbf=/c2pa/urn:c2pa:4fd76c2c02ac401eae072fdc4cf75376/c2pa.assertions/c2pa.ingredient.v3",
+                            "explanation": "hashed uri matched: self#jumbf=/c2pa/urn:c2pa:4fd76c2c02ac401eae072fdc4cf75376/c2pa.assertions/c2pa.ingredient.v3",
+                        },
+                        {
+                            "code": "assertion.dataHash.match",
+                            "url": "self#jumbf=/c2pa/urn:c2pa:4fd76c2c02ac401eae072fdc4cf75376/c2pa.assertions/c2pa.hash.data",
+                            "explanation": "data hash valid",
+                        },
+                    ],
+                    "informational": [],
+                    "failure": [
+                        {
+                            "code": "signingCredential.untrusted",
+                            "url": "self#jumbf=/c2pa/urn:c2pa:4fd76c2c02ac401eae072fdc4cf75376/c2pa.signature",
+                            "explanation": "signing certificate untrusted",
+                        }
+                    ],
+                },
+                "ingredientDeltas": [
+                    {
+                        "ingredientAssertionURI": "self#jumbf=/c2pa/urn:c2pa:4fd76c2c02ac401eae072fdc4cf75376/c2pa.assertions/c2pa.ingredient.v3",
+                        "validationDeltas": {
+                            "success": [],
+                            "informational": [
+                                {
+                                    "code": "ingredient.unknownProvenance",
+                                    "url": "self#jumbf=/c2pa/urn:c2pa:4fd76c2c02ac401eae072fdc4cf75376/c2pa.assertions/c2pa.ingredient.v3",
+                                    "explanation": "test_image.jpg: ingredient does not have provenance",
+                                }
+                            ],
+                            "failure": [],
+                        },
+                    }
+                ],
+            },
         }
 
-        if c2pa_manifest_ref is not None:
-            schema["c2pa_manifest"] = c2pa_manifest_ref
+        if active_manifest is not None:
+            schema["activeManifest"] = active_manifest
 
         super().__init__(C2PA_AssertionTypes.ingredient, schema)
