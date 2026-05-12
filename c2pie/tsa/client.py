@@ -62,6 +62,7 @@ def fetch_timestamp(
     signature_bytes: bytes,
     tsa_url: str,
     tsa_log_dir: str | None,
+    tsa_response_timeout: int = 30,
 ) -> bytes:
     time_stamp_req_der, nonce = _build_request(signature_bytes)
 
@@ -84,7 +85,7 @@ def fetch_timestamp(
             url=tsa_url,
             data=time_stamp_req_der,
             headers={"Content-Type": "application/timestamp-query"},
-            timeout=30,
+            timeout=tsa_response_timeout,
         )
 
         response.raise_for_status()
