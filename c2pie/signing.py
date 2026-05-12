@@ -167,10 +167,9 @@ def sign_file(
         private_key=key,
         certificate_chain=certificates,
         file_name=output_path.name,
-    # TODO: #66  : move that variables to configfile
-    tsa_url: str | None = None,
-    require_tsa: bool = False,
-    tsa_log_dir: str | None = None,
+        tsa_url=tsa_url,
+        require_tsa=require_tsa,
+        tsa_log_dir=tsa_log_dir,
     )
 
     signed_bytes = c2pie_EmplaceManifest(

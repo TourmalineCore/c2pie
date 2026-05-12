@@ -53,6 +53,7 @@ def c2pie_GenerateManifest(
     private_key: bytes,
     certificate_chain: bytes,
     file_name: str,
+    # TODO: #66  : move that variables to configfile
     tsa_url: str | None,
     require_tsa: bool,
     tsa_log_dir: str | None,
