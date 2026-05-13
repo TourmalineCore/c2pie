@@ -1,10 +1,10 @@
 // For format details, see https://aka.ms/devcontainer.json
 {
-  "name": "Existing Dockerfile",
-  "build": {
-    "context": "..",
-    "dockerfile": "Dockerfile"
-  },
+	"name": "Existing Dockerfile",
+	"build": {
+	"context": "..",
+	"dockerfile": "Dockerfile"
+	},
 	"customizations": {
 		"vscode": {
 			"extensions": [
@@ -25,9 +25,17 @@
 						"source.fixAll.ruff": "explicit",
 						"source.organizeImports.ruff": "explicit"
 					},
+					"python.analysis.exclude": [
+						"**/__pycache__",
+						"**/.*"
+					]
 				},
+				"files.associations": {
+					".env-example": "dotenv" // For syntax highlighting
+				},
+				"editor.tabSize": 4
 			}
-    	}
+		}
 	},
 	"runArgs": [
         "--env-file", "${localWorkspaceFolder}/.env",
