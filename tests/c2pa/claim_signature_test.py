@@ -17,6 +17,9 @@ def test_create_claim_signature_with_empty_claim():
         private_key=b"",
         certificate_pem_bundle=b"",
         certificate=None,
+        tsa_url=None,
+        require_tsa=False,
+        tsa_log_dir=None,
     )
 
     assert claim_signature is not None
@@ -43,7 +46,14 @@ def test_create_claim_signature_with_non_empty_claim():
         dc_title="test.jpg",
     )
 
-    claim_signature = ClaimSignature(claim=claim, private_key=key, certificate=certificate)
+    claim_signature = ClaimSignature(
+        claim=claim,
+        private_key=key,
+        certificate=certificate,
+        tsa_url=None,
+        require_tsa=False,
+        tsa_log_dir=None,
+    )
 
     assert claim_signature.claim is not None  # noqa: B015
     assert claim_signature.content_boxes[0].get_type() == b"cbor".hex()  # noqa: B015

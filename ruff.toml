@@ -1,5 +1,6 @@
 line-length = 120
-target-version = "py38"  
+target-version = "py39"
+exclude = [".env-example"]
 
 [lint]
 select = ["E", "F", "I", "B", "UP"]

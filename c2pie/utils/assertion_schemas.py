@@ -53,5 +53,7 @@ def get_assertion_label(assertion_type: C2PA_AssertionTypes) -> str:
         return "c2pa.embedded-data"
     elif assertion_type == C2PA_AssertionTypes.thumbnail:
         return "c2pa.thumbnail.claim"
+    elif assertion_type == C2PA_AssertionTypes.actions:
+        return "c2pa.actions.v2"
     else:
         return ""
