@@ -24,6 +24,10 @@ jobs:
       run: |
         echo "DEV_CONTAINER_IMAGE=${GITHUB_REPOSITORY,,}-devcontainer" >>${GITHUB_ENV}
 
+    - name: Create .env from .env-example
+      run: |
+        cp .env-example .env
+
     - name: Calculate and Save Unit Tests Coverage
       uses: devcontainers/ci@v0.3
       with:
