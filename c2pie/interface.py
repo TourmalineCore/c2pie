@@ -34,7 +34,10 @@ def c2pie_GenerateActionsAssertion(
     action: str,
     parameters: dict[str, list[dict[str, str]]] | None = None,
 ) -> ActionsAssertion:
-    return ActionsAssertion(action, parameters)
+    return ActionsAssertion(
+        action=action,
+        parameters=parameters,
+    )
 
 
 # Currently not in use.

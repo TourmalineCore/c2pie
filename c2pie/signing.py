@@ -16,6 +16,7 @@ from c2pie.interface import (
 )
 from c2pie.jumbf_boxes.box import Box
 from c2pie.utils.content_types import C2PA_ContentTypes
+from c2pie.utils.generate_hashed_uri_map import generate_hashed_uri_map
 
 
 def _ensure_path_type_for_filepath(path: str | Path) -> Path:
@@ -140,10 +141,14 @@ def sign_file(
     else:
         cai_offset = 2
 
+    assertions = []
+
     hash_data_assertion = c2pie_GenerateHashDataAssertion(
         cai_offset=cai_offset,
         hashed_data=hashlib.sha256(raw_bytes).digest(),
     )
+
+    assertions.append(hash_data_assertion)
 
     manifest_store_bytes = extract_manifest_store_bytes(
         file_type,
@@ -160,16 +165,25 @@ def sign_file(
         active_manifest_urn=active_manifest_urn,
         previous_manifest_boxes=previous_manifest_boxes,
     )
+    assertions.append(ingredient_assertion)
 
-    # This section should be replaced with the content generation logic once the relevant
-    # functionality is available (example, action 'c2pa.opened' for Ingredient Assertion)
-    actions_assertion = c2pie_GenerateActionsAssertion(action="c2pa.created")
+    ingredient_assertion_hash = hashlib.sha256(ingredient_assertion.payload).digest()
 
-    assertions = [
-        hash_data_assertion,
-        actions_assertion,
-        ingredient_assertion,
-    ]
+    actions_assertion_parameters: dict[str, list[dict[str, str | bytes]]] = {
+        "ingredients": [
+            generate_hashed_uri_map(
+                url=f"self#jumbf=c2pa.assertions/{ingredient_assertion.get_label()}",
+                hash_value=ingredient_assertion_hash,
+                hash_algorithm="sha256",
+            ),
+        ],
+    }
+
+    actions_assertion = c2pie_GenerateActionsAssertion(
+        action="c2pa.opened",
+        parameters=actions_assertion_parameters,
+    )
+    assertions.append(actions_assertion)
 
     manifest_store = c2pie_GenerateManifestStore(
         assertions=assertions,

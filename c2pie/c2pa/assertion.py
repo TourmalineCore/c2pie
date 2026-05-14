@@ -19,6 +19,7 @@ from c2pie.utils.assertion_schemas import (
     json_to_bytes,
 )
 from c2pie.utils.content_types import jumbf_content_types
+from c2pie.utils.generate_hashed_uri_map import generate_hashed_uri_map
 
 _ALLOWED_ACTIONS = ["c2pa.created", "c2pa.opened"]
 
@@ -214,22 +215,6 @@ def validate_ingredient(
         return reader.get_validation_results()
 
 
-def _generate_hashed_uri_map(
-    url: str,
-    hash_value: bytes,
-    hash_algorithm: str | None = None,
-) -> dict[str, str | bytes]:
-    schema: dict[str, str | bytes] = {
-        "url": url,
-        "hash": hash_value,
-    }
-
-    if hash_algorithm:
-        schema["alg"] = hash_algorithm
-
-    return schema
-
-
 class IngredientAssertion(Assertion):
     """c2pa.ingredient.v3 asset-binding assertion."""
 
@@ -259,6 +244,7 @@ class IngredientAssertion(Assertion):
                     C2PA_AssertionTypes.ingredient,
                     schema,
                 )
+                return
 
             active_manifest_box: Box = None
             for box in previous_manifest_boxes:
@@ -272,15 +258,16 @@ class IngredientAssertion(Assertion):
                     break
 
             # We should not include information about the active manifest if validation was unsuccessful
-            if active_manifest_box:
+            if active_manifest_box is None:
                 super().__init__(
                     C2PA_AssertionTypes.ingredient,
                     schema,
                 )
+                return
 
             active_manifest_hash = hashlib.sha256(active_manifest_box.payload).digest()
 
-            active_manifest: dict[str, str | bytes] = _generate_hashed_uri_map(
+            active_manifest: dict[str, str | bytes] = generate_hashed_uri_map(
                 url=f"self#jumbf=/c2pa/{active_manifest_urn}",
                 hash_value=active_manifest_hash,
                 hash_algorithm="sha256",
