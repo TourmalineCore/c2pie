@@ -15,7 +15,7 @@ authors = [
   { name="Tourmaline Core", email="contact@tourmalinecore.com" },
 ]
 license = {file = 'LICENSE'}
-requires-python = '>=3.9.2'
+requires-python = '>=3.10'
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Natural Language :: English",
@@ -40,7 +40,7 @@ Issues = "https://github.com/TourmalineCore/c2pie/issues"
 c2pie = 'c2pie.main:main'
 
 [tool.poetry.dependencies]
-python = ">=3.9.2,<3.15"
+python = ">=3.10,<3.15"
 cbor2 = "^5.6.3"
 cryptography = ">=44.0.1"
 pytz = "^2024.1"

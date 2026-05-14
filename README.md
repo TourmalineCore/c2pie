@@ -21,7 +21,7 @@ The package supports building claims, assertions, and COSE signatures and embedd
 
 🔸 **Supported file extensions**: `JPG`, `JPEG`, `PDF`
 
-🔸 **Supported Python versions**: `3.9.2 - 3.14.0`
+🔸 **Supported Python versions**: `3.10 - 3.14.0`
 
 🔸 **Supported C2PA Spec Versions**: `1.4`. 
 
@@ -122,7 +122,7 @@ After being copied to host machine, signed files can then be validated using eit
 
 ### Prerequisites
 
-1) Python environment. Currently supported Python versions: 3.9.2 - 3.14.0. Make sure to [create and activate virtual environment](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/) to avoid installing packages globally and any errors caused by that.
+1) Python environment. Currently supported Python versions: 3.10 - 3.14.0. Make sure to [create and activate virtual environment](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/) to avoid installing packages globally and any errors caused by that.
 
 2) Private key and certificate chain pair. The repo contains pre-generated mock credentials in `tests/credentials`. You can either download and use them for a quick start or go to [Certificates](#-certificates) for instructions on how to generate a similar key-certificate pair.
 
