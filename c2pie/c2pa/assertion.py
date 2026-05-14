@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import io
 from typing import Any
+
+import c2pa
 
 from c2pie.jumbf_boxes.content_box import ContentBox
 from c2pie.jumbf_boxes.super_box import SuperBox
@@ -194,6 +197,20 @@ class ThumbnailAssertion(EmbeddedDataAssertion):
         )
 
 
+def validate_ingredient(
+    ingredient_bytes: bytes,
+    mime_type: str,
+) -> dict | None:
+    stream = io.BytesIO(ingredient_bytes)
+    reader = c2pa.Reader.try_create(mime_type, stream)
+
+    if reader is None:
+        return None
+
+    with reader:
+        return reader.get_validation_results()
+
+
 class IngredientAssertion(Assertion):
     """c2pa.ingredient.v3 asset-binding assertion."""
 
@@ -201,75 +218,21 @@ class IngredientAssertion(Assertion):
         self,
         title: str,
         dc_format: str,
+        ingredient_bytes: bytes,
         active_manifest: dict | None = None,
     ):
         schema: dict[str, Any] = {
             "dc:title": title,
             "dc:format": dc_format,
             "relationship": "parentOf",
-            "validationResults": {
-                "activeManifest": {
-                    "success": [
-                        {
-                            "code": "claimSignature.insideValidity",
-                            "url": "self#jumbf=/c2pa/urn:c2pa:4fd76c2c02ac401eae072fdc4cf75376/c2pa.signature",
-                            "explanation": "claim signature valid",
-                        },
-                        {
-                            "code": "claimSignature.validated",
-                            "url": "self#jumbf=/c2pa/urn:c2pa:4fd76c2c02ac401eae072fdc4cf75376/c2pa.signature",
-                            "explanation": "claim signature valid",
-                        },
-                        {
-                            "code": "assertion.hashedURI.match",
-                            "url": "self#jumbf=/c2pa/urn:c2pa:4fd76c2c02ac401eae072fdc4cf75376/c2pa.assertions/c2pa.hash.data",
-                            "explanation": "hashed uri matched: self#jumbf=/c2pa/urn:c2pa:4fd76c2c02ac401eae072fdc4cf75376/c2pa.assertions/c2pa.hash.data",
-                        },
-                        {
-                            "code": "assertion.hashedURI.match",
-                            "url": "self#jumbf=/c2pa/urn:c2pa:4fd76c2c02ac401eae072fdc4cf75376/c2pa.assertions/c2pa.actions.v2",
-                            "explanation": "hashed uri matched: self#jumbf=/c2pa/urn:c2pa:4fd76c2c02ac401eae072fdc4cf75376/c2pa.assertions/c2pa.actions.v2",
-                        },
-                        {
-                            "code": "assertion.hashedURI.match",
-                            "url": "self#jumbf=/c2pa/urn:c2pa:4fd76c2c02ac401eae072fdc4cf75376/c2pa.assertions/c2pa.ingredient.v3",
-                            "explanation": "hashed uri matched: self#jumbf=/c2pa/urn:c2pa:4fd76c2c02ac401eae072fdc4cf75376/c2pa.assertions/c2pa.ingredient.v3",
-                        },
-                        {
-                            "code": "assertion.dataHash.match",
-                            "url": "self#jumbf=/c2pa/urn:c2pa:4fd76c2c02ac401eae072fdc4cf75376/c2pa.assertions/c2pa.hash.data",
-                            "explanation": "data hash valid",
-                        },
-                    ],
-                    "informational": [],
-                    "failure": [
-                        {
-                            "code": "signingCredential.untrusted",
-                            "url": "self#jumbf=/c2pa/urn:c2pa:4fd76c2c02ac401eae072fdc4cf75376/c2pa.signature",
-                            "explanation": "signing certificate untrusted",
-                        }
-                    ],
-                },
-                "ingredientDeltas": [
-                    {
-                        "ingredientAssertionURI": "self#jumbf=/c2pa/urn:c2pa:4fd76c2c02ac401eae072fdc4cf75376/c2pa.assertions/c2pa.ingredient.v3",
-                        "validationDeltas": {
-                            "success": [],
-                            "informational": [
-                                {
-                                    "code": "ingredient.unknownProvenance",
-                                    "url": "self#jumbf=/c2pa/urn:c2pa:4fd76c2c02ac401eae072fdc4cf75376/c2pa.assertions/c2pa.ingredient.v3",
-                                    "explanation": "test_image.jpg: ingredient does not have provenance",
-                                }
-                            ],
-                            "failure": [],
-                        },
-                    }
-                ],
-            },
         }
 
-        if active_manifest is not None:
+        validation_results = validate_ingredient(ingredient_bytes, dc_format)
+
+        if validation_results:
+            schema["validationResults"] = validation_results
+
+        if active_manifest:
             schema["activeManifest"] = active_manifest
 
         super().__init__(C2PA_AssertionTypes.ingredient, schema)

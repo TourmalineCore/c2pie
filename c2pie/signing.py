@@ -5,7 +5,6 @@ import os
 from pathlib import Path
 from typing import Literal
 
-from c2pie.c2pa_injection.jpg_injection import strip_c2pa_app11
 from c2pie.c2pa_parsing.jumbf_parsing import extract_manifest_boxes, get_active_manifest_uuid
 from c2pie.c2pa_parsing.manifest_extractor import extract_manifest_store_bytes
 from c2pie.interface import (
@@ -164,7 +163,7 @@ def sign_file(
         if urn:
             manifest_hash = hashlib.sha256(previous_manifest_boxes[-1].payload).digest()
             active_manifest = _generate_hashed_uri_map(
-                url=urn,
+                url=f"self#jumbf=/c2pa/{urn}",
                 hash_value=manifest_hash,
                 hash_algorithm="sha256",
             )
@@ -186,6 +185,7 @@ def sign_file(
     ingredient_assertion = c2pie_GenerateIngredientAssertion(
         title=input_path.name,
         dc_format=_DC_FORMAT_BY_CONTENT_TYPE[file_type.name],
+        ingredient_bytes=raw_bytes,
         active_manifest=active_manifest,
     )
 

@@ -52,11 +52,13 @@ def c2pie_GenerateThumbnailAssertion(
 def c2pie_GenerateIngredientAssertion(
     title: str,
     dc_format: str,
+    ingredient_bytes: bytes,
     active_manifest: dict | None = None,
 ) -> IngredientAssertion:
     return IngredientAssertion(
         title=title,
         dc_format=dc_format,
+        ingredient_bytes=ingredient_bytes,
         active_manifest=active_manifest,
     )
 
