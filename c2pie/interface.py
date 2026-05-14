@@ -17,6 +17,7 @@ from c2pie.c2pa.manifest import Manifest
 from c2pie.c2pa.manifest_store import ManifestStore
 from c2pie.c2pa_injection.jpg_injection import JpgSegmentApp11Storage
 from c2pie.c2pa_injection.pdf_injection import emplace_manifest_into_pdf
+from c2pie.jumbf_boxes.box import Box
 from c2pie.utils.assertion_schemas import C2PA_AssertionTypes
 from c2pie.utils.content_types import C2PA_ContentTypes
 
@@ -53,13 +54,15 @@ def c2pie_GenerateIngredientAssertion(
     title: str,
     dc_format: str,
     ingredient_bytes: bytes,
-    active_manifest: dict | None = None,
+    active_manifest_urn: str | None,
+    previous_manifest_boxes: list[Box],
 ) -> IngredientAssertion:
     return IngredientAssertion(
         title=title,
         dc_format=dc_format,
         ingredient_bytes=ingredient_bytes,
-        active_manifest=active_manifest,
+        active_manifest_urn=active_manifest_urn,
+        previous_manifest_boxes=previous_manifest_boxes,
     )
 
 

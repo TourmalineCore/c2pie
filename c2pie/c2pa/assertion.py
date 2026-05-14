@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import hashlib
 import io
 from typing import Any
 
 import c2pa
 
+from c2pie.c2pa_parsing.jumbf_parsing import _find_in_box
+from c2pie.jumbf_boxes.box import Box
 from c2pie.jumbf_boxes.content_box import ContentBox
 from c2pie.jumbf_boxes.super_box import SuperBox
 from c2pie.utils.assertion_schemas import (
@@ -211,6 +214,22 @@ def validate_ingredient(
         return reader.get_validation_results()
 
 
+def _generate_hashed_uri_map(
+    url: str,
+    hash_value: bytes,
+    hash_algorithm: str | None = None,
+) -> dict[str, str | bytes]:
+    schema: dict[str, str | bytes] = {
+        "url": url,
+        "hash": hash_value,
+    }
+
+    if hash_algorithm:
+        schema["alg"] = hash_algorithm
+
+    return schema
+
+
 class IngredientAssertion(Assertion):
     """c2pa.ingredient.v3 asset-binding assertion."""
 
@@ -219,7 +238,8 @@ class IngredientAssertion(Assertion):
         title: str,
         dc_format: str,
         ingredient_bytes: bytes,
-        active_manifest: dict | None = None,
+        active_manifest_urn: str | None,
+        previous_manifest_boxes: list[Box],
     ):
         schema: dict[str, Any] = {
             "dc:title": title,
@@ -227,12 +247,49 @@ class IngredientAssertion(Assertion):
             "relationship": "parentOf",
         }
 
-        validation_results = validate_ingredient(ingredient_bytes, dc_format)
+        if active_manifest_urn and previous_manifest_boxes:
+            validation_results = validate_ingredient(
+                ingredient_bytes,
+                dc_format,
+            )
 
-        if validation_results:
+            # We should not include information about the active manifest if validation was unsuccessful
+            if validation_results is None:
+                super().__init__(
+                    C2PA_AssertionTypes.ingredient,
+                    schema,
+                )
+
+            active_manifest_box: Box = None
+            for box in previous_manifest_boxes:
+                found_box = _find_in_box(
+                    box,
+                    active_manifest_urn,
+                )
+
+                if found_box:
+                    active_manifest_box = found_box
+                    break
+
+            # We should not include information about the active manifest if validation was unsuccessful
+            if active_manifest_box:
+                super().__init__(
+                    C2PA_AssertionTypes.ingredient,
+                    schema,
+                )
+
+            active_manifest_hash = hashlib.sha256(active_manifest_box.payload).digest()
+
+            active_manifest: dict[str, str | bytes] = _generate_hashed_uri_map(
+                url=f"self#jumbf=/c2pa/{active_manifest_urn}",
+                hash_value=active_manifest_hash,
+                hash_algorithm="sha256",
+            )
+
+            schema["activeManifest"] = active_manifest
             schema["validationResults"] = validation_results
 
-        if active_manifest:
-            schema["activeManifest"] = active_manifest
-
-        super().__init__(C2PA_AssertionTypes.ingredient, schema)
+        super().__init__(
+            C2PA_AssertionTypes.ingredient,
+            schema,
+        )

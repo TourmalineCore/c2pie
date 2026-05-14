@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from c2pie.c2pa.manifest import Manifest
 from c2pie.jumbf_boxes.box import Box, iter_boxes
 from c2pie.jumbf_boxes.constants import (
     JUMB_TYPE,
@@ -74,34 +73,30 @@ def _find_in_box(
     return None
 
 
-def extract_manifest_boxes(manifest_store_bytes: bytes) -> list[Manifest]:
-    """Returns raw JUMBF bytes of each manifest (urn:c2pa:…) box in the store."""
+def extract_manifest_boxes(manifest_store_bytes: bytes) -> list[Box]:
+    """Returns a list of manifests (urn:c2pa:…) that represent a Box."""
+    
     try:
         manifest_store_box, _ = Box.parse_from_bytes(manifest_store_bytes, 0)
-    except ValueError:
+    except Exception:
         return []
 
     if manifest_store_box.get_type() != JUMB_TYPE:
         return []
 
-    manifests: list[Manifest] = []
+    manifests: list[Box] = []
     for manifest in iter_boxes(manifest_store_box.get_payload()):
         if manifest.get_type() != JUMB_TYPE:
             continue
 
-        manifest_boxes = list(iter_boxes(manifest.get_payload()))
-        if not manifest_boxes or manifest_boxes[0].get_type() != JUMD_TYPE:
+        description_box = next(iter_boxes(manifest.get_payload()), None)
+        if not description_box or description_box.get_type() != JUMD_TYPE:
             continue
 
-        label = jumd_label(manifest_boxes[0].get_payload())
+        label = jumd_label(description_box.get_payload())
 
         if label and label.startswith("urn:c2pa:"):
-            manifest_class = Manifest(manifest_label=label)
-            manifest_class.set_claim_signature(manifest_boxes[1])
-            manifest_class.set_claim(manifest_boxes[2])
-            manifest_class.set_assertion_store(manifest_boxes[3])
-
-            manifests.append(manifest_class)
+            manifests.append(manifest)
 
     return manifests
 
@@ -116,7 +111,7 @@ def get_active_manifest_uuid(manifest_store_bytes: bytes) -> str | None:
     """
     try:
         manifest_store_box, _ = Box.parse_from_bytes(manifest_store_bytes, 0)
-    except ValueError:
+    except Exception:
         return None
 
     if manifest_store_box.get_type() != JUMB_TYPE:
