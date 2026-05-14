@@ -46,9 +46,6 @@ jobs:
         cacheFrom: ghcr.io/${{ env.DEV_CONTAINER_IMAGE }}
         runCmd: |
           COVERAGE_FILE=.coverage.e2e pytest tests/c2pa/e2e_test.py --cov=c2pie -v --cov-report xml:e2e-coverage.xml
-        env:
-          C2PIE_PRIVATE_KEY_FILE=${{ vars.C2PIE_PRIVATE_KEY_FILE }}
-          C2PIE_CERTIFICATE_CHAIN_FILE=${{ vars.C2PIE_CERTIFICATE_CHAIN_FILE }}
         push: never
 
     - name: Merge Units And E2E Into Full Coverage
