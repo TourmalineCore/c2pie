@@ -46,6 +46,7 @@ class Box:
             data[offset : offset + LBOX_SIZE],
             BYTE_ORDER,
         )
+
         t_box = data[offset + LBOX_SIZE : offset + HEADER_SIZE].hex()
 
         # If the length of the box is unknown, the encoders may set the LBox value to 0.
@@ -60,6 +61,7 @@ class Box:
 
         payload = data[offset + HEADER_SIZE : end]
         box = cls(t_box, payload)
+
         return box, end
 
 
