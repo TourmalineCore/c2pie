@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 from collections import defaultdict
-from typing import Callable
+from collections.abc import Callable
 
 from c2pie.utils.content_types import C2PA_ContentTypes
 
