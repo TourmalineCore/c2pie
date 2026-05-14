@@ -54,7 +54,4 @@ jobs:
 
       - name: Run unit tests
         run: |
-          poetry run pytest \ 
-            -m "not e2e" \
-            --maxfail=1 \
-            -v
+          poetry run pytest -m "not e2e" --maxfail=1 -v
