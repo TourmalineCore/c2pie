@@ -34,7 +34,7 @@ jobs:
         imageName: ghcr.io/${{ env.DEV_CONTAINER_IMAGE }}
         cacheFrom: ghcr.io/${{ env.DEV_CONTAINER_IMAGE }}
         runCmd: |
-            COVERAGE_FILE=.coverage.unit pytest -m "not e2e" --maxfail=1 -v --cov-report xml:units-coverage.xml
+            COVERAGE_FILE=.coverage.unit pytest -m "not e2e" --maxfail=1 -v --cov=c2pie --cov-report xml:units-coverage.xml
             
         # in the first step that runs inside Dev Container we push the image we built to re-use it in the next steps
         # we never push in the next steps, only use the cache if available
