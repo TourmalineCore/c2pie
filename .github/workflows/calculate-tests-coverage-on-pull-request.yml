@@ -34,6 +34,11 @@ jobs:
         imageName: ghcr.io/${{ env.DEV_CONTAINER_IMAGE }}
         cacheFrom: ghcr.io/${{ env.DEV_CONTAINER_IMAGE }}
         runCmd: |
+            # COVERAGE_FILE is necessary to later combine separate .coverage files for e2e and unit tests 
+            # We have "e2e" marker configured, so using -m "not e2e" allows running all tests without "e2e" marker
+            # Here we could use any random non-existent marker in place of "not e2e", this one was chosen for clarity 
+            # With --cov-report xml, we save coverage results in both default pytest's coverage format (sqlite) and in xml 
+            # We need both cause sqlite is expected in `coverage combine`, and xml is expected later when parsing it to embed percentage into README
             COVERAGE_FILE=.coverage.unit pytest -m "not e2e" --maxfail=1 -v --cov=c2pie --cov-report xml:units-coverage.xml
             
         # in the first step that runs inside Dev Container we push the image we built to re-use it in the next steps
@@ -45,6 +50,7 @@ jobs:
       with:
         cacheFrom: ghcr.io/${{ env.DEV_CONTAINER_IMAGE }}
         runCmd: |
+          # For detailed explanation refer to previous step
           COVERAGE_FILE=.coverage.e2e pytest tests/c2pa/e2e_test.py --cov=c2pie -v --cov-report xml:e2e-coverage.xml
         push: never
 
