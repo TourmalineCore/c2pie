@@ -54,7 +54,7 @@ class SuperBox(Box):
         for content_box in self.content_boxes:
             if content_box:
                 result.join(content_box.serialize())
-                
+
         return result
 
     def add_content_box(

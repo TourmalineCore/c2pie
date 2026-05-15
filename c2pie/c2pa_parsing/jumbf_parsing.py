@@ -75,7 +75,7 @@ def _find_in_box(
 
 def extract_manifest_boxes(manifest_store_bytes: bytes) -> list[Box]:
     """Returns a list of manifests (urn:c2pa:…) that represent a Box."""
-    
+
     try:
         manifest_store_box, _ = Box.parse_from_bytes(manifest_store_bytes, 0)
     except Exception:

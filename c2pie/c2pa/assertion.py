@@ -76,7 +76,7 @@ class HashDataAssertion(Assertion):
                 "length": 65535,
             },
         ]
-        
+
         if additional_exclusions:
             exclusions.extend(additional_exclusions)
 
