@@ -139,7 +139,7 @@ def test_emplace_manifest_returns_bytes_with_jpeg_signature():
         format_type=C2PA_ContentTypes.jpg,
         content_bytes=jpeg_bytes,
         c2pa_offset=2,
-        manifests=manifest_store,
+        manifest_store=manifest_store,
     )
 
     assert isinstance(result, bytes)
