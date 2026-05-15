@@ -6,7 +6,7 @@
 
 -------
 
-[![Lint](https://github.com/TourmalineCore/c2pie/actions/workflows/lint-on-pull-request.yml/badge.svg?branch=develop)](https://github.com/TourmalineCore/c2pie/actions/workflows/lint-on-pull-request.yml)
+[![Linting](https://github.com/TourmalineCore/c2pie/actions/workflows/lint-on-pull-request.yml/badge.svg?branch=develop)](https://github.com/TourmalineCore/c2pie/actions/workflows/lint-on-pull-request.yml)
 [![c2pa](https://img.shields.io/badge/c2pa-v1.4-seagreen.svg)](https://c2pa.org/)
 [![coverage](https://img.shields.io/badge/e2e_coverage-68.47%25-orange)](https://github.com/TourmalineCore/c2pie/actions/workflows/calculate-tests-coverage-on-pull-request.yml)
 [![coverage](https://img.shields.io/badge/units_coverage-79.54%25-yellow)](https://github.com/TourmalineCore/c2pie/actions/workflows/calculate-tests-coverage-on-pull-request.yml)
