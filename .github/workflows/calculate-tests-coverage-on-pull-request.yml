@@ -101,10 +101,10 @@ jobs:
           name: full-coverage
           path: full-coverage.xml
 
-    update-coverage:
-      runs-on: ubuntu-24.04
-      needs: [calculate-coverage]
-      steps:
+  update-coverage:
+    runs-on: ubuntu-24.04
+    needs: [calculate-coverage]
+    steps:
       - name: Checkout Repository 
         uses: actions/checkout@v4
         with:
