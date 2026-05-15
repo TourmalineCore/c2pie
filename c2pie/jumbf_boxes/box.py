@@ -13,7 +13,7 @@ class Box:
         box_type: str,
         payload: bytes = b"",
     ):
-        self.payload = payload  # Box payload
+        self.payload = payload
         self.t_box = box_type
         self.l_box = (
             len(bytes.fromhex(self.t_box)) + 4 + len(self.payload)

@@ -26,8 +26,14 @@ def c2pie_GenerateAssertion(assertion_type: C2PA_AssertionTypes, assertion_schem
     return Assertion(assertion_type, assertion_schema)
 
 
-def c2pie_GenerateHashDataAssertion(cai_offset: int, hashed_data: bytes) -> HashDataAssertion:
-    return HashDataAssertion(cai_offset, hashed_data)
+def c2pie_GenerateHashDataAssertion(
+    cai_offset: int,
+    hashed_data: bytes,
+) -> HashDataAssertion:
+    return HashDataAssertion(
+        cai_offset,
+        hashed_data,
+    )
 
 
 def c2pie_GenerateActionsAssertion(

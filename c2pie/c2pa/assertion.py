@@ -70,7 +70,13 @@ class HashDataAssertion(Assertion):
         hashed_data: bytes,
         additional_exclusions: list[dict[str, int]] | None = None,
     ):
-        exclusions: list[dict[str, int]] = [{"start": cai_offset, "length": 65535}]
+        exclusions: list[dict[str, int]] = [
+            {
+                "start": cai_offset,
+                "length": 65535,
+            },
+        ]
+        
         if additional_exclusions:
             exclusions.extend(additional_exclusions)
 

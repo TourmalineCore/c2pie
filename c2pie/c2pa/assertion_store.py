@@ -11,6 +11,7 @@ class AssertionStore(SuperBox):
         assertions: list,
     ):
         self.assertions = assertions
+
         super().__init__(
             content_type=c2pa_content_types["assertions"],
             label="c2pa.assertions",
