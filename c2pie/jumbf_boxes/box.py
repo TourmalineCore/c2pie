@@ -15,9 +15,7 @@ class Box:
     ):
         self.payload = payload
         self.t_box = box_type
-        self.l_box = (
-            len(bytes.fromhex(self.t_box)) + 4 + len(self.payload)
-        )  # Size of box_type (4 bytes) + self size (4 bytes)
+        self.l_box = 4 + 4 + len(self.payload)  # 4 bytes (LBox) + 4 bytes (TBox) + payload
 
     def get_length(self):
         return self.l_box
