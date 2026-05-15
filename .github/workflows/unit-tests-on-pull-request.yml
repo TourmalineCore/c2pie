@@ -15,7 +15,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
 
     defaults:
       run:
@@ -36,9 +36,7 @@ jobs:
       - name: Install Poetry
         uses: snok/install-poetry@v1
         with:
-          # If you use a version newer than 2.2.1, the Poetry installation will fail because, 
-          # starting with version 2.3.0, Poetry no longer supports Python 3.9
-          version: '2.2.1'
+          version: '2.4.1'
           virtualenvs-create: true
           virtualenvs-in-project: true
 
