@@ -47,6 +47,9 @@ pytz = "^2024.1"
 cffi = "<=2.0.0"
 pypdf = "^6.1.1"
 c2pa-python = ">=0.32.6"
+requests = "^2.32"
+pyasn1 = "^0.6"
+pyasn1-modules = "^0.4"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.0"

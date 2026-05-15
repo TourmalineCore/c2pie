@@ -96,6 +96,9 @@ def test_manifest_store_set_hash_data_length_only_affects_new_manifests():
     claim_signature = ClaimSignature(
         claim=claim,
         private_key=b"\x00\x00\x00",
+        tsa_url=None,
+        require_tsa=False,
+        tsa_log_dir=None
     )
 
     previous_manifest = Manifest(manifest_label="urn:c2pa:previous-manifest")

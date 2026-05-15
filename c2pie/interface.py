@@ -80,6 +80,10 @@ def c2pie_GenerateManifestStore(
     private_key: bytes,
     certificate_chain: bytes,
     file_name: str,
+    # TODO: #66  : move that variables to configfile
+    tsa_url: str | None,
+    require_tsa: bool,
+    tsa_log_dir: str | None,
     previous_manifest_boxes: list[Manifest] | None = None,
 ) -> ManifestStore:
     """
@@ -105,6 +109,9 @@ def c2pie_GenerateManifestStore(
         claim=claim,
         private_key=private_key,
         certificate_pem_bundle=certificate_chain,
+        tsa_url=tsa_url,
+        require_tsa=require_tsa,
+        tsa_log_dir=tsa_log_dir,
     )
     manifest.set_claim_signature(claim_signature)
 
