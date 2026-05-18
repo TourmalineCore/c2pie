@@ -46,13 +46,13 @@ jobs:
         c2pie sign --input_file ./test_doc.pdf
 
     - name: Upload Signed Image
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: signed_test_image
         path: signed_test_image.jpg
 
     - name: Upload Signed PDF
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: signed_test_doc
         path: signed_test_doc.pdf
@@ -62,12 +62,12 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
     - name: Download Signed Image
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v8
       with:
         name: signed_test_image
     
     - name: Download Signed PDF
-      uses: actions/download-artifact@v5
+      uses: actions/download-artifact@v8
       with:
         name: signed_test_doc
     

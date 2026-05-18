@@ -84,19 +84,19 @@ jobs:
           cat Summary.md >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload Unit Tests Coverage
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: units-coverage
           path: units-coverage.xml
 
       - name: Upload E2E Tests Coverage
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: e2e-coverage
           path: e2e-coverage.xml
 
       - name: Upload Full Tests Coverage
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: full-coverage
           path: full-coverage.xml
@@ -112,19 +112,19 @@ jobs:
           ref: ${{ github.head_ref }}
 
       - name: Download Units Coverage
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           name: units-coverage
           path: coverage
       
       - name: Download E2E Coverage
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           name: e2e-coverage
           path: coverage
       
       - name: Download Full Coverage
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v8
         with:
           name: full-coverage
           path: coverage
