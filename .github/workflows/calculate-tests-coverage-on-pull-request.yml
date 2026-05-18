@@ -184,7 +184,7 @@ jobs:
               env_value_name_with_bage_color: str,
           ) -> None:
             new_coverage = float(os.getenv(env_value_name_with_coverage))
-            badge_color = get_bage_color_by_coverage_value(new_coverage)
+            badge_color = get_badge_color_by_coverage_value(new_coverage)
             env_file = os.getenv("GITHUB_ENV")
 
             with open(env_file, "a") as f:
