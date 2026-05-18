@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
@@ -164,7 +164,7 @@ jobs:
         run: |
           import os
 
-          def get_bage_color_by_coverage_value(
+          def get_badge_color_by_coverage_value(
             new_coverage: str,
           ) -> str:
             if new_coverage < 60:
