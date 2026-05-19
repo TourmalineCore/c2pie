@@ -49,13 +49,7 @@ class SuperBox(Box):
         return instance
 
     def _serialize_children(self) -> bytes:
-        result: bytes = b""
-
-        for content_box in self.content_boxes:
-            if content_box:
-                result.join(content_box.serialize())
-
-        return result
+        return b"".join(content_box for content_box in self.content_boxes if content_box)
 
     def add_content_box(
         self,
