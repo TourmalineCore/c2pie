@@ -207,20 +207,6 @@ class ThumbnailAssertion(EmbeddedDataAssertion):
         )
 
 
-def validate_ingredient(
-    ingredient_bytes: bytes,
-    mime_type: str,
-) -> dict | None:
-    stream = io.BytesIO(ingredient_bytes)
-    reader = c2pa.Reader.try_create(mime_type, stream)
-
-    if reader is None:
-        return None
-
-    with reader:
-        return reader.get_validation_results()
-
-
 class IngredientAssertion(Assertion):
     """c2pa.ingredient.v3 asset-binding assertion."""
 
@@ -239,7 +225,7 @@ class IngredientAssertion(Assertion):
         }
 
         if active_manifest_urn and previous_manifest_boxes:
-            validation_results = validate_ingredient(
+            validation_results = self.validate_ingredient(
                 ingredient_bytes,
                 dc_format,
             )
@@ -286,3 +272,16 @@ class IngredientAssertion(Assertion):
             C2PA_AssertionTypes.ingredient,
             schema,
         )
+    
+    def validate_ingredient(
+        ingredient_bytes: bytes,
+        mime_type: str,
+    ) -> dict | None:
+        stream = io.BytesIO(ingredient_bytes)
+        reader = c2pa.Reader.try_create(mime_type, stream)
+
+        if reader is None:
+            return None
+
+        with reader:
+            return reader.get_validation_results()

@@ -45,7 +45,7 @@ def test_no_active_manifest_when_boxes_empty():
 
 def test_no_active_manifest_when_validation_fails():
     with patch(
-        "c2pie.c2pa.assertion.validate_ingredient",
+        "c2pie.c2pa.assertion.IngredientAssertion.validate_ingredient",
         return_value=None,
     ):
         manifest_box, _ = Box.parse_from_bytes(
@@ -65,7 +65,7 @@ def test_no_active_manifest_when_validation_fails():
 
 def test_no_active_manifest_when_box_not_found():
     with patch(
-        "c2pie.c2pa.assertion.validate_ingredient",
+        "c2pie.c2pa.assertion.IngredientAssertion.validate_ingredient",
         return_value=VALIDATION_RESULTS,
     ):
         manifest_box, _ = Box.parse_from_bytes(
@@ -84,7 +84,7 @@ def test_no_active_manifest_when_box_not_found():
 
 def test_ingredient_assertion_schema_with_active_manifest_is_correct():
     with patch(
-        "c2pie.c2pa.assertion.validate_ingredient",
+        "c2pie.c2pa.assertion.IngredientAssertion.validate_ingredient",
         return_value=VALIDATION_RESULTS,
     ):
         manifest_box, _ = Box.parse_from_bytes(
@@ -108,7 +108,7 @@ def test_ingredient_assertion_schema_with_active_manifest_is_correct():
 
 def test_finds_matching_box_among_multiple():
     with patch(
-        "c2pie.c2pa.assertion.validate_ingredient",
+        "c2pie.c2pa.assertion.IngredientAssertion.validate_ingredient",
         return_value=VALIDATION_RESULTS,
     ):
         first_manifest_box, _ = Box.parse_from_bytes(
