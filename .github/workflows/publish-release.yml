@@ -5,24 +5,22 @@ on:
     branches:
       - master
       - 'release/*'
-      - feature/#67-rewrite-release-workflow
+      - develop
  
 permissions:
   contents: write
 
 jobs:
-  # linting-and-testing:
-  #   name: Linting and Testing
-  #   uses: ./.github/workflows/lint-and-test.yml
-  #   permissions:
-  #     packages: read
-  #     contents: write
-  # test-job:
-  #   name: Test job with no dependencies 
+  linting-and-testing:
+    name: Linting and Testing
+    uses: ./.github/workflows/lint-and-test.yml
+    permissions:
+      packages: read
+      contents: write
 
   release:
     name: Create and Publish Release
-    # needs: linting-and-testing
+    needs: linting-and-testing
     runs-on: ubuntu-latest
     concurrency:
       group: ${{ github.workflow }}-release-${{ github.ref_name }}
