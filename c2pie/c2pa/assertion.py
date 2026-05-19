@@ -272,7 +272,7 @@ class IngredientAssertion(Assertion):
             C2PA_AssertionTypes.ingredient,
             schema,
         )
-    
+
     def validate_ingredient(
         ingredient_bytes: bytes,
         mime_type: str,
