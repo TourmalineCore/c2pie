@@ -8,7 +8,7 @@ on:
 jobs:
   sign-steps:
     runs-on: ubuntu-24.04
-    container: python:3.9.2-buster
+    container: python:3.10-bookworm
     steps:
     - name: Generate Certificates, Install c2pie, and Sign Image and PDF
       run: |
