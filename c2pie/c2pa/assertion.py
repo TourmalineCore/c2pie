@@ -1,12 +1,11 @@
 from __future__ import annotations
-
 import hashlib
 import io
 from typing import Any
 
 import c2pa
 
-from c2pie.c2pa_parsing.jumbf_parsing import _find_in_box
+from c2pie.c2pa_parsing.jumbf_parsing import find_in_box
 from c2pie.jumbf_boxes.box import Box
 from c2pie.jumbf_boxes.content_box import ContentBox
 from c2pie.jumbf_boxes.super_box import SuperBox
@@ -36,7 +35,7 @@ class Assertion(SuperBox):
         self.type = assertion_type
         self.schema = schema
 
-        if content_boxes is None:
+        if not content_boxes:
             payload = self.get_payload_from_schema()
             box_type_hex = get_assertion_content_box_type(self.type)
             content_boxes = [ContentBox(box_type=box_type_hex, payload=payload)]
@@ -231,7 +230,7 @@ class IngredientAssertion(Assertion):
             )
 
             # We should not include information about the active manifest if validation was unsuccessful
-            if validation_results is None:
+            if not validation_results:
                 super().__init__(
                     C2PA_AssertionTypes.ingredient,
                     schema,
@@ -240,7 +239,7 @@ class IngredientAssertion(Assertion):
 
             active_manifest_box: Box = None
             for box in previous_manifest_boxes:
-                found_box = _find_in_box(
+                found_box = find_in_box(
                     box,
                     active_manifest_urn,
                 )
@@ -250,7 +249,7 @@ class IngredientAssertion(Assertion):
                     break
 
             # We should not include information about the active manifest if validation was unsuccessful
-            if active_manifest_box is None:
+            if not active_manifest_box:
                 super().__init__(
                     C2PA_AssertionTypes.ingredient,
                     schema,
@@ -265,8 +264,19 @@ class IngredientAssertion(Assertion):
                 hash_algorithm="sha256",
             )
 
+            claim_signature_box = find_in_box(active_manifest_box, "c2pa.signature")
+
+            claim_signature_hash = hashlib.sha256(claim_signature_box.payload).digest()
+
+            claim_signature: dict[str, str | bytes] = generate_hashed_uri_map(
+                url=f"self#jumbf=/c2pa/{active_manifest_urn}/c2pa.signature",
+                hash_value=claim_signature_hash,
+                hash_algorithm="sha256",
+            )
+
             schema["activeManifest"] = active_manifest
             schema["validationResults"] = validation_results
+            schema["claimSignature"] = claim_signature
 
         super().__init__(
             C2PA_AssertionTypes.ingredient,
@@ -281,7 +291,7 @@ class IngredientAssertion(Assertion):
         stream = io.BytesIO(ingredient_bytes)
         reader = c2pa.Reader.try_create(mime_type, stream)
 
-        if reader is None:
+        if not reader:
             return None
 
         with reader:

@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 import hashlib
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from c2pie.c2pa.assertion import IngredientAssertion
+from c2pie.c2pa.claim_signature import ClaimSignature
+from c2pie.c2pa.manifest import Manifest
+from c2pie.c2pa_parsing.jumbf_parsing import find_in_box
 from c2pie.jumbf_boxes.box import Box
 from c2pie.utils.assertion_schemas import C2PA_AssertionTypes
 from tests.helpers.jumbf_generators import _mock_make_superbox
@@ -87,23 +90,41 @@ def test_ingredient_assertion_schema_with_active_manifest_is_correct():
         "c2pie.c2pa.assertion.IngredientAssertion.validate_ingredient",
         return_value=VALIDATION_RESULTS,
     ):
-        manifest_box, _ = Box.parse_from_bytes(
-            _mock_make_superbox(ACTIVE_URN),
-        )
+        manifest = Manifest(manifest_label="urn:c2pa:test-manifest")
+
+        with patch.object(ClaimSignature, "_generate_payload", return_value=[]):
+            claim = MagicMock()
+            claim_signature = ClaimSignature(
+                claim=claim,
+                private_key=b"\x00\x00\x00",
+                tsa_url=None,
+                require_tsa=False,
+                tsa_log_dir=None,
+            )
+            manifest.set_claim_signature(claim_signature)
+
         ingredient_assertion = IngredientAssertion(
             TITLE,
             DC_FORMAT,
             INGREDIENT_BYTES,
             ACTIVE_URN,
-            [manifest_box],
+            [manifest],
         )
 
-    expected_hash = hashlib.sha256(manifest_box.get_payload()).digest()
+    active_manifest_expected_hash = hashlib.sha256(manifest.get_payload()).digest()
+
+    claim_signature_box = find_in_box(manifest, "c2pa.signature")
+    claim_signature_expected_hash = hashlib.sha256(claim_signature_box.get_payload()).digest()
 
     assert ingredient_assertion.schema["activeManifest"]["url"] == f"self#jumbf=/c2pa/{ACTIVE_URN}"
-    assert ingredient_assertion.schema["activeManifest"]["hash"] == expected_hash
+    assert ingredient_assertion.schema["activeManifest"]["hash"] == active_manifest_expected_hash
     assert ingredient_assertion.schema["activeManifest"]["alg"] == "sha256"
+
     assert ingredient_assertion.schema["validationResults"] == VALIDATION_RESULTS
+
+    assert ingredient_assertion.schema["claimSignature"]["url"] == f"self#jumbf=/c2pa/{ACTIVE_URN}/c2pa.signature"
+    assert ingredient_assertion.schema["claimSignature"]["hash"] == claim_signature_expected_hash
+    assert ingredient_assertion.schema["claimSignature"]["alg"] == "sha256"
 
 
 def test_finds_matching_box_among_multiple():
@@ -111,20 +132,29 @@ def test_finds_matching_box_among_multiple():
         "c2pie.c2pa.assertion.IngredientAssertion.validate_ingredient",
         return_value=VALIDATION_RESULTS,
     ):
-        first_manifest_box, _ = Box.parse_from_bytes(
-            _mock_make_superbox(ACTIVE_URN),
-        )
-        second_manifest_box, _ = Box.parse_from_bytes(
-            _mock_make_superbox("urn:c2pa:other-manifest"),
-        )
+        active_manifest = Manifest(manifest_label=ACTIVE_URN)
+        some_manifest = Manifest(manifest_label="urn:c2pa:other-manifest")
+
+        with patch.object(ClaimSignature, "_generate_payload", return_value=[]):
+            claim = MagicMock()
+            claim_signature = ClaimSignature(
+                claim=claim,
+                private_key=b"\x00\x00\x00",
+                tsa_url=None,
+                require_tsa=False,
+                tsa_log_dir=None,
+            )
+            active_manifest.set_claim_signature(claim_signature)
+            some_manifest.set_claim_signature(claim_signature)
+
         ingredient_assertion = IngredientAssertion(
             TITLE,
             DC_FORMAT,
             INGREDIENT_BYTES,
             ACTIVE_URN,
             [
-                first_manifest_box,
-                second_manifest_box,
+                active_manifest,
+                some_manifest,
             ],
         )
 
