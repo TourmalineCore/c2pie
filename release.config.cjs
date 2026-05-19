@@ -6,7 +6,7 @@ module.exports = {
     branches: [
         { name: 'master' },
         { name: 'release/*', prerelease: 'rc' },
-        { name: 'develop', prerelease: 'alpha' },
+        { name: 'feature/#67-rewrite-release-workflow', prerelease: 'alpha' },
     ],
 
     plugins: [
