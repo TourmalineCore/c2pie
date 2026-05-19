@@ -1,38 +1,46 @@
 const { RELEASE_RULES, CHANGELOG_TYPES } = require('./release.rules.cjs');
 
 module.exports = {
+    // You can find out more about the configuration of this file here https://semantic-release.gitbook.io/semantic-release/usage/configuration
     branches: [
         { name: 'master' },
         { name: 'release/*', prerelease: 'rc' },
         { name: 'develop', prerelease: 'alpha' },
     ],
-
+    // Plugins https://semantic-release.gitbook.io/semantic-release/extending/plugins-list
     plugins: [
         [
+            // Analyzes commits and determines which release version should be released.
             '@semantic-release/commit-analyzer',
             {
                 preset: 'conventionalcommits',
+                // Define the commits that will increase the release version
                 releaseRules: RELEASE_RULES,
             },
         ],
         [
+            // Add release notes
             '@semantic-release/release-notes-generator',
             {
                 preset: 'conventionalcommits',
+                // Define the commits that will be described in the release notes
                 presetConfig: { types: CHANGELOG_TYPES },
             },
         ],
         [
+            // Writing release notes to a changelog
             '@semantic-release/changelog',
             { changelogFile: 'CHANGELOG.md' },
         ],
         [
+            // Bumping version in pyproject.toml and build .whl
             '@semantic-release/exec', 
             {
                 prepareCmd: 'poetry version ${nextRelease.version} && poetry build',
             }
         ],
         [
+            // Plugin for commits changes
             '@semantic-release/git',
             {
                 assets: ['CHANGELOG.md', 'pyproject.toml'],
@@ -43,16 +51,19 @@ module.exports = {
             },
         ],
         [
+            // Release to Github with builded files 
             '@semantic-release/github', 
             {
                 assets: [{ path: 'dist/*' }],
             }
         ],
         [
+            // Merging changes from actions in master and release/ to develop
             '@kilianpaquier/semantic-release-backmerge',
             {
                 targets: 
                 [
+                    // If the develop branch has a protected rule, you need to configure an App Token or personal token so that semantic-release can push to develop
                     { from: 'master', to: 'develop' },
                     { from: 'release/*', to: 'develop' },
                 ],
