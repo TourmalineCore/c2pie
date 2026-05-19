@@ -1,5 +1,3 @@
-'use strict';
-
 const RELEASE_RULES = [
     { type: 'feat', release: 'minor' },
     { type: 'fix', release: 'patch' },
@@ -14,16 +12,16 @@ const RELEASE_RULES = [
 ];
 
 const CHANGELOG_TYPES = [
-    { type: 'feat', section: 'Features', hidden: false },
-    { type: 'fix', section: 'Bug Fixes', hidden: false },
-    { type: 'docs', section: 'Documentation', hidden: false },
-    { type: 'refactor', section: 'Refactoring', hidden: false },
-    { type: 'build', section: 'Build System', hidden: true },
-    { type: 'chore', section: 'Chores', hidden: true },
-    { type: 'ci', section: 'CI', hidden: true },
-    { type: 'style', section: 'Style', hidden: true },
-    { type: 'test', section: 'Tests', hidden: true },
-    { type: 'config', section: 'Config', hidden: true },
+    { type: 'feat',     section: 'Features',     hidden: false },
+    { type: 'fix',      section: 'Bug Fixes',     hidden: false },
+    { type: 'docs',     section: 'Documentation', hidden: false },
+    { type: 'refactor', section: 'Refactoring',   hidden: false },
+    { type: 'build',    hidden: true },
+    { type: 'chore',    hidden: true },
+    { type: 'ci',       hidden: true },
+    { type: 'style',    hidden: true },
+    { type: 'test',     hidden: true },
+    { type: 'config',   hidden: true },
 ];
 
 module.exports = { RELEASE_RULES, CHANGELOG_TYPES };

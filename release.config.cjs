@@ -1,5 +1,3 @@
-'use strict';
-
 const { RELEASE_RULES, CHANGELOG_TYPES } = require('./release.rules.cjs');
 
 module.exports = {
@@ -29,6 +27,12 @@ module.exports = {
             { changelogFile: 'CHANGELOG.md' },
         ],
         [
+            '@semantic-release/exec', 
+            {
+                prepareCmd: 'poetry version ${nextRelease.version} && poetry build',
+            }
+        ],
+        [
             '@semantic-release/git',
             {
                 assets: ['CHANGELOG.md', 'pyproject.toml'],
@@ -39,11 +43,10 @@ module.exports = {
             },
         ],
         [
-            '@semantic-release/exec', 
+            '@semantic-release/github', 
             {
-                prepareCmd: 'poetry version ${nextRelease.version}',
+                assets: [{ path: 'dist/*' }],
             }
         ],
-        '@semantic-release/github',
     ],
 };
