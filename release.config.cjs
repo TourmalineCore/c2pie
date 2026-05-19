@@ -48,5 +48,16 @@ module.exports = {
                 assets: [{ path: 'dist/*' }],
             }
         ],
+        [
+            '@kilianpaquier/semantic-release-backmerge',
+            {
+                targets: 
+                [
+                    { from: 'master', to: 'develop' },
+                    { from: 'release/*', to: 'develop' },
+                ],
+                backmergeStrategy: 'merge',
+            },
+        ],
     ],
 };
