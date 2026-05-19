@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import uuid
 
 from c2pie.jumbf_boxes.super_box import SuperBox

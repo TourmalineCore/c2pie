@@ -1,4 +1,3 @@
-from __future__ import annotations
 from c2pie.jumbf_boxes.box import Box, iter_boxes
 from c2pie.jumbf_boxes.constants import (
     JUMB_TYPE,

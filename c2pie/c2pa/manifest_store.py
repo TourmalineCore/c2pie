@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from c2pie.c2pa.manifest import Manifest
 from c2pie.jumbf_boxes.super_box import SuperBox
 from c2pie.utils.content_types import c2pa_content_types

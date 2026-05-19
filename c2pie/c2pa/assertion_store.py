@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from c2pie.c2pa.assertion import Assertion
 from c2pie.jumbf_boxes.super_box import SuperBox
 from c2pie.utils.assertion_schemas import C2PA_AssertionTypes

@@ -1,6 +1,3 @@
-from __future__ import annotations
-
-
 class TSAConnectionError(Exception):
     """Network error while reaching the TSA."""
 
