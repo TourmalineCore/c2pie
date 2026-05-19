@@ -274,6 +274,7 @@ class IngredientAssertion(Assertion):
         )
 
     def validate_ingredient(
+        self,
         ingredient_bytes: bytes,
         mime_type: str,
     ) -> dict | None:
