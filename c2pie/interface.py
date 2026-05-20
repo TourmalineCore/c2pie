@@ -1,11 +1,10 @@
-from __future__ import annotations
-
 import uuid
 
 from c2pie.c2pa.assertion import (
     ActionsAssertion,
     Assertion,
     HashDataAssertion,
+    IngredientAssertion,
     ThumbnailAssertion,
 )
 from c2pie.c2pa.assertion_store import AssertionStore
@@ -16,6 +15,7 @@ from c2pie.c2pa.manifest import Manifest
 from c2pie.c2pa.manifest_store import ManifestStore
 from c2pie.c2pa_injection.jpg_injection import JpgSegmentApp11Storage
 from c2pie.c2pa_injection.pdf_injection import emplace_manifest_into_pdf
+from c2pie.jumbf_boxes.box import Box
 from c2pie.utils.assertion_schemas import C2PA_AssertionTypes
 from c2pie.utils.content_types import C2PA_ContentTypes
 
@@ -24,15 +24,24 @@ def c2pie_GenerateAssertion(assertion_type: C2PA_AssertionTypes, assertion_schem
     return Assertion(assertion_type, assertion_schema)
 
 
-def c2pie_GenerateHashDataAssertion(cai_offset: int, hashed_data: bytes) -> HashDataAssertion:
-    return HashDataAssertion(cai_offset, hashed_data)
+def c2pie_GenerateHashDataAssertion(
+    cai_offset: int,
+    hashed_data: bytes,
+) -> HashDataAssertion:
+    return HashDataAssertion(
+        cai_offset,
+        hashed_data,
+    )
 
 
 def c2pie_GenerateActionsAssertion(
     action: str,
     parameters: dict[str, list[dict[str, str]]] | None = None,
 ) -> ActionsAssertion:
-    return ActionsAssertion(action, parameters)
+    return ActionsAssertion(
+        action=action,
+        parameters=parameters,
+    )
 
 
 # Currently not in use.
@@ -48,7 +57,23 @@ def c2pie_GenerateThumbnailAssertion(
     )
 
 
-def c2pie_GenerateManifest(
+def c2pie_GenerateIngredientAssertion(
+    title: str,
+    dc_format: str,
+    ingredient_bytes: bytes,
+    active_manifest_urn: str | None,
+    previous_manifest_boxes: list[Box],
+) -> IngredientAssertion:
+    return IngredientAssertion(
+        title=title,
+        dc_format=dc_format,
+        ingredient_bytes=ingredient_bytes,
+        active_manifest_urn=active_manifest_urn,
+        previous_manifest_boxes=previous_manifest_boxes,
+    )
+
+
+def c2pie_GenerateManifestStore(
     assertions: list,
     private_key: bytes,
     certificate_chain: bytes,
@@ -57,10 +82,12 @@ def c2pie_GenerateManifest(
     tsa_url: str | None,
     require_tsa: bool,
     tsa_log_dir: str | None,
+    previous_manifest_boxes: list[Manifest] | None = None,
 ) -> ManifestStore:
     """
     private_key: PKCS#8 PEM (RSA) bytes
     certificate_chain: PEM bundle (leaf + intermediates, NO root) bytes
+    previous_manifest_boxes: raw JUMBF bytes of manifests from a previous signing (preserved in the store)
     """
 
     manifest_label = f"urn:c2pa:{uuid.uuid4().hex}"
@@ -86,45 +113,42 @@ def c2pie_GenerateManifest(
     )
     manifest.set_claim_signature(claim_signature)
 
-    return ManifestStore([manifest])
+    return ManifestStore([*(previous_manifest_boxes or []), manifest])
 
 
 def c2pie_EmplaceManifest(
     format_type: C2PA_ContentTypes,
     content_bytes: bytes,
     c2pa_offset: int,
-    manifests: ManifestStore,
+    manifest_store: ManifestStore,
 ) -> bytes:
-    if hasattr(manifests, "manifests"):
-        for manifest in manifests.manifests:
-            claim = getattr(manifest, "claim", None)
-            if claim is not None and hasattr(claim, "set_format"):
-                if format_type == C2PA_ContentTypes.jpg or format_type == C2PA_ContentTypes.jpeg:
-                    claim.set_format("image/jpg")
-                elif format_type == C2PA_ContentTypes.pdf:
-                    claim.set_format("application/pdf")
-
     if format_type == C2PA_ContentTypes.jpg or format_type == C2PA_ContentTypes.jpeg:
         assumed_hash_data_len = 0
         final_length = -1
         tail = b""
+
         for _ in range(RETRY_SIGNATURE):
-            manifests.set_hash_data_length_for_all(assumed_hash_data_len)
-            payload = manifests.serialize()
+            manifest_store.set_hash_data_length_for_all(assumed_hash_data_len)
+
+            payload = manifest_store.serialize()
             storage = JpgSegmentApp11Storage(
-                app11_segment_box_length=manifests.get_length(),
-                app11_segment_box_type=manifests.get_type(),
+                app11_segment_box_length=manifest_store.get_length(),
+                app11_segment_box_type=manifest_store.get_type(),
                 payload=payload,
             )
+
             tail = storage.serialize()
             total_len = len(tail)
+
             if total_len == final_length:
                 break
+
             final_length = total_len
             assumed_hash_data_len = total_len
+
         return content_bytes[:c2pa_offset] + tail + content_bytes[c2pa_offset:]
 
     if format_type == C2PA_ContentTypes.pdf:
-        return emplace_manifest_into_pdf(content_bytes, manifests)
+        return emplace_manifest_into_pdf(content_bytes, manifest_store)
 
     raise ValueError(f"Unsupported content type {format_type}!")

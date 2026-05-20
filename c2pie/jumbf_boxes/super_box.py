@@ -19,7 +19,11 @@ class SuperBox(Box):
         self.content_boxes = [] if content_boxes is None else content_boxes
 
         payload = self.description_box.serialize() + self.serialize_content_boxes()
-        super().__init__(b"jumb".hex(), payload=payload)
+
+        super().__init__(
+            b"jumb".hex(),
+            payload=payload,
+        )
 
     @classmethod
     def from_box(
@@ -45,7 +49,7 @@ class SuperBox(Box):
         return instance
 
     def _serialize_children(self) -> bytes:
-        return b"".join(cb.serialize() for cb in self.content_boxes if cb is not None)
+        return b"".join(content_box for content_box in self.content_boxes if content_box)
 
     def add_content_box(
         self,
@@ -58,7 +62,7 @@ class SuperBox(Box):
         serialized_content_boxes = b""
 
         for content_box in self.content_boxes:
-            if content_box is not None:
+            if content_box:
                 serialized_content_boxes += content_box.serialize()
 
         return serialized_content_boxes

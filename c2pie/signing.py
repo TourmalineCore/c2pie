@@ -1,17 +1,20 @@
-from __future__ import annotations
-
 import hashlib
 import os
 from pathlib import Path
 from typing import Literal
 
+from c2pie.c2pa_parsing.jumbf_parsing import extract_manifest_boxes, get_active_manifest_uuid
+from c2pie.c2pa_parsing.manifest_extractor import extract_manifest_store_bytes
 from c2pie.interface import (
     c2pie_EmplaceManifest,
     c2pie_GenerateActionsAssertion,
     c2pie_GenerateHashDataAssertion,
-    c2pie_GenerateManifest,
+    c2pie_GenerateIngredientAssertion,
+    c2pie_GenerateManifestStore,
 )
+from c2pie.jumbf_boxes.box import Box
 from c2pie.utils.content_types import C2PA_ContentTypes
+from c2pie.utils.generate_hashed_uri_map import generate_hashed_uri_map
 
 
 def _ensure_path_type_for_filepath(path: str | Path) -> Path:
@@ -23,6 +26,13 @@ def _ensure_path_type_for_filepath(path: str | Path) -> Path:
 def _get_content_type_by_filepath(file_path: Path) -> C2PA_ContentTypes:
     file_content_type = C2PA_ContentTypes(file_path.suffix)
     return file_content_type
+
+
+_DC_FORMAT_BY_CONTENT_TYPE: dict[str, str] = {
+    "jpg": "image/jpeg",
+    "jpeg": "image/jpeg",
+    "pdf": "application/pdf",
+}
 
 
 def _check_file_extension_is_supported(file_path: Path) -> None:
@@ -103,22 +113,6 @@ def _load_certificates_and_key(
     return key, certificates
 
 
-def _generate_hashed_uri_map(
-    url: str,
-    hash_value: bytes,
-    hash_algorithm: str | None = None,
-) -> dict[str, str | bytes]:
-    result: dict[str, str | bytes] = {
-        "url": url,
-        "hash": hash_value,
-    }
-
-    if hash_algorithm:
-        result["alg"] = hash_algorithm
-
-    return result
-
-
 def sign_file(
     input_path: Path | str,
     output_path: Path | str | None = None,
@@ -141,32 +135,63 @@ def sign_file(
     with open(input_path, "rb") as f:
         raw_bytes = f.read()
 
-    file_type: C2PA_ContentTypes = _get_content_type_by_filepath(file_path=input_path)
+    file_type: C2PA_ContentTypes = _get_content_type_by_filepath(input_path)
 
     if file_type.name == "pdf":
         cai_offset = len(raw_bytes)
     else:
         cai_offset = 2
 
+    assertions = []
+
     hash_data_assertion = c2pie_GenerateHashDataAssertion(
         cai_offset=cai_offset,
         hashed_data=hashlib.sha256(raw_bytes).digest(),
     )
 
-    # This section should be replaced with the content generation logic once the relevant
-    # functionality is available (example, action 'c2pa.opened' for Ingredient Assertion)
-    actions_assertion = c2pie_GenerateActionsAssertion(action="c2pa.created")
+    assertions.append(hash_data_assertion)
 
-    assertions = [
-        hash_data_assertion,
-        actions_assertion,
-    ]
+    manifest_store_bytes = extract_manifest_store_bytes(
+        file_type,
+        raw_bytes,
+    )
 
-    manifest = c2pie_GenerateManifest(
+    active_manifest_urn: str | None = get_active_manifest_uuid(manifest_store_bytes)
+    previous_manifest_boxes: list[Box] = extract_manifest_boxes(manifest_store_bytes)
+
+    ingredient_assertion = c2pie_GenerateIngredientAssertion(
+        title=input_path.name,
+        dc_format=_DC_FORMAT_BY_CONTENT_TYPE[file_type.name],
+        ingredient_bytes=raw_bytes,
+        active_manifest_urn=active_manifest_urn,
+        previous_manifest_boxes=previous_manifest_boxes,
+    )
+    assertions.append(ingredient_assertion)
+
+    ingredient_assertion_hash = hashlib.sha256(ingredient_assertion.payload).digest()
+
+    actions_assertion_parameters: dict[str, list[dict[str, str | bytes]]] = {
+        "ingredients": [
+            generate_hashed_uri_map(
+                url=f"self#jumbf=c2pa.assertions/{ingredient_assertion.get_label()}",
+                hash_value=ingredient_assertion_hash,
+                hash_algorithm="sha256",
+            ),
+        ],
+    }
+
+    actions_assertion = c2pie_GenerateActionsAssertion(
+        action="c2pa.opened",
+        parameters=actions_assertion_parameters,
+    )
+    assertions.append(actions_assertion)
+
+    manifest_store = c2pie_GenerateManifestStore(
         assertions=assertions,
         private_key=key,
         certificate_chain=certificates,
         file_name=output_path.name,
+        previous_manifest_boxes=previous_manifest_boxes,
         tsa_url=tsa_url,
         require_tsa=require_tsa,
         tsa_log_dir=tsa_log_dir,
@@ -176,7 +201,7 @@ def sign_file(
         format_type=file_type,
         content_bytes=raw_bytes,
         c2pa_offset=cai_offset,
-        manifests=manifest,
+        manifest_store=manifest_store,
     )
 
     with open(output_path, "wb") as output_file:

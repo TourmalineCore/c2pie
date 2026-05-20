@@ -1,7 +1,11 @@
-from __future__ import annotations
-
+import hashlib
+import io
 from typing import Any
 
+import c2pa
+
+from c2pie.c2pa_parsing.jumbf_parsing import find_in_box
+from c2pie.jumbf_boxes.box import Box
 from c2pie.jumbf_boxes.content_box import ContentBox
 from c2pie.jumbf_boxes.super_box import SuperBox
 from c2pie.utils.assertion_schemas import (
@@ -13,6 +17,7 @@ from c2pie.utils.assertion_schemas import (
     json_to_bytes,
 )
 from c2pie.utils.content_types import jumbf_content_types
+from c2pie.utils.generate_hashed_uri_map import generate_hashed_uri_map
 
 _ALLOWED_ACTIONS = ["c2pa.created", "c2pa.opened"]
 
@@ -29,7 +34,7 @@ class Assertion(SuperBox):
         self.type = assertion_type
         self.schema = schema
 
-        if content_boxes is None:
+        if not content_boxes:
             payload = self.get_payload_from_schema()
             box_type_hex = get_assertion_content_box_type(self.type)
             content_boxes = [ContentBox(box_type=box_type_hex, payload=payload)]
@@ -63,7 +68,13 @@ class HashDataAssertion(Assertion):
         hashed_data: bytes,
         additional_exclusions: list[dict[str, int]] | None = None,
     ):
-        exclusions: list[dict[str, int]] = [{"start": cai_offset, "length": 65535}]
+        exclusions: list[dict[str, int]] = [
+            {
+                "start": cai_offset,
+                "length": 65535,
+            },
+        ]
+
         if additional_exclusions:
             exclusions.extend(additional_exclusions)
 
@@ -76,12 +87,18 @@ class HashDataAssertion(Assertion):
         }
         super().__init__(C2PA_AssertionTypes.data_hash, schema)
 
-    def set_hash_data_length(self, length: int) -> None:
+    def set_hash_data_length(
+        self,
+        length: int,
+    ) -> None:
         if self.schema.get("name") != "jumbf manifest":
             raise ValueError("c2pa.hash.data: jumbf manifest is missing")
+
         exclusions = self.schema.get("exclusions", [])
+
         if not exclusions:
             raise ValueError("c2pa.hash.data: exclusions are missing")
+
         exclusions[0]["length"] = int(length)
 
         payload = self.get_payload_from_schema()
@@ -97,6 +114,7 @@ class HashDataAssertion(Assertion):
                     payload=payload,
                 )
             ]
+
         self.sync_payload()
 
 
@@ -185,3 +203,95 @@ class ThumbnailAssertion(EmbeddedDataAssertion):
             image_data=image_data,
             assertion_type=C2PA_AssertionTypes.thumbnail,
         )
+
+
+class IngredientAssertion(Assertion):
+    """c2pa.ingredient.v3 asset-binding assertion."""
+
+    def __init__(
+        self,
+        title: str,
+        dc_format: str,
+        ingredient_bytes: bytes,
+        active_manifest_urn: str | None,
+        previous_manifest_boxes: list[Box],
+    ):
+        schema: dict[str, Any] = {
+            "dc:title": title,
+            "dc:format": dc_format,
+            "relationship": "parentOf",
+        }
+
+        if active_manifest_urn and previous_manifest_boxes:
+            validation_results = self.validate_ingredient(
+                ingredient_bytes,
+                dc_format,
+            )
+
+            # We should not include information about the active manifest if validation was unsuccessful
+            if not validation_results:
+                super().__init__(
+                    C2PA_AssertionTypes.ingredient,
+                    schema,
+                )
+                return
+
+            active_manifest_box: Box = None
+            for box in previous_manifest_boxes:
+                found_box = find_in_box(
+                    box,
+                    active_manifest_urn,
+                )
+
+                if found_box:
+                    active_manifest_box = found_box
+                    break
+
+            # We should not include information about the active manifest if validation was unsuccessful
+            if not active_manifest_box:
+                super().__init__(
+                    C2PA_AssertionTypes.ingredient,
+                    schema,
+                )
+                return
+
+            active_manifest_hash = hashlib.sha256(active_manifest_box.payload).digest()
+
+            active_manifest: dict[str, str | bytes] = generate_hashed_uri_map(
+                url=f"self#jumbf=/c2pa/{active_manifest_urn}",
+                hash_value=active_manifest_hash,
+                hash_algorithm="sha256",
+            )
+
+            claim_signature_box = find_in_box(active_manifest_box, "c2pa.signature")
+
+            claim_signature_hash = hashlib.sha256(claim_signature_box.payload).digest()
+
+            claim_signature: dict[str, str | bytes] = generate_hashed_uri_map(
+                url=f"self#jumbf=/c2pa/{active_manifest_urn}/c2pa.signature",
+                hash_value=claim_signature_hash,
+                hash_algorithm="sha256",
+            )
+
+            schema["activeManifest"] = active_manifest
+            schema["validationResults"] = validation_results
+            schema["claimSignature"] = claim_signature
+
+        super().__init__(
+            C2PA_AssertionTypes.ingredient,
+            schema,
+        )
+
+    def validate_ingredient(
+        self,
+        ingredient_bytes: bytes,
+        mime_type: str,
+    ) -> dict | None:
+        stream = io.BytesIO(ingredient_bytes)
+        reader = c2pa.Reader.try_create(mime_type, stream)
+
+        if not reader:
+            return None
+
+        with reader:
+            return reader.get_validation_results()
