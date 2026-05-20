@@ -13,11 +13,9 @@ class Box:
         box_type: str,
         payload: bytes = b"",
     ):
-        self.payload = payload  # Box payload
+        self.payload = payload
         self.t_box = box_type
-        self.l_box = (
-            len(bytes.fromhex(self.t_box)) + 4 + len(self.payload)
-        )  # Size of box_type (4 bytes) + self size (4 bytes)
+        self.l_box = 4 + 4 + len(self.payload)  # 4 bytes (LBox) + 4 bytes (TBox) + payload
 
     def get_length(self):
         return self.l_box
@@ -46,6 +44,7 @@ class Box:
             data[offset : offset + LBOX_SIZE],
             BYTE_ORDER,
         )
+
         t_box = data[offset + LBOX_SIZE : offset + HEADER_SIZE].hex()
 
         # If the length of the box is unknown, the encoders may set the LBox value to 0.
@@ -60,6 +59,7 @@ class Box:
 
         payload = data[offset + HEADER_SIZE : end]
         box = cls(t_box, payload)
+
         return box, end
 
 

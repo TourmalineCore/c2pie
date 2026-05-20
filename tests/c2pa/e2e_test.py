@@ -64,7 +64,7 @@ def _c2pa_json_report(asset_path: str) -> dict:
 def test_e2e_signing_with_c2patool_validation(tmp_path):
     if not has_c2patool():
         pytest.skip("c2patool not available")
-    if sign_file is None:
+    if not sign_file:
         pytest.skip("sign_file function not available yet")
 
     os.environ["C2PA_BACKEND"] = "tool"

@@ -1,5 +1,4 @@
-from __future__ import annotations
-
+from c2pie.c2pa.manifest import Manifest
 from c2pie.jumbf_boxes.super_box import SuperBox
 from c2pie.utils.content_types import c2pa_content_types
 
@@ -11,8 +10,12 @@ class ManifestStore(SuperBox):
     For PDF, the length of the exception is set by the injector; for JPG, by its own injector.
     """
 
-    def __init__(self, manifests: list | None = None):
-        self.manifests: list = [] if manifests is None else manifests
+    def __init__(
+        self,
+        manifests: list[Manifest] | None = None,
+    ):
+        self.manifests: list[Manifest] = [] if manifests is None else manifests
+
         super().__init__(
             content_type=c2pa_content_types["manifest_store"],
             label="c2pa",
@@ -26,8 +29,8 @@ class ManifestStore(SuperBox):
         self,
         length: int,
     ) -> None:
-        for manifest in self.manifests:
-            manifest.set_hash_data_length(length)
+        self.manifests[-1].set_hash_data_length(length)
+
         super().sync_payload()
 
     def serialize(self) -> bytes:

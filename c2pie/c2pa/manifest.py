@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import uuid
 
 from c2pie.jumbf_boxes.super_box import SuperBox
@@ -21,7 +19,10 @@ class Manifest(SuperBox):
         self.claim_signature = None
         self.assertion_store = None
 
-        super().__init__(content_type=c2pa_content_types["default_manifest"], label=self.manifest_label)
+        super().__init__(
+            content_type=c2pa_content_types["default_manifest"],
+            label=self.manifest_label,
+        )
 
     def set_claim(self, claim):
         self.claim = claim
@@ -43,16 +44,17 @@ class Manifest(SuperBox):
             return self.assertion_store.get_assertions()
         return
 
-    def set_hash_data_length(self, length: int):
+    def set_hash_data_length(
+        self,
+        length: int,
+    ):
         """
         Updates the length of exceptions in HashData, reassembles Claim (assertion hashes)
         and ClaimSignature (COSE Sign1 detached over Claim CBOR).
         """
         if self.assertion_store and self.claim and self.claim_signature:
             self.assertion_store.set_hash_data_length(length)
-
             self.claim.set_assertion_store(self.assertion_store)
-
             self.claim_signature.set_claim(self.claim)
 
         self.sync_payload()
