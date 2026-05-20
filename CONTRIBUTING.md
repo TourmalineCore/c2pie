@@ -130,7 +130,7 @@ master         →  1.4.0
 
 | Commit type | Bump | Example |
 |---|---|---|
-| `fix` | patch | `1.4.0 → 1.4.1` |
+| `fix` / `docs` / `refactor` | patch | `1.4.0 → 1.4.1` |
 | `feat` | minor | `1.4.0 → 1.5.0` |
 | `feat!` / `BREAKING CHANGE` | major | `1.4.0 → 2.0.0` |
 
