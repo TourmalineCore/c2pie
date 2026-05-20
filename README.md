@@ -8,7 +8,7 @@
 
 [![Linting and Testing](https://github.com/TourmalineCore/c2pie/actions/workflows/lint-and-test.yml/badge.svg?branch=develop)](https://github.com/TourmalineCore/c2pie/actions/workflows/lint-and-test.yml)
 [![c2pa](https://img.shields.io/badge/c2pa-v1.4-seagreen.svg)](https://c2pa.org/)
-[![coverage](https://img.shields.io/badge/coverage-91%25-forestgreen?logo=codecov&logoColor=ff9d1c)](https://github.com/TourmalineCore/c2pie/actions/workflows/lint-and-test.yml)
+[![coverage](https://img.shields.io/badge/coverage-92%25-forestgreen?logo=codecov&logoColor=ff9d1c)](https://github.com/TourmalineCore/c2pie/actions/workflows/lint-and-test.yml)
 [![latest](https://img.shields.io/pypi/v/c2pie?label=latest&colorB=fc8021)](https://pypi.org/project/c2pie/)
 
 <br>
@@ -442,7 +442,7 @@ For detailed information on signing and certificates please explore the [corresp
 
 1) Load a sample asset (`tests/test_files/..`);
 
-2) Build a manifest with `c2pie_GenerateAssertion`, `c2pie_GenerateHashDataAssertion`, `c2pie_GenerateManifest`;
+2) Build a manifest with `c2pie_GenerateAssertion`, `c2pie_GenerateHashDataAssertion`, `c2pie_GenerateManifestStore`;
 
 3) Embed the manifest (`c2pie_EmplaceManifest`);  
 
