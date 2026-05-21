@@ -1,0 +1,74 @@
+{
+  "urn:c2pa:47affab1a5d24c75b991fbc030e02448": {
+    "claim": {
+      "instanceID": "xmp:iid:47affab1-a5d2-4c75-b991-fbc030e02448",
+      "claim_generator_info": {
+        "name": "c2pie",
+        "specVersion": "2.4.0"
+      },
+      "signature": "self#jumbf=c2pa/urn:c2pa:47affab1a5d24c75b991fbc030e02448/c2pa.signature",
+      "created_assertions": [
+        {
+          "url": "self#jumbf=/c2pa/urn:c2pa:47affab1a5d24c75b991fbc030e02448/c2pa.assertions/c2pa.hash.data",
+          "alg": "sha256",
+          "hash": "EYf/YOhrOlcaxxutOfLcIPZqq5w4H54XV8COi/LPQag="
+        }
+      ],
+      "gathered_assertions": [
+        {
+          "url": "self#jumbf=/c2pa/urn:c2pa:47affab1a5d24c75b991fbc030e02448/c2pa.assertions/c2pa.ingredient.v3",
+          "alg": "sha256",
+          "hash": "q9CufT1XerH+W2vJtzMcCdSeHjXjcmwpC5Y8wRoqTzQ="
+        },
+        {
+          "url": "self#jumbf=/c2pa/urn:c2pa:47affab1a5d24c75b991fbc030e02448/c2pa.assertions/c2pa.actions.v2",
+          "alg": "sha256",
+          "hash": "THwVz3Urtoaa6nfCKdoW8rmyHeJBKHbS27hX+5G4L+o="
+        }
+      ],
+      "dc:title": "out..jpeg",
+      "alg": "sha256",
+      "claim_version": 2
+    },
+    "assertion_store": {
+      "c2pa.hash.data": {
+        "name": "jumbf manifest",
+        "exclusions": [
+          {
+            "start": 2,
+            "length": 7099
+          }
+        ],
+        "alg": "sha256",
+        "hash": "E37XCCmj1TMM/dPvossZXekI7KBH7l/NhO1f2n6DhYY=",
+        "pad": []
+      },
+      "c2pa.ingredient.v3": {
+        "dc:title": "test_image.jpeg",
+        "dc:format": "image/jpeg",
+        "relationship": "parentOf"
+      },
+      "c2pa.actions.v2": {
+        "actions": [
+          {
+            "action": "c2pa.opened",
+            "parameters": {
+              "ingredients": [
+                {
+                  "url": "self#jumbf=c2pa.assertions/c2pa.ingredient.v3",
+                  "hash": "q9CufT1XerH+W2vJtzMcCdSeHjXjcmwpC5Y8wRoqTzQ=",
+                  "alg": "sha256"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "signature": {
+      "alg": "ps256",
+      "issuer": "C2PA Test Signing Cert",
+      "common_name": "C2PA Signer"
+    }
+  }
+}

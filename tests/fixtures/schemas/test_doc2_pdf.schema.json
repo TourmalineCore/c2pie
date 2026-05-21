@@ -1,0 +1,74 @@
+{
+    "urn:c2pa:47affab1a5d24c75b991fbc030e02448": {
+        "claim": {
+            "instanceID": "xmp:iid:47affab1-a5d2-4c75-b991-fbc030e02448",
+            "claim_generator_info": {
+                "name": "c2pie",
+                "specVersion": "2.4.0"
+            },
+            "signature": "self#jumbf=c2pa/urn:c2pa:47affab1a5d24c75b991fbc030e02448/c2pa.signature",
+            "created_assertions": [
+                {
+                    "url": "self#jumbf=/c2pa/urn:c2pa:47affab1a5d24c75b991fbc030e02448/c2pa.assertions/c2pa.hash.data",
+                    "alg": "sha256",
+                    "hash": "MMkQqVFzYqEzOVTMJZMnB8erzf/KJgoTqgfE7mvgRsg="
+                }
+            ],
+            "gathered_assertions": [
+                {
+                    "url": "self#jumbf=/c2pa/urn:c2pa:47affab1a5d24c75b991fbc030e02448/c2pa.assertions/c2pa.ingredient.v3",
+                    "alg": "sha256",
+                    "hash": "BL9TnPqwxPJQdMptT+k2ZaTNb/pm6fEEJ9WNYwav6gc="
+                },
+                {
+                    "url": "self#jumbf=/c2pa/urn:c2pa:47affab1a5d24c75b991fbc030e02448/c2pa.assertions/c2pa.actions.v2",
+                    "alg": "sha256",
+                    "hash": "P3Yot9Y66GXiJ2nVo0TGSnIKeT5UI5bu/ANbIPOrtwo="
+                }
+            ],
+            "dc:title": "out..pdf",
+            "alg": "sha256",
+            "claim_version": 2
+        },
+        "assertion_store": {
+            "c2pa.ingredient.v3": {
+                "dc:title": "test_doc2.pdf",
+                "dc:format": "application/pdf",
+                "relationship": "parentOf"
+            },
+            "c2pa.actions.v2": {
+                "actions": [
+                    {
+                        "action": "c2pa.opened",
+                        "parameters": {
+                            "ingredients": [
+                                {
+                                    "url": "self#jumbf=c2pa.assertions/c2pa.ingredient.v3",
+                                    "hash": "BL9TnPqwxPJQdMptT+k2ZaTNb/pm6fEEJ9WNYwav6gc=",
+                                    "alg": "sha256"
+                                }
+                            ]
+                        }
+                    }
+                ]
+            },
+            "c2pa.hash.data": {
+                "name": "jumbf manifest",
+                "exclusions": [
+                    {
+                        "start": 3591889,
+                        "length": 7783
+                    }
+                ],
+                "alg": "sha256",
+                "hash": "mLPrS6/BsFicteZ1kCv8iYJ57iUrlvsm39HoMT/hPF0=",
+                "pad": []
+            }
+        },
+        "signature": {
+            "alg": "ps256",
+            "issuer": "C2PA Test Signing Cert",
+            "common_name": "C2PA Signer"
+        }
+    }
+}

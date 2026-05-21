@@ -1,98 +1,97 @@
 import json
-import os
 import shutil
 import subprocess
+import uuid
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 
 from c2pie.signing import sign_file
-from c2pie.utils.content_types import C2PA_ContentTypes
 
-FIXTURES_DIR = Path(__file__).parent.parent / "test_files"
+FILES_DIR = Path(__file__).parent.parent / "fixtures"
 
-test_files_by_extension = {
-    "pdf": [
-        "test_doc.pdf",
-        "test_doc2.pdf",
-    ],
-    "jpg": [
-        "test_image.jpg",
-    ],
-    "jpeg": [
-        "test_image.jpeg",
-    ],
-}
-
-
-def get_test_file_full_path(filename: str) -> Path:
-    path = FIXTURES_DIR / filename
-    if not path.exists():
-        raise FileNotFoundError(f"Fixture not found: {path}")
-    return path
+test_cases = [
+    (
+        Path(FILES_DIR / "test_image.jpg"),
+        Path(FILES_DIR / "schemas/test_image_jpg.schema.json"),
+    ),
+    (
+        Path(FILES_DIR / "test_image.jpeg"),
+        Path(FILES_DIR / "schemas/test_image_jpeg.schema.json"),
+    ),
+    (
+        Path(FILES_DIR / "test_doc.pdf"),
+        Path(FILES_DIR / "schemas/test_doc_pdf.schema.json"),
+    ),
+    (
+        Path(FILES_DIR / "test_doc2.pdf"),
+        Path(FILES_DIR / "schemas/test_doc2_pdf.schema.json"),
+    ),
+]
 
 
-def copy_test_file(source_path: str, destination_path: Path) -> None:
-    source_full_path = get_test_file_full_path(source_path)
-    destination_path.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copyfile(source_full_path, destination_path)
-
-
-def has_c2patool() -> bool:
+def _has_c2patool() -> bool:
     return shutil.which("c2patool") is not None
 
 
-def _c2pa_json_report(asset_path: str) -> dict:
+def _validate_using_c2patool_and_return_json_report(asset_path: Path) -> dict:
     """
     Return c2patool's JSON report. If parsing fails, raise with stdout/stderr for debugging.
     """
     c2patool_launch_command = ["c2patool", asset_path, "-d"]
 
-    cp2atool_result = subprocess.run(c2patool_launch_command, capture_output=True, text=True)
-    evaluation_result = cp2atool_result
-    if cp2atool_result.returncode == 0:
-        return json.loads(cp2atool_result.stdout or "{}")
+    c2patool_result = subprocess.run(
+        c2patool_launch_command,
+        # If set to False (by default), 'stdout' and 'stderr' outputs
+        # will not be available via '.stderr' and '.stdout', correspondingly.
+        capture_output=True,
+        # If set to False (by default), a byte stream will be
+        # returned instead of a string.
+        text=True,
+    )
+
+    if c2patool_result.returncode == 0:
+        return json.loads(c2patool_result.stdout)
+
     pytest.fail(
         "c2patool failed or did not output JSON.\n"
-        f"args={evaluation_result.args if evaluation_result else None}\n"
-        f"stdout={evaluation_result.stdout if evaluation_result else None}\n"
-        f"stderr={evaluation_result.stderr if evaluation_result else None}"
+        f"args={c2patool_result.args if c2patool_result else None}\n"
+        f"stdout={c2patool_result.stdout if c2patool_result else None}\n"
+        f"stderr={c2patool_result.stderr if c2patool_result else None}"
     )
 
 
-@pytest.mark.e2e
-def test_e2e_signing_with_c2patool_validation(tmp_path):
-    if not has_c2patool():
+@pytest.mark.parametrize(
+    "data_file,schema_file",
+    test_cases,
+    ids=lambda p: p.name,
+)
+def test_e2e_signing_with_c2patool_validation(
+    data_file: Path,
+    schema_file: Path,
+    tmp_path,
+):
+    if not _has_c2patool():
         pytest.skip("c2patool not available")
-    if not sign_file:
-        pytest.skip("sign_file function not available yet")
 
-    os.environ["C2PA_BACKEND"] = "tool"
+    output_file = tmp_path / f"out.{data_file.suffix}"
 
-    for content_type in C2PA_ContentTypes:
-        input_file = tmp_path / f"in.{content_type.name}"
-        output_file = tmp_path / f"out.{content_type.name}"
+    fixed_uuid = uuid.UUID("47affab1a5d24c75b991fbc030e02448")
 
-        for test_file in test_files_by_extension[content_type.name]:
-            copy_test_file(f"./{test_file}", input_file)
+    # If the call is not intercepted and a fixed value
+    # is not specified, a random value will be generated
+    with (
+        patch("c2pie.interface.uuid.uuid4", return_value=fixed_uuid),
+        patch("c2pie.c2pa.claim.uuid.uuid4", return_value=fixed_uuid),
+    ):
+        sign_file(
+            input_path=data_file,
+            output_path=output_file,
+        )
 
-            try:
-                sign_file(
-                    input_path=input_file,
-                    output_path=output_file,
-                )
-            except NotImplementedError:
-                pytest.xfail("sign_file function not implemented yet")
+    report = _validate_using_c2patool_and_return_json_report(output_file)
+    manifests = report.get("manifests")
+    expected_schema = json.loads(schema_file.read_text())
 
-            data = _c2pa_json_report(str(output_file))
-            assert "manifests" in data or "manifest" in data
-
-            manifests = data.get("manifests")
-            assert manifests, "no manifests in output"
-
-            if isinstance(manifests, dict):
-                manifests_list = list(manifests.values())
-            else:
-                manifests_list = manifests
-
-            assert manifests_list, "empty manifests list after normalization"
+    assert manifests == expected_schema
