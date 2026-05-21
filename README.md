@@ -99,7 +99,7 @@ export C2PIE_CERTIFICATE_CHAIN_FILE=./certificate_chain.pem
 pip install c2pie 
 
 # Download test image from this repo
-wget https://raw.githubusercontent.com/TourmalineCore/c2pie/refs/heads/master/example_app/test_files/test_image.jpg
+wget https://raw.githubusercontent.com/TourmalineCore/c2pie/refs/heads/master/example_app/fixtures/test_image.jpg
 
 # Sign downloaded image
 c2pie sign --input_file ./test_image.jpg
@@ -126,7 +126,7 @@ After being copied to host machine, signed files can then be validated using eit
 
 1) Python environment. Currently supported Python versions: 3.10.0 - 3.14.5. Make sure to [create and activate virtual environment](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/) to avoid installing packages globally and any errors caused by that.
 
-2) Private key and certificate chain pair. The repo contains pre-generated mock credentials in `tests/credentials`. You can either download and use them for a quick start or go to [Certificates](#-certificates) for instructions on how to generate a similar key-certificate pair.
+2) Private key and certificate chain pair. The repo contains pre-generated mock credentials in `tests/fixtures/credentials`. You can either download and use them for a quick start or go to [Certificates](#-certificates) for instructions on how to generate a similar key-certificate pair.
 
 
 3) Key and certificate chain filepaths exported into the current environment with (pay attention to filenames):
@@ -158,8 +158,8 @@ c2pie sign --input_file path/to/input_file --output_file path/to/output_file
 
 If the file has been successfully signed, you'll see a message like this: 
 ```bash
-Successfully signed the file tests/test_files/test_doc.pdf!
-The result was saved to tests/test_files/signed_test_doc.pdf.
+Successfully signed the file tests/fixtures/test_doc.pdf!
+The result was saved to tests/fixtures/signed_test_doc.pdf.
 ```
 
 #### Code
@@ -184,8 +184,8 @@ sign_file(input_path=input_file_path, output_path=output_file_path)
 
 If the file has been successfully signed, you'll see a message like this: 
 ```bash
-Successfully signed the file tests/test_files/test_doc.pdf!
-The result was saved to tests/test_files/signed_test_doc.pdf.
+Successfully signed the file tests/fixtures/test_doc.pdf!
+The result was saved to tests/fixtures/signed_test_doc.pdf.
 ```
 
 <br>
@@ -219,11 +219,11 @@ Follow the steps:
     docker compose up c2pie-test-signing-pdf
     ```
 
-    After running either of these commands, you'll see a resulting signed file appear in `example_app/test_files` directory with a `signed-` prefix and a corresponding message with c2patool validation results in your terminal like this:
+    After running either of these commands, you'll see a resulting signed file appear in `example_app/fixtures` directory with a `signed-` prefix and a corresponding message with c2patool validation results in your terminal like this:
     
     ```bash
-    Successfully signed the file test_files/test_image.jpg!
-    The result was saved to test_files/signed_test_image.jpg. 
+    Successfully signed the file fixtures/test_image.jpg!
+    The result was saved to fixtures/signed_test_image.jpg. 
     c2patool_validation_results:
     {
         "active_manifest": "urn:uuid:f0ce8560b76342d1bb3085cfbe6cc5e9",
@@ -371,7 +371,7 @@ cargo install c2patool
 
 # 🥧 Certificates
 
-Example certificate chain and key file are located in `tests/credentials`. 
+Example certificate chain and key file are located in `tests/fixtures/credentials`. 
 
 >[!WARNING]
 >This repository's credentials are suitable for development only! 
@@ -442,7 +442,7 @@ For detailed information on signing and certificates please explore the [corresp
 
 ## Workflow of test applications
 
-1) Load a sample asset (`tests/test_files/..`);
+1) Load a sample asset (`tests/fixtures/..`);
 
 2) Build a manifest with `c2pie_GenerateAssertion`, `c2pie_GenerateHashDataAssertion`, `c2pie_GenerateManifestStore`;
 

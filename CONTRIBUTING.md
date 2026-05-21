@@ -37,7 +37,7 @@ To contribute to the c2pie package development, you can use one of the following
 
 3. To run any Python command related to the project's dependencies, remember to add `poetry run` in front of the command. For example:
     ```bash
-    poetry run c2pie sign --input_file tests/test_files/test_doc.pdf
+    poetry run c2pie sign --input_file tests/fixtures/test_doc.pdf
     
     poetry run ruff check
     ```
@@ -49,7 +49,7 @@ To contribute to the c2pie package development, you can use one of the following
 
 To run test applications, you need to fill out `TEST_PDF_PATH` and/or `TEST_IMAGE_PATH` in values in *.env*. Test scripts use these filepaths as input files for signing.
 
-Also make sure that you have test certificate chain and public key in `tests/credentials`. They should be there by default if you've cloned the repository. If needed, you can change their filepaths in *.env* as well.
+Also make sure that you have test certificate chain and public key in `tests/fixtures/credentials`. They should be there by default if you've cloned the repository. If needed, you can change their filepaths in *.env* as well.
 
 
 You can test the signing workflow with the following VS Code tasks:

@@ -5,7 +5,7 @@ build
 dist
 **/signed_*
 # This file is needed for unit tests
-!tests/test_files/signed_signed_test_doc.pdf
+!tests/fixtures/signed_signed_test_doc.pdf
 .vscode/launch.json
 .env
 **/.ipynb_checkpoints

@@ -38,13 +38,13 @@ def make_jpeg(*app11_segments: bytes) -> bytes:
 
 @pytest.fixture
 def signed_jpg_bytes() -> bytes:
-    path = Path(__file__).parent.parent / "test_files" / "big_c2pa_test_image.jpg"
+    path = Path(__file__).parent.parent / "fixtures" / "big_c2pa_test_image.jpg"
     return path.read_bytes()
 
 
 @pytest.fixture
 def signed_pdf_bytes() -> bytes:
-    path = Path(__file__).parent.parent / "test_files" / "signed_signed_test_doc.pdf"
+    path = Path(__file__).parent.parent / "fixtures" / "signed_signed_test_doc.pdf"
     return path.read_bytes()
 
 

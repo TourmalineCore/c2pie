@@ -28,8 +28,8 @@ def test_create_claim_signature_with_empty_claim():
 
 
 def test_create_claim_signature_with_non_empty_claim():
-    key_filepath = "tests/credentials/private-key.pem"
-    cert_filepath = "tests/credentials/certificate-chain.pub"
+    key_filepath = "tests/fixtures/credentials/private-key.pem"
+    cert_filepath = "tests/fixtures/credentials/certificate-chain.pub"
 
     with open(key_filepath, "rb") as f:
         key = f.read()

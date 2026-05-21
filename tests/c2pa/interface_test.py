@@ -15,8 +15,8 @@ from c2pie.utils.content_types import C2PA_ContentTypes
 JPEG_HEADER = b"\xff\xd8\xff"
 MEDIA_TYPE = "image/jpeg"
 
-KEY_FILEPATH = "tests/credentials/private-key.pem"
-CERT_FILEPATH = "tests/credentials/certificate-chain.pub"
+KEY_FILEPATH = "tests/fixtures/credentials/private-key.pem"
+CERT_FILEPATH = "tests/fixtures/credentials/certificate-chain.pub"
 
 
 def test_generate_assertion_has_correct_type():
@@ -129,7 +129,7 @@ def test_emplace_manifest_returns_bytes_with_jpeg_signature():
         key = f.read()
     with open(CERT_FILEPATH, "rb") as f:
         cert = f.read()
-    with open("tests/test_files/test_image.jpg", "rb") as f:
+    with open("tests/fixtures/test_image.jpg", "rb") as f:
         jpeg_bytes = f.read()
 
     assertions = [

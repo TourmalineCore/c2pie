@@ -10,8 +10,8 @@ from c2pie.c2pa.claim_signature import ClaimSignature
 from c2pie.tsa.exceptions import TSARequiredError
 from c2pie.utils.assertion_schemas import C2PA_AssertionTypes
 
-_KEY_FILE = "tests/credentials/private-key.pem"
-_CERT_FILE = "tests/credentials/certificate-chain.pub"
+_KEY_FILE = "tests/fixtures/credentials/private-key.pem"
+_CERT_FILE = "tests/fixtures/credentials/certificate-chain.pub"
 _FAKE_TST_DER = b"\x30\x82\x01\x00"
 
 

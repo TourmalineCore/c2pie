@@ -19,7 +19,7 @@ def _mock_get_label(box: Box) -> str | None:
 
 @pytest.fixture
 def signed_pdf_bytes() -> bytes:
-    path = Path(__file__).parent.parent / "test_files" / "signed_signed_test_doc.pdf"
+    path = Path(__file__).parent.parent / "fixtures" / "signed_signed_test_doc.pdf"
     return path.read_bytes()
 
 
