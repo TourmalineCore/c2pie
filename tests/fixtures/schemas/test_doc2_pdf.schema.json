@@ -11,7 +11,7 @@
                 {
                     "url": "self#jumbf=/c2pa/urn:c2pa:47affab1a5d24c75b991fbc030e02448/c2pa.assertions/c2pa.hash.data",
                     "alg": "sha256",
-                    "hash": "MMkQqVFzYqEzOVTMJZMnB8erzf/KJgoTqgfE7mvgRsg="
+                    "hash": "vgM0V20ABvnz0XSFmlfe7LF1Y/G7rDmJddAgTfukYu8="
                 }
             ],
             "gathered_assertions": [
@@ -26,7 +26,7 @@
                     "hash": "P3Yot9Y66GXiJ2nVo0TGSnIKeT5UI5bu/ANbIPOrtwo="
                 }
             ],
-            "dc:title": "out..pdf",
+            "dc:title": "out.pdf",
             "alg": "sha256",
             "claim_version": 2
         },
@@ -57,7 +57,7 @@
                 "exclusions": [
                     {
                         "start": 3591889,
-                        "length": 7783
+                        "length": 7782
                     }
                 ],
                 "alg": "sha256",

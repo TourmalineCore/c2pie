@@ -1,71 +1,73 @@
 {
     "urn:c2pa:47affab1a5d24c75b991fbc030e02448": {
         "claim": {
-            "instanceID": "xmp:iid:47affab1-a5d2-4c75-b991-fbc030e02448", 
+            "instanceID": "xmp:iid:47affab1-a5d2-4c75-b991-fbc030e02448",
             "claim_generator_info": {
-                "name": "c2pie", 
+                "name": "c2pie",
                 "specVersion": "2.4.0"
-            }, 
-            "signature": "self#jumbf=c2pa/urn:c2pa:47affab1a5d24c75b991fbc030e02448/c2pa.signature", 
+            },
+            "signature": "self#jumbf=c2pa/urn:c2pa:47affab1a5d24c75b991fbc030e02448/c2pa.signature",
             "created_assertions": [
                 {
-                    "url": "self#jumbf=/c2pa/urn:c2pa:47affab1a5d24c75b991fbc030e02448/c2pa.assertions/c2pa.hash.data", 
-                    "alg": "sha256", "hash": "SALOqfbvs2hmoTKZEIpL5R9B+wZP1ne6/ddaqNDdNIU="
+                    "url": "self#jumbf=/c2pa/urn:c2pa:47affab1a5d24c75b991fbc030e02448/c2pa.assertions/c2pa.hash.data",
+                    "alg": "sha256",
+                    "hash": "msm0uonQIj0Syqoq89aQ4qoPWDY4wYpy1crxKUB5fCc="
                 }
-            ], 
+            ],
             "gathered_assertions": [
                 {
-                    "url": "self#jumbf=/c2pa/urn:c2pa:47affab1a5d24c75b991fbc030e02448/c2pa.assertions/c2pa.ingredient.v3", 
-                    "alg": "sha256", 
+                    "url": "self#jumbf=/c2pa/urn:c2pa:47affab1a5d24c75b991fbc030e02448/c2pa.assertions/c2pa.ingredient.v3",
+                    "alg": "sha256",
                     "hash": "JJ18iFoSPOgnHBH6tKv30IPU9n7qH4koyvZDqXQKcu4="
-                }, 
+                },
                 {
-                    "url": "self#jumbf=/c2pa/urn:c2pa:47affab1a5d24c75b991fbc030e02448/c2pa.assertions/c2pa.actions.v2", 
-                    "alg": "sha256", "hash": "h7RlLBxuOP65Asr8/LVqx61Yt1mrIFm6nltq2qw+xnY="
+                    "url": "self#jumbf=/c2pa/urn:c2pa:47affab1a5d24c75b991fbc030e02448/c2pa.assertions/c2pa.actions.v2",
+                    "alg": "sha256",
+                    "hash": "h7RlLBxuOP65Asr8/LVqx61Yt1mrIFm6nltq2qw+xnY="
                 }
-            ], 
-            "dc:title": "out..jpg", 
-            "alg": "sha256", 
+            ],
+            "dc:title": "out.jpg",
+            "alg": "sha256",
             "claim_version": 2
-        }, 
+        },
         "assertion_store": {
+            "c2pa.ingredient.v3": {
+                "dc:title": "test_image.jpg",
+                "dc:format": "image/jpeg",
+                "relationship": "parentOf"
+            },
             "c2pa.actions.v2": {
                 "actions": [
                     {
-                        "action": "c2pa.opened", 
+                        "action": "c2pa.opened",
                         "parameters": {
                             "ingredients": [
                                 {
-                                    "url": "self#jumbf=c2pa.assertions/c2pa.ingredient.v3", 
-                                    "hash": "JJ18iFoSPOgnHBH6tKv30IPU9n7qH4koyvZDqXQKcu4=", 
+                                    "url": "self#jumbf=c2pa.assertions/c2pa.ingredient.v3",
+                                    "hash": "JJ18iFoSPOgnHBH6tKv30IPU9n7qH4koyvZDqXQKcu4=",
                                     "alg": "sha256"
                                 }
                             ]
                         }
                     }
                 ]
-            }, 
+            },
             "c2pa.hash.data": {
-                "name": "jumbf manifest", 
+                "name": "jumbf manifest",
                 "exclusions": [
                     {
-                        "start": 2, 
-                        "length": 7097
+                        "start": 2,
+                        "length": 7096
                     }
-                ], 
-                "alg": "sha256", 
-                "hash": "6yG+uMT+fWyhUvoOM6xoMlOvIUrHGUBi+ol66NEg0Mc=", 
+                ],
+                "alg": "sha256",
+                "hash": "6yG+uMT+fWyhUvoOM6xoMlOvIUrHGUBi+ol66NEg0Mc=",
                 "pad": []
-            }, 
-            "c2pa.ingredient.v3": {
-                "dc:title": "test_image.jpg", 
-                "dc:format": "image/jpeg", 
-                "relationship": "parentOf"
             }
-        }, 
+        },
         "signature": {
-            "alg": "ps256", 
-            "issuer": "C2PA Test Signing Cert", 
+            "alg": "ps256",
+            "issuer": "C2PA Test Signing Cert",
             "common_name": "C2PA Signer"
         }
     }

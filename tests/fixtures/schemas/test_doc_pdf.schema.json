@@ -11,7 +11,7 @@
                 {
                     "url": "self#jumbf=/c2pa/urn:c2pa:47affab1a5d24c75b991fbc030e02448/c2pa.assertions/c2pa.hash.data",
                     "alg": "sha256",
-                    "hash": "qwE9wvwSBT+2Pj2MlJoFDTP8jAK7zd/i/3wqmwI5m64="
+                    "hash": "N6NnQGQn/TLtwvX72beUdL1YMrOj0YD2c0mAkRQrZeE="
                 }
             ],
             "gathered_assertions": [
@@ -26,11 +26,28 @@
                     "hash": "apIdTwvVKzbY1BLve9N+DchrlMbMX39JB7fCj/xYeEg="
                 }
             ],
-            "dc:title": "out..pdf",
+            "dc:title": "out.pdf",
             "alg": "sha256",
             "claim_version": 2
         },
         "assertion_store": {
+            "c2pa.hash.data": {
+                "name": "jumbf manifest",
+                "exclusions": [
+                    {
+                        "start": 2233837,
+                        "length": 7783
+                    }
+                ],
+                "alg": "sha256",
+                "hash": "cqhAY3CQS51gK0CK7XUXTseD6hEnPMPbXG+snkrop4Q=",
+                "pad": []
+            },
+            "c2pa.ingredient.v3": {
+                "dc:title": "test_doc.pdf",
+                "dc:format": "application/pdf",
+                "relationship": "parentOf"
+            },
             "c2pa.actions.v2": {
                 "actions": [
                     {
@@ -46,23 +63,6 @@
                         }
                     }
                 ]
-            },
-            "c2pa.hash.data": {
-                "name": "jumbf manifest",
-                "exclusions": [
-                    {
-                        "start": 2233837,
-                        "length": 7784
-                    }
-                ],
-                "alg": "sha256",
-                "hash": "cqhAY3CQS51gK0CK7XUXTseD6hEnPMPbXG+snkrop4Q=",
-                "pad": []
-            },
-            "c2pa.ingredient.v3": {
-                "dc:title": "test_doc.pdf",
-                "dc:format": "application/pdf",
-                "relationship": "parentOf"
             }
         },
         "signature": {
