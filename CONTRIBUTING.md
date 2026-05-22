@@ -4,9 +4,13 @@ To contribute to the c2pie package development, you can use one of the following
 
 ### General principles
 
-🔸 Use Conventional Commits (e.g., `feat:`, `fix:`, `style(ruff):`, `ci:`). 
+🔸 Use Conventional Commits (e.g., `feat(scope):`, `fix:`, `style(ruff):`, `ci:`). 
 
-🔸 Use [Git Flow](https://nvie.com/posts/a-successful-git-branching-model/) branches names (e.g., `feature/`, `fix/`, `release/`).  
+🔸 Name branches using Git Flow convention with the issue number and short description
+(e.g., `feature/#67-add-validation`, `fix/#42-crash-on-empty-input`).
+
+🔸 Name pull requests using Conventional Commits format with the issue number
+(e.g., `feat(api): #67 add ingredient validation`, `fix(parser): #42 handle empty input`).
 
 🔸 Run `Lint and Format` task before committing.  
 
@@ -144,3 +148,12 @@ After every release on `master` or `release/*`, semantic-release automatically m
 | `release/*` | `develop` |
 
 > Note: Backmerged commit to the `develop` branch has the `[skip ci]` tag, so a new alpha release from the `develop` branch will not be created.
+
+### PyPI Publishing
+
+Every release (stable, RC, and alpha) automatically triggers the `publish-package.yml`
+workflow. It consists of two jobs:
+
+1. **Build** — installs Poetry and builds the package via `poetry build`
+2. **Publish** — uploads the built distributions to [PyPI](https://pypi.org/p/c2pie)
+   using the official [`pypa/gh-action-pypi-publish`](https://github.com/pypa/gh-action-pypi-publish) action
