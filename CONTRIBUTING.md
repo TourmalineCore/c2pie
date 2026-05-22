@@ -151,8 +151,9 @@ After every release on `master` or `release/*`, semantic-release automatically m
 
 ### PyPI Publishing
 
-Every release (stable, RC, and alpha) automatically triggers the `publish-package.yml`
-workflow. It consists of two jobs:
+Every release (stable, RC, and alpha) automatically triggers the `publish-package.yml` workflow. 
+
+Workflow consists of two jobs:
 
 1. **Build** — installs Poetry and builds the package via `poetry build`
 2. **Publish** — uploads the built distributions to [PyPI](https://pypi.org/p/c2pie)
