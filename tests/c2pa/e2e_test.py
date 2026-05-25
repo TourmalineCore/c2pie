@@ -1,5 +1,4 @@
 import json
-import os
 import shutil
 import subprocess
 from pathlib import Path
@@ -27,36 +26,58 @@ test_files_by_extension = {
 
 def get_test_file_full_path(filename: str) -> Path:
     path = FIXTURES_DIR / filename
+
     if not path.exists():
         raise FileNotFoundError(f"Fixture not found: {path}")
+
     return path
 
 
-def copy_test_file(source_path: str, destination_path: Path) -> None:
+def copy_test_file(
+    source_path: str,
+    destination_path: Path,
+) -> None:
     source_full_path = get_test_file_full_path(source_path)
-    destination_path.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copyfile(source_full_path, destination_path)
+
+    destination_path.parent.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    shutil.copyfile(
+        source_full_path,
+        destination_path,
+    )
 
 
 def has_c2patool() -> bool:
     return shutil.which("c2patool") is not None
 
 
-def _c2pa_json_report(asset_path: str) -> dict:
+def _validate_using_c2patool_and_return_json_report(asset_path: Path) -> dict:
     """
     Return c2patool's JSON report. If parsing fails, raise with stdout/stderr for debugging.
     """
     c2patool_launch_command = ["c2patool", asset_path, "-d"]
 
-    cp2atool_result = subprocess.run(c2patool_launch_command, capture_output=True, text=True)
-    evaluation_result = cp2atool_result
+    cp2atool_result = subprocess.run(
+        c2patool_launch_command,
+        # If set to False (by default), 'stdout' and 'stderr' outputs
+        # will not be available via '.stderr' and '.stdout', correspondingly.
+        capture_output=True,
+        # If set to False (by default), a byte stream will be
+        # returned instead of a string.
+        text=True,
+    )
+
     if cp2atool_result.returncode == 0:
-        return json.loads(cp2atool_result.stdout or "{}")
+        return json.loads(cp2atool_result.stdout)
+
     pytest.fail(
         "c2patool failed or did not output JSON.\n"
-        f"args={evaluation_result.args if evaluation_result else None}\n"
-        f"stdout={evaluation_result.stdout if evaluation_result else None}\n"
-        f"stderr={evaluation_result.stderr if evaluation_result else None}"
+        f"args={cp2atool_result.args if cp2atool_result else None}\n"
+        f"stdout={cp2atool_result.stdout if cp2atool_result else None}\n"
+        f"stderr={cp2atool_result.stderr if cp2atool_result else None}"
     )
 
 
@@ -64,35 +85,30 @@ def _c2pa_json_report(asset_path: str) -> dict:
 def test_e2e_signing_with_c2patool_validation(tmp_path):
     if not has_c2patool():
         pytest.skip("c2patool not available")
+
     if not sign_file:
         pytest.skip("sign_file function not available yet")
-
-    os.environ["C2PA_BACKEND"] = "tool"
 
     for content_type in C2PA_ContentTypes:
         input_file = tmp_path / f"in.{content_type.name}"
         output_file = tmp_path / f"out.{content_type.name}"
 
         for test_file in test_files_by_extension[content_type.name]:
-            copy_test_file(f"./{test_file}", input_file)
+            copy_test_file(
+                test_file,
+                input_file,
+            )
 
-            try:
-                sign_file(
-                    input_path=input_file,
-                    output_path=output_file,
-                )
-            except NotImplementedError:
-                pytest.xfail("sign_file function not implemented yet")
+            sign_file(
+                input_path=input_file,
+                output_path=output_file,
+            )
 
-            data = _c2pa_json_report(str(output_file))
-            assert "manifests" in data or "manifest" in data
+            report = _validate_using_c2patool_and_return_json_report(output_file)
+            assert "manifests" in report
 
-            manifests = data.get("manifests")
+            manifests = report.get("manifests")
             assert manifests, "no manifests in output"
 
-            if isinstance(manifests, dict):
-                manifests_list = list(manifests.values())
-            else:
-                manifests_list = manifests
-
+            manifests_list = list(manifests.values())
             assert manifests_list, "empty manifests list after normalization"
