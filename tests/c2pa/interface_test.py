@@ -76,6 +76,9 @@ def test_generate_manifest_returns_manifest_store():
         private_key=key,
         certificate_chain=cert,
         file_name=Path("test.jpg").name,
+        tsa_url=None,
+        require_tsa=False,
+        tsa_log_dir=None,
     )
 
     assert isinstance(manifest_store, ManifestStore)
@@ -93,6 +96,9 @@ def test_generate_manifest_contains_one_manifest():
         private_key=key,
         certificate_chain=cert,
         file_name=Path("test.jpg").name,
+        tsa_url=None,
+        require_tsa=False,
+        tsa_log_dir=None,
     )
 
     assert len(manifest_store.manifests) == 1
@@ -110,6 +116,9 @@ def test_generate_manifest_label_follows_urn_c2pa_format():
         private_key=key,
         certificate_chain=cert,
         file_name=Path("test.jpg").name,
+        tsa_url=None,
+        require_tsa=False,
+        tsa_log_dir=None,
     )
 
     label = manifest_store.manifests[0].get_manifest_label()
@@ -134,6 +143,9 @@ def test_emplace_manifest_returns_bytes_with_jpeg_signature():
         private_key=key,
         certificate_chain=cert,
         file_name=Path("test.jpg").name,
+        tsa_url=None,
+        require_tsa=False,
+        tsa_log_dir=None,
     )
 
     result = c2pie_EmplaceManifest(
@@ -167,6 +179,9 @@ def test_calculated_exclusion_covers_the_full_app11():
         private_key=key,
         certificate_chain=cert,
         file_name=Path("test.jpg").name,
+        tsa_url=None,
+        require_tsa=False,
+        tsa_log_dir=None,
     )
 
     # 2 bytes - jpeg marker

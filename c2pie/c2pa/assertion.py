@@ -71,7 +71,7 @@ class HashDataAssertion(Assertion):
         exclusions: list[dict[str, int]] = [
             {
                 "start": cai_offset,
-                "length": 65535,
+                "length": 0,
             },
         ]
 
@@ -79,11 +79,10 @@ class HashDataAssertion(Assertion):
             exclusions.extend(additional_exclusions)
 
         schema: dict[str, Any] = {
-            "name": "jumbf manifest",
             "exclusions": exclusions,
             "alg": "sha256",
             "hash": hashed_data,
-            "pad": [],
+            "pad": b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",
         }
         super().__init__(C2PA_AssertionTypes.data_hash, schema)
 
@@ -91,23 +90,19 @@ class HashDataAssertion(Assertion):
         self,
         length: int,
     ) -> None:
-        if self.schema.get("name") != "jumbf manifest":
-            raise ValueError("c2pa.hash.data: jumbf manifest is missing")
+        exclusions = self.schema["exclusions"]
+        previous_exclusion_lenght = len(cbor_to_bytes(exclusions))
 
-        exclusions = self.schema.get("exclusions", [])
+        self.schema["exclusions"][0]["length"] = length
+        current_exclusion_lenght = len(cbor_to_bytes(exclusions))
 
-        if not exclusions:
-            raise ValueError("c2pa.hash.data: exclusions are missing")
+        difference = current_exclusion_lenght - previous_exclusion_lenght
 
-        exclusions[0]["length"] = int(length)
+        self.schema["pad"] = self.schema["pad"][difference:]
 
         payload = self.get_payload_from_schema()
+
         if self.content_boxes:
-            self.content_boxes[0] = ContentBox(
-                box_type=get_assertion_content_box_type(self.type),
-                payload=payload,
-            )
-        else:
             self.content_boxes = [
                 ContentBox(
                     box_type=get_assertion_content_box_type(self.type),

@@ -38,12 +38,12 @@ def test_hash_data_assertion_schema_alg_is_sha256():
     assert data_hash_assertion.schema["alg"] == "sha256"
 
 
-def test_hash_data_assertion_schema_pad_is_empty():
+def test_hash_data_assertion_schema_pad_is_16_bytes_lenght():
     data_hash_assertion = HashDataAssertion(
         cai_offset=CAI_OFFSET,
         hashed_data=HASHED_DATA,
     )
-    assert data_hash_assertion.schema["pad"] == []
+    assert data_hash_assertion.schema["pad"] == b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
 
 
 def test_hash_data_assertion_has_correct_offset():
@@ -59,7 +59,7 @@ def test_hash_data_assertion_default_exclusion_length():
         cai_offset=CAI_OFFSET,
         hashed_data=HASHED_DATA,
     )
-    assert data_hash_assertion.schema["exclusions"][0]["length"] == 65535
+    assert data_hash_assertion.schema["exclusions"][0]["length"] == 0
 
 
 def test_hash_data_assertion_has_correct_hash():

@@ -10,7 +10,6 @@ from c2pie.c2pa.assertion import (
 from c2pie.c2pa.assertion_store import AssertionStore
 from c2pie.c2pa.claim import Claim
 from c2pie.c2pa.claim_signature import ClaimSignature
-from c2pie.c2pa.config import RETRY_SIGNATURE
 from c2pie.c2pa.manifest import Manifest
 from c2pie.c2pa.manifest_store import ManifestStore
 from c2pie.c2pa_injection.jpg_injection import JpgSegmentApp11Storage
@@ -82,9 +81,6 @@ def c2pie_GenerateManifestStore(
     tsa_url: str | None,
     require_tsa: bool,
     tsa_log_dir: str | None,
-    tsa_url: str | None = None,
-    require_tsa: bool = False,
-    tsa_log_dir: str | None = None,
     previous_manifest_boxes: list[Manifest] | None = None,
 ) -> ManifestStore:
     """
@@ -126,28 +122,29 @@ def c2pie_EmplaceManifest(
     manifest_store: ManifestStore,
 ) -> bytes:
     if format_type == C2PA_ContentTypes.jpg or format_type == C2PA_ContentTypes.jpeg:
-        assumed_hash_data_len = 0
-        final_length = -1
-        tail = b""
+        serialized_manifest_store = manifest_store.serialize()
 
-        for _ in range(RETRY_SIGNATURE):
-            manifest_store.set_hash_data_length_for_all(assumed_hash_data_len)
+        app11_storage = JpgSegmentApp11Storage(
+            app11_segment_box_length=manifest_store.get_length(),
+            app11_segment_box_type=manifest_store.get_type(),
+            payload=serialized_manifest_store,
+        )
 
-            payload = manifest_store.serialize()
-            storage = JpgSegmentApp11Storage(
-                app11_segment_box_length=manifest_store.get_length(),
-                app11_segment_box_type=manifest_store.get_type(),
-                payload=payload,
-            )
+        app11_storage.serialize()
 
-            tail = storage.serialize()
-            total_len = len(tail)
+        serialized_app11_storage_lenght = app11_storage.get_serialized_length()
 
-            if total_len == final_length:
-                break
+        manifest_store.set_hash_data_length_for_all(serialized_app11_storage_lenght)
 
-            final_length = total_len
-            assumed_hash_data_len = total_len
+        serialized_manifest_store = manifest_store.serialize()
+
+        app11_storage = JpgSegmentApp11Storage(
+            app11_segment_box_length=manifest_store.get_length(),
+            app11_segment_box_type=manifest_store.get_type(),
+            payload=serialized_manifest_store,
+        )
+
+        tail = app11_storage.serialize()
 
         return content_bytes[:c2pa_offset] + tail + content_bytes[c2pa_offset:]
 
