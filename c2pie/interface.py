@@ -82,6 +82,9 @@ def c2pie_GenerateManifestStore(
     tsa_url: str | None,
     require_tsa: bool,
     tsa_log_dir: str | None,
+    tsa_url: str | None = None,
+    require_tsa: bool = False,
+    tsa_log_dir: str | None = None,
     previous_manifest_boxes: list[Manifest] | None = None,
 ) -> ManifestStore:
     """

@@ -1,4 +1,5 @@
 from pathlib import Path
+from unittest.mock import patch
 
 from c2pie.c2pa.manifest_store import ManifestStore
 from c2pie.interface import (
@@ -75,9 +76,6 @@ def test_generate_manifest_returns_manifest_store():
         private_key=key,
         certificate_chain=cert,
         file_name=Path("test.jpg").name,
-        tsa_url=None,
-        require_tsa=False,
-        tsa_log_dir=None,
     )
 
     assert isinstance(manifest_store, ManifestStore)
@@ -95,9 +93,6 @@ def test_generate_manifest_contains_one_manifest():
         private_key=key,
         certificate_chain=cert,
         file_name=Path("test.jpg").name,
-        tsa_url=None,
-        require_tsa=False,
-        tsa_log_dir=None,
     )
 
     assert len(manifest_store.manifests) == 1
@@ -115,9 +110,6 @@ def test_generate_manifest_label_follows_urn_c2pa_format():
         private_key=key,
         certificate_chain=cert,
         file_name=Path("test.jpg").name,
-        tsa_url=None,
-        require_tsa=False,
-        tsa_log_dir=None,
     )
 
     label = manifest_store.manifests[0].get_manifest_label()
@@ -142,9 +134,6 @@ def test_emplace_manifest_returns_bytes_with_jpeg_signature():
         private_key=key,
         certificate_chain=cert,
         file_name=Path("test.jpg").name,
-        tsa_url=None,
-        require_tsa=False,
-        tsa_log_dir=None,
     )
 
     result = c2pie_EmplaceManifest(
@@ -156,3 +145,45 @@ def test_emplace_manifest_returns_bytes_with_jpeg_signature():
 
     assert isinstance(result, bytes)
     assert result[:2] == b"\xff\xd8"
+
+
+def test_calculated_exclusion_covers_the_full_app11():
+    with open(KEY_FILEPATH, "rb") as f:
+        key = f.read()
+    with open(CERT_FILEPATH, "rb") as f:
+        cert = f.read()
+    with open("tests/test_files/test_image.jpg", "rb") as f:
+        jpeg_bytes = f.read()
+
+    assertions = [
+        c2pie_GenerateHashDataAssertion(
+            cai_offset=2,
+            hashed_data=b"\x00" * 32,
+        ),
+    ]
+
+    manifest_store = c2pie_GenerateManifestStore(
+        assertions=assertions,
+        private_key=key,
+        certificate_chain=cert,
+        file_name=Path("test.jpg").name,
+    )
+
+    # 2 bytes - jpeg marker
+    # 2 bytes - segment lenght
+    # 2 bytes - CI
+    # 2 bytes - EN
+    # 4 bytes - Z
+    serialized_manifest_store_lenght = len(manifest_store.serialize()) + 2 + 2 + 2 + 2 + 4
+
+    with patch("c2pie.c2pa.manifest_store.ManifestStore.set_hash_data_length_for_all") as mock_func:
+        c2pie_EmplaceManifest(
+            format_type=C2PA_ContentTypes.jpg,
+            content_bytes=jpeg_bytes,
+            c2pa_offset=2,
+            manifest_store=manifest_store,
+        )
+
+        last_call = mock_func.call_args
+
+        assert serialized_manifest_store_lenght == last_call.args[0]
