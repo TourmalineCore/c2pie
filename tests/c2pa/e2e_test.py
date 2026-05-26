@@ -13,7 +13,7 @@ FIXTURES_DIR = Path(__file__).parent.parent / "test_files"
 test_files_by_extension = {
     "pdf": [
         "test_doc.pdf",
-        "test_doc2.pdf",
+        "test_broken_doc.pdf",
     ],
     "jpg": [
         "test_image.jpg",
