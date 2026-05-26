@@ -4,7 +4,6 @@ from typing import NamedTuple
 
 from pypdf import PdfWriter
 
-from c2pie.c2pa.config import RETRY_SIGNATURE
 from c2pie.c2pa.manifest_store import ManifestStore
 
 
@@ -66,7 +65,7 @@ def _xref_entry(offset: int) -> bytes:
 
 def emplace_manifest_into_pdf(
     initial_content: bytes,
-    manifests: ManifestStore,
+    manifest_store: ManifestStore,
     *,
     author: str | None = None,
 ) -> bytes:
@@ -80,6 +79,7 @@ def emplace_manifest_into_pdf(
     except ValueError:
         initial_content = _read_pdf_using_pypdf(initial_content=initial_content)
         info = _scan_pdf_to_get_its_data(initial_content)
+
     initial_length_of_file = len(initial_content)
     pointer_on_previous_xref = info.startxref
     starting_value = info.max_obj + 1
@@ -89,114 +89,134 @@ def emplace_manifest_into_pdf(
 
     author_info_required = bool(author)
 
-    assumed_hash_data_len = 0
-    last = -1
-    for _ in range(RETRY_SIGNATURE):
-        manifests.set_hash_data_length_for_all(assumed_hash_data_len)
-        store = manifests.serialize()
-        length_of_c2pa_manifest = len(store)
+    serialized_manifest_store = manifest_store.serialize()
 
-        object_1 = (
-            f"{starting_value} 0 obj\n".encode("ascii")
-            + f"<< /Type /EmbeddedFile /Subtype {subtype} /Length {length_of_c2pa_manifest} >>\n".encode("ascii")
-            + b"stream\n"
-            + store
-            + b"\nendstream\nendobj\n"
-        )
-        object_2 = (
-            f"{starting_value + 1} 0 obj\n".encode("ascii")
-            + (
-                f"<< /Type /Filespec /AFRelationship /C2PA_Manifest "
-                f"/F ({fname}) /UF ({fname}) /Desc (C2PA Manifest Store) "
-                f"/Subtype {subtype} /EF << /F {starting_value} 0 R >> >>\n"
-            ).encode("ascii")
+    serialized_manifest_store_lenght = len(serialized_manifest_store)
+
+    object_1 = (
+        f"{starting_value} 0 obj\n".encode("ascii")
+        + f"<< /Type /EmbeddedFile /Subtype {subtype} /Length {serialized_manifest_store_lenght} >>\n".encode("ascii")
+        + b"stream\n"
+        + serialized_manifest_store
+        + b"\nendstream\nendobj\n"
+    )
+    object_2 = (
+        f"{starting_value + 1} 0 obj\n".encode("ascii")
+        + (
+            f"<< /Type /Filespec /AFRelationship /C2PA_Manifest "
+            f"/F ({fname}) /UF ({fname}) /Desc (C2PA Manifest Store) "
+            f"/Subtype {subtype} /EF << /F {starting_value} 0 R >> >>\n"
+        ).encode("ascii")
+        + b"endobj\n"
+    )
+    object_3 = (
+        f"{starting_value + 2} 0 obj\n".encode("ascii")
+        + f"<< /Type /Names /Names [ ({fname}) {starting_value + 1} 0 R ] >>\n".encode("ascii")
+        + b"endobj\n"
+    )
+    object_4 = (
+        f"{starting_value + 3} 0 obj\n".encode("ascii")
+        + f"<< /Type /Names /EmbeddedFiles {starting_value + 2} 0 R >>\n".encode("ascii")
+        + b"endobj\n"
+    )
+    object_5 = (
+        f"{starting_value + 4} 0 obj\n".encode("ascii")
+        + (
+            f"<< /Type /Catalog /Pages {info.pages_ref} /Names "
+            f"{starting_value + 3} 0 R /AF [ {starting_value + 1} 0 R ] >>\n"
+        ).encode("ascii")
+        + b"endobj\n"
+    )
+
+    if author_info_required:
+        author_s = author.replace(")", r"\)") if author else ""
+        object_6 = (
+            f"{starting_value + 5} 0 obj\n".encode("ascii")
+            + f"<< /Author ({author_s}) >>\n".encode("ascii")
             + b"endobj\n"
         )
-        object_3 = (
-            f"{starting_value + 2} 0 obj\n".encode("ascii")
-            + f"<< /Type /Names /Names [ ({fname}) {starting_value + 1} 0 R ] >>\n".encode("ascii")
-            + b"endobj\n"
-        )
-        object_4 = (
-            f"{starting_value + 3} 0 obj\n".encode("ascii")
-            + f"<< /Type /Names /EmbeddedFiles {starting_value + 2} 0 R >>\n".encode("ascii")
-            + b"endobj\n"
-        )
-        object_5 = (
-            f"{starting_value + 4} 0 obj\n".encode("ascii")
-            + (
-                f"<< /Type /Catalog /Pages {info.pages_ref} /Names "
-                f"{starting_value + 3} 0 R /AF [ {starting_value + 1} 0 R ] >>\n"
-            ).encode("ascii")
-            + b"endobj\n"
-        )
+    else:
+        object_6 = b""
 
-        if author_info_required:
-            author_s = author.replace(")", r"\)") if author else ""
-            object_6 = (
-                f"{starting_value + 5} 0 obj\n".encode("ascii")
-                + f"<< /Author ({author_s}) >>\n".encode("ascii")
-                + b"endobj\n"
-            )
-        else:
-            object_6 = b""
+    sep = b"\n"
+    offset_of_object_1 = initial_length_of_file + len(sep)
+    offset_of_object_2 = offset_of_object_1 + len(object_1)
+    offset_of_object_3 = offset_of_object_2 + len(object_2)
+    offset_of_object_4 = offset_of_object_3 + len(object_3)
+    offset_of_object_5 = offset_of_object_4 + len(object_4)
 
-        sep = b"\n"
-        offset_of_object_1 = initial_length_of_file + len(sep)
-        offset_of_object_2 = offset_of_object_1 + len(object_1)
-        offset_of_object_3 = offset_of_object_2 + len(object_2)
-        offset_of_object_4 = offset_of_object_3 + len(object_3)
-        offset_of_object_5 = offset_of_object_4 + len(object_4)
-        if author_info_required:
-            offset_of_object_6 = offset_of_object_5 + len(object_5)
-            xref_pos = offset_of_object_6 + len(object_6)
-        else:
-            xref_pos = offset_of_object_5 + len(object_5)
+    if author_info_required:
+        offset_of_object_6 = offset_of_object_5 + len(object_5)
+        xref_pos = offset_of_object_6 + len(object_6)
+    else:
+        xref_pos = offset_of_object_5 + len(object_5)
 
-        count = 5 + (1 if author_info_required else 0)
-        xref = b"xref\n" + f"{starting_value} {count}\n".encode("ascii")
-        xref += (
-            _xref_entry(offset_of_object_1)
-            + _xref_entry(offset_of_object_2)
-            + _xref_entry(offset_of_object_3)
-            + _xref_entry(offset_of_object_4)
-            + _xref_entry(offset_of_object_5)
-        )
-        if author_info_required:
-            xref += _xref_entry(offset_of_object_6)
+    count = 5 + (1 if author_info_required else 0)
+    xref = b"xref\n" + f"{starting_value} {count}\n".encode("ascii")
+    xref += (
+        _xref_entry(offset_of_object_1)
+        + _xref_entry(offset_of_object_2)
+        + _xref_entry(offset_of_object_3)
+        + _xref_entry(offset_of_object_4)
+        + _xref_entry(offset_of_object_5)
+    )
 
-        size_val = starting_value + count
-        trailer = (
-            b"trailer\n<< "
-            + f"/Size {size_val} ".encode("ascii")
-            + f"/Root {starting_value + 4} 0 R ".encode("ascii")
-            + f"/Prev {pointer_on_previous_xref} ".encode("ascii")
-        )
-        if author_info_required:
-            trailer += f"/Info {starting_value + 5} 0 R ".encode("ascii")
-        trailer += b">>\n"
+    if author_info_required:
+        xref += _xref_entry(offset_of_object_6)
 
-        tail = (
-            sep
-            + object_1
-            + object_2
-            + object_3
-            + object_4
-            + object_5
-            + object_6
-            + xref
-            + trailer
-            + b"startxref\n"
-            + str(xref_pos).encode("ascii")
-            + b"\n%%EOF\n"
-        )
+    size_val = starting_value + count
+    trailer = (
+        b"trailer\n<< "
+        + f"/Size {size_val} ".encode("ascii")
+        + f"/Root {starting_value + 4} 0 R ".encode("ascii")
+        + f"/Prev {pointer_on_previous_xref} ".encode("ascii")
+    )
 
-        total_len = len(tail)
-        if total_len == last:
-            return initial_content + tail
-        last = total_len
-        assumed_hash_data_len = total_len
+    if author_info_required:
+        trailer += f"/Info {starting_value + 5} 0 R ".encode("ascii")
 
-    manifests.set_hash_data_length_for_all(assumed_hash_data_len)
-    store = manifests.serialize()
+    trailer += b">>\n"
+
+    tail = (
+        sep
+        + object_1
+        + object_2
+        + object_3
+        + object_4
+        + object_5
+        + object_6
+        + xref
+        + trailer
+        + b"startxref\n"
+        + str(xref_pos).encode("ascii")
+        + b"\n%%EOF\n"
+    )
+
+    manifest_store.set_hash_data_length_for_all(len(tail))
+
+    serialized_manifest_store = manifest_store.serialize()
+
+    object_1 = (
+        f"{starting_value} 0 obj\n".encode("ascii")
+        + f"<< /Type /EmbeddedFile /Subtype {subtype} /Length {serialized_manifest_store_lenght} >>\n".encode("ascii")
+        + b"stream\n"
+        + serialized_manifest_store
+        + b"\nendstream\nendobj\n"
+    )
+
+    tail = (
+        sep
+        + object_1
+        + object_2
+        + object_3
+        + object_4
+        + object_5
+        + object_6
+        + xref
+        + trailer
+        + b"startxref\n"
+        + str(xref_pos).encode("ascii")
+        + b"\n%%EOF\n"
+    )
+
     return initial_content + tail
