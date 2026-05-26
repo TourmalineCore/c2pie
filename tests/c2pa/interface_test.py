@@ -1,6 +1,8 @@
 from pathlib import Path
 from unittest.mock import patch
 
+import pytest
+
 from c2pie.c2pa.manifest_store import ManifestStore
 from c2pie.interface import (
     c2pie_EmplaceManifest,
@@ -159,13 +161,27 @@ def test_emplace_manifest_returns_bytes_with_jpeg_signature():
     assert result[:2] == b"\xff\xd8"
 
 
-def test_calculated_exclusion_covers_the_full_app11():
+FIXTURES_FOLDER_PATH = Path(__file__).parent.parent / "test_files"
+
+test_cases = [
+    Path(FIXTURES_FOLDER_PATH / "test_image.jpg"),
+    Path(FIXTURES_FOLDER_PATH / "test_doc.pdf"),
+]
+
+
+@pytest.mark.parametrize(
+    "file",
+    test_cases,
+    ids=lambda x: x.suffix[1:],
+)
+def test_calculated_exclusion_covers_the_full_storage(file):
     with open(KEY_FILEPATH, "rb") as f:
         key = f.read()
     with open(CERT_FILEPATH, "rb") as f:
         cert = f.read()
-    with open("tests/test_files/test_image.jpg", "rb") as f:
-        jpeg_bytes = f.read()
+
+    with open(file, "rb") as f:
+        raw_bytes = f.read()
 
     assertions = [
         c2pie_GenerateHashDataAssertion(
@@ -178,27 +194,39 @@ def test_calculated_exclusion_covers_the_full_app11():
         assertions=assertions,
         private_key=key,
         certificate_chain=cert,
-        file_name=Path("test.jpg").name,
+        file_name=file.name,
         tsa_url=None,
         require_tsa=False,
         tsa_log_dir=None,
     )
 
-    # 2 bytes - jpeg marker
-    # 2 bytes - segment lenght
-    # 2 bytes - CI
-    # 2 bytes - EN
-    # 4 bytes - Z
-    serialized_manifest_store_lenght = len(manifest_store.serialize()) + 2 + 2 + 2 + 2 + 4
+    file_extension = C2PA_ContentTypes(file.suffix)
+
+    if file_extension == C2PA_ContentTypes.jpeg or file_extension == C2PA_ContentTypes.jpg:
+        """
+        Expected length of serialized data in JPEG/JPG format consists 
+        of APP11 segment header + payload (serialized ManifestStore).
+
+        More info about APP11 segment you can see here: docs/JPG-structure-overview.md
+        """
+        expected_serialized_lenght = 2 + 2 + 2 + 2 + 4 + len(manifest_store.serialize())
+    elif file_extension == C2PA_ContentTypes.pdf:
+        """
+        Expected length of serialized data in PDF format consists 
+        of boby (serialized ManifestStore) + updated cross-ref table and trailer.
+
+        More info about PDF Incremental Update you can see here: docs/PDF-structure-overview.md
+        """
+        expected_serialized_lenght = 7115
 
     with patch("c2pie.c2pa.manifest_store.ManifestStore.set_hash_data_length_for_all") as mock_func:
         c2pie_EmplaceManifest(
-            format_type=C2PA_ContentTypes.jpg,
-            content_bytes=jpeg_bytes,
+            format_type=file_extension,
+            content_bytes=raw_bytes,
             c2pa_offset=2,
             manifest_store=manifest_store,
         )
 
         last_call = mock_func.call_args
 
-        assert serialized_manifest_store_lenght == last_call.args[0]
+        assert expected_serialized_lenght == last_call.args[0]
