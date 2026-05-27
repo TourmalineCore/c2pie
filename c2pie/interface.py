@@ -24,13 +24,9 @@ def c2pie_GenerateAssertion(assertion_type: C2PA_AssertionTypes, assertion_schem
 
 
 def c2pie_GenerateHashDataAssertion(
-    cai_offset: int,
     hashed_data: bytes,
 ) -> HashDataAssertion:
-    return HashDataAssertion(
-        cai_offset,
-        hashed_data,
-    )
+    return HashDataAssertion(hashed_data)
 
 
 def c2pie_GenerateActionsAssertion(
@@ -134,7 +130,10 @@ def c2pie_EmplaceManifest(
 
         serialized_app11_storage_lenght = app11_storage.get_serialized_length()
 
-        manifest_store.set_hash_data_length_for_all(serialized_app11_storage_lenght)
+        manifest_store.add_full_c2pa_structure_exclusion(
+            c2pa_offset,
+            serialized_app11_storage_lenght,
+        )
 
         serialized_manifest_store = manifest_store.serialize()
 
@@ -149,6 +148,10 @@ def c2pie_EmplaceManifest(
         return content_bytes[:c2pa_offset] + tail + content_bytes[c2pa_offset:]
 
     if format_type == C2PA_ContentTypes.pdf:
-        return emplace_manifest_into_pdf(content_bytes, manifest_store)
+        return emplace_manifest_into_pdf(
+            content_bytes,
+            manifest_store,
+            c2pa_offset,
+        )
 
     raise ValueError(f"Unsupported content type {format_type}!")

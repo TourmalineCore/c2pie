@@ -37,7 +37,12 @@ class Assertion(SuperBox):
         if not content_boxes:
             payload = self.get_payload_from_schema()
             box_type_hex = get_assertion_content_box_type(self.type)
-            content_boxes = [ContentBox(box_type=box_type_hex, payload=payload)]
+            content_boxes = [
+                ContentBox(
+                    box_type=box_type_hex,
+                    payload=payload,
+                )
+            ]
 
         super().__init__(
             content_type=get_assertion_content_type(self.type),
@@ -64,16 +69,10 @@ class HashDataAssertion(Assertion):
 
     def __init__(
         self,
-        cai_offset: int,
         hashed_data: bytes,
         additional_exclusions: list[dict[str, int]] | None = None,
     ):
-        exclusions: list[dict[str, int]] = [
-            {
-                "start": cai_offset,
-                "length": 0,
-            },
-        ]
+        exclusions: list[dict[str, int]] = []
 
         if additional_exclusions:
             exclusions.extend(additional_exclusions)
@@ -82,33 +81,63 @@ class HashDataAssertion(Assertion):
             "exclusions": exclusions,
             "alg": "sha256",
             "hash": hashed_data,
-            "pad": b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",
+            "pad": b""
+            + b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+            + b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+            + b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+            + b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",
         }
-        super().__init__(C2PA_AssertionTypes.data_hash, schema)
 
-    def set_hash_data_length(
+        super().__init__(
+            C2PA_AssertionTypes.data_hash,
+            schema,
+        )
+
+    def add_full_c2pa_structure_exclusion(
         self,
+        offset: int,
         length: int,
     ) -> None:
         exclusions = self.schema["exclusions"]
         previous_exclusion_lenght = len(cbor_to_bytes(exclusions))
 
-        self.schema["exclusions"][0]["length"] = length
+        self.schema["exclusions"].extend(
+            [
+                {
+                    "start": offset,
+                    "length": length,
+                },
+            ]
+        )
+
         current_exclusion_lenght = len(cbor_to_bytes(exclusions))
 
         difference = current_exclusion_lenght - previous_exclusion_lenght
 
-        self.schema["pad"] = self.schema["pad"][difference:]
+        """
+        Important! If the Data Hash Assertion is less than 24 bytes or greater than
+        255 bytes, the size of the cbor header will change during conversion to cbor
+        and will occupy less than 2 bytes or more than 2 bytes, correspondingly.
+        """
+
+        schema_length = len(cbor_to_bytes(self.schema))
+        additional_byte = 0  # 2 byte CBOR header case
+
+        if schema_length < 24:  # 1 byte CBOR header case
+            additional_byte = -1
+        elif schema_length > 255:  # 3 byte CBOR header case
+            additional_byte = 1
+
+        self.schema["pad"] = self.schema["pad"][difference + additional_byte :]
 
         payload = self.get_payload_from_schema()
 
-        if self.content_boxes:
-            self.content_boxes = [
-                ContentBox(
-                    box_type=get_assertion_content_box_type(self.type),
-                    payload=payload,
-                )
-            ]
+        self.content_boxes = [
+            ContentBox(
+                box_type=get_assertion_content_box_type(self.type),
+                payload=payload,
+            )
+        ]
 
         self.sync_payload()
 

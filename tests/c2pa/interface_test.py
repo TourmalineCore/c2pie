@@ -43,7 +43,6 @@ def test_generate_hash_data_assertion_returns_hash_data_assertion_instance():
     from c2pie.c2pa.assertion import HashDataAssertion
 
     hash_data_assertion = c2pie_GenerateHashDataAssertion(
-        cai_offset=2,
         hashed_data=b"\x00" * 32,
     )
     assert isinstance(hash_data_assertion, HashDataAssertion)
@@ -136,7 +135,7 @@ def test_emplace_manifest_returns_bytes_with_jpeg_signature():
         jpeg_bytes = f.read()
 
     assertions = [
-        c2pie_GenerateHashDataAssertion(cai_offset=2, hashed_data=b"\x00" * 32),
+        c2pie_GenerateHashDataAssertion(hashed_data=b"\x00" * 32),
         c2pie_GenerateActionsAssertion(action="c2pa.created"),
     ]
 
@@ -185,7 +184,6 @@ def test_calculated_exclusion_covers_the_full_storage(file):
 
     assertions = [
         c2pie_GenerateHashDataAssertion(
-            cai_offset=2,
             hashed_data=b"\x00" * 32,
         ),
     ]
@@ -219,7 +217,7 @@ def test_calculated_exclusion_covers_the_full_storage(file):
         """
         expected_serialized_lenght = 7115
 
-    with patch("c2pie.c2pa.manifest_store.ManifestStore.set_hash_data_length_for_all") as mock_func:
+    with patch("c2pie.c2pa.manifest_store.ManifestStore.add_full_c2pa_structure_exclusion") as mock_func:
         c2pie_EmplaceManifest(
             format_type=file_extension,
             content_bytes=raw_bytes,
@@ -229,4 +227,4 @@ def test_calculated_exclusion_covers_the_full_storage(file):
 
         last_call = mock_func.call_args
 
-        assert expected_serialized_lenght == last_call.args[0]
+        assert expected_serialized_lenght == last_call.args[1]

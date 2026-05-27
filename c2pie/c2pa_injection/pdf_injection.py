@@ -66,6 +66,7 @@ def _xref_entry(offset: int) -> bytes:
 def emplace_manifest_into_pdf(
     initial_content: bytes,
     manifest_store: ManifestStore,
+    c2pa_offset: int,
     *,
     author: str | None = None,
 ) -> bytes:
@@ -192,7 +193,10 @@ def emplace_manifest_into_pdf(
         + b"\n%%EOF\n"
     )
 
-    manifest_store.set_hash_data_length_for_all(len(tail))
+    manifest_store.add_full_c2pa_structure_exclusion(
+        c2pa_offset,
+        len(tail),
+    )
 
     serialized_manifest_store = manifest_store.serialize()
 

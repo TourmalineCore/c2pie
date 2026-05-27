@@ -145,7 +145,6 @@ def sign_file(
     assertions = []
 
     hash_data_assertion = c2pie_GenerateHashDataAssertion(
-        cai_offset=cai_offset,
         hashed_data=hashlib.sha256(raw_bytes).digest(),
     )
 
