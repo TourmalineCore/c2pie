@@ -64,6 +64,8 @@ class ClaimSignature(SuperBox):
         self.require_tsa = require_tsa
         self.tsa_log_dir = tsa_log_dir
 
+        self.serialized_length = 0
+
         content_boxes = self._generate_payload()
 
         super().__init__(
@@ -129,9 +131,44 @@ class ClaimSignature(SuperBox):
                         },
                     ],
                 },
+                "pad": b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",
             }
 
         return unprotected_header
+
+    def serialize_cose_sign1_tagged_with_alignment(
+        self,
+        cose_sign1: list,
+    ) -> bytes:
+        """
+        Takes a COSE_Sign1 as an array containing protected_header, unprotected_header,
+        payload, and signature, and returns a serialized COSE_Sign1_Tagged structure.
+        """
+        cose_sign1_tagged_cbor = cbor2.dumps(
+            cbor2.CBORTag(18, cose_sign1),
+            canonical=True,
+        )
+
+        """
+        The length of a TSA token can be variable. To ensure that a new token does not exceed
+        the exclusion boundary for the C2PA structure, we need to align the length of
+        the Claim Signature using the pad field, similar to the Data Hash Assertion.
+        """
+        if self.serialized_length == 0:
+            self.serialized_length = len(cose_sign1_tagged_cbor)
+        elif self.serialized_length != len(cose_sign1_tagged_cbor):
+            difference = self.serialized_length - len(cose_sign1_tagged_cbor)
+
+            if difference > len(cose_sign1[1]["pad"]):
+                raise ValueError("Difference in length exceeds the predefined pad")
+
+            cose_sign1[1]["pad"] = b"\x00" * (len(cose_sign1[1]["pad"]) + difference)
+            cose_sign1_tagged_cbor = cbor2.dumps(
+                cbor2.CBORTag(18, cose_sign1),
+                canonical=True,
+            )
+
+        return cose_sign1_tagged_cbor
 
     def _create_cose_sign1_tagged(self) -> bytes:
         """
@@ -179,4 +216,6 @@ class ClaimSignature(SuperBox):
 
         cose_sign1 = [serialized_protected_header, unprotected_header, None, signature]
 
-        return cbor2.dumps(cbor2.CBORTag(18, cose_sign1), canonical=True)
+        cose_sign1_tagged_cbor = self.serialize_cose_sign1_tagged_with_alignment(cose_sign1)
+
+        return cose_sign1_tagged_cbor
