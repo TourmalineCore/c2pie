@@ -1,3 +1,11 @@
+# JPG_SEGMENT_MAX_PAYLOAD_LENGTH =
+#   65535 (max segment length)
+#   - 2 (bytes of length)
+#   - 2 (bytes of CI)
+#   - 2 (bytes of EN)
+#   - 4 (bytes of Z)
+#   - 4 (bytes of LBox)
+#   - 4 (bytes of TBox)
 JPG_SEGMENT_MAX_PAYLOAD_LENGTH = 65517
 
 
