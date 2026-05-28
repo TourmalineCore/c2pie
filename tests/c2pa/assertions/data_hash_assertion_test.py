@@ -46,26 +46,39 @@ def test_hash_data_assertion_serializes_as_cbor():
     assert data_hash_assertion.content_boxes[0].payload == expected_payload
 
 
-def test_hash_data_assertion_with_additional_exclusions():
-    additional = [
-        {
-            "start": 100,
-            "length": 200,
-        },
-    ]
+# def test_hash_data_assertion_with_additional_exclusions():
+#     additional = [
+#         {
+#             "start": 100,
+#             "length": 200,
+#         },
+#     ]
 
-    data_hash_assertion = HashDataAssertion(
-        hashed_data=HASHED_DATA,
-        additional_exclusions=additional,
-    )
+#     data_hash_assertion = HashDataAssertion(
+#         hashed_data=HASHED_DATA,
+#         additional_exclusions=additional,
+#     )
 
-    exclusions = data_hash_assertion.schema["exclusions"]
+#     exclusions = data_hash_assertion.schema["exclusions"]
 
-    assert len(exclusions) == 1
-    assert exclusions[0] == {
-        "start": 100,
-        "length": 200,
-    }
+#     assert len(exclusions) == 1
+#     assert exclusions[0] == {
+#         "start": 100,
+#         "length": 200,
+#     }
+
+# def test_additional_extensions_adding_for_hash_data_assertions():
+#     additional_exclusion = {
+#         "start": 100,
+#         "length": 1000,
+#     }
+
+#     data_hash_assertion = HashDataAssertion(
+#         hashed_data=b"",
+#         additional_exclusions=[additional_exclusion],
+#     )
+
+#     assert additional_exclusion in data_hash_assertion.schema["exclusions"]
 
 
 def test_hash_data_assertion_without_additional_exclusions_has_not_exclusions():

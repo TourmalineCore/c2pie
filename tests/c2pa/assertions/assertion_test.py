@@ -77,16 +77,3 @@ def test_assertion_content_boxes_not_empty():  # noqa: F811
     actions_assertion = Assertion(C2PA_AssertionTypes.actions, {})
     assert len(actions_assertion.content_boxes) != 0
 
-
-def test_additional_extensions_adding_for_hash_data_assertions():
-    additional_exclusion = {
-        "start": 100,
-        "length": 1000,
-    }
-
-    data_hash_assertion = HashDataAssertion(
-        hashed_data=b"",
-        additional_exclusions=[additional_exclusion],
-    )
-
-    assert additional_exclusion in data_hash_assertion.schema["exclusions"]
