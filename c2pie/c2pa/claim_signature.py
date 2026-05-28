@@ -161,9 +161,9 @@ class ClaimSignature(SuperBox):
             # If a CBOR overflow is not handled, the extra length byte that
             # would be added in this case will not be taken into account.
             if updated_pad_length > 23:
-                difference += 1
+                updated_pad_length += 1
             elif updated_pad_length > 255:
-                difference += 2
+                updated_pad_length += 2
 
             cose_sign1[1]["pad"] = b"\x00" * updated_pad_length
             cose_sign1_tagged_cbor = cbor2.dumps(
