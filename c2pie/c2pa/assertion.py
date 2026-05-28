@@ -119,15 +119,14 @@ class HashDataAssertion(Assertion):
         if -difference > len(self.schema["pad"]):
             raise ValueError("Difference in length exceeds the predefined pad")
 
-        # Important! If the pad is less than 24 bytes the size of the cbor header
+        # If the pad is less than 24 bytes the size of the cbor header
         # will change during conversion to cbor and will occupy less than 2 bytes.
-        additional_byte = 0
         updated_pad_length = len(self.schema["pad"]) + difference
 
         # If a CBOR overflow is not handled, the extra length byte that
         # would be added in this case will not be taken into account.
         if updated_pad_length < 24:
-            additional_byte -= 1
+            updated_pad_length -= 1
 
         self.schema["pad"] = b"\x00" * updated_pad_length
 
