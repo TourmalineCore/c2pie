@@ -12,7 +12,7 @@ from c2pie.c2pa.claim import Claim
 from c2pie.c2pa.claim_signature import ClaimSignature
 from c2pie.c2pa.manifest import Manifest
 from c2pie.c2pa.manifest_store import ManifestStore
-from c2pie.c2pa_injection.jpg_injection import JpgSegmentApp11Storage
+from c2pie.c2pa_injection.jpg_injection import emplace_manifest_into_jpeg
 from c2pie.c2pa_injection.pdf_injection import emplace_manifest_into_pdf
 from c2pie.jumbf_boxes.box import Box
 from c2pie.utils.assertion_schemas import C2PA_AssertionTypes
@@ -118,40 +118,16 @@ def c2pie_EmplaceManifest(
     manifest_store: ManifestStore,
 ) -> bytes:
     if format_type == C2PA_ContentTypes.jpg or format_type == C2PA_ContentTypes.jpeg:
-        serialized_manifest_store = manifest_store.serialize()
-
-        app11_storage = JpgSegmentApp11Storage(
-            app11_segment_box_length=manifest_store.get_length(),
-            app11_segment_box_type=manifest_store.get_type(),
-            payload=serialized_manifest_store,
-        )
-
-        app11_storage.serialize()
-
-        serialized_app11_storage_lenght = app11_storage.get_serialized_length()
-
-        manifest_store.add_full_c2pa_structure_exclusion(
+        return emplace_manifest_into_jpeg(
+            content_bytes,
+            manifest_store,
             c2pa_offset,
-            serialized_app11_storage_lenght,
         )
-
-        serialized_manifest_store = manifest_store.serialize()
-
-        app11_storage = JpgSegmentApp11Storage(
-            app11_segment_box_length=manifest_store.get_length(),
-            app11_segment_box_type=manifest_store.get_type(),
-            payload=serialized_manifest_store,
-        )
-
-        tail = app11_storage.serialize()
-
-        return content_bytes[:c2pa_offset] + tail + content_bytes[c2pa_offset:]
-
-    if format_type == C2PA_ContentTypes.pdf:
+    elif format_type == C2PA_ContentTypes.pdf:
         return emplace_manifest_into_pdf(
             content_bytes,
             manifest_store,
             c2pa_offset,
         )
-
-    raise ValueError(f"Unsupported content type {format_type}!")
+    else:
+        raise ValueError(f"Unsupported content type {format_type}!")
