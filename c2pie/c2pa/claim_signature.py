@@ -140,20 +140,14 @@ class ClaimSignature(SuperBox):
         self,
         cose_sign1: list,
     ) -> bytes:
-        """
-        Takes a COSE_Sign1 as an array containing protected_header, unprotected_header,
-        payload, and signature, and returns a serialized COSE_Sign1_Tagged structure.
-        """
         cose_sign1_tagged_cbor = cbor2.dumps(
             cbor2.CBORTag(18, cose_sign1),
             canonical=True,
         )
 
-        """
-        The length of a TSA token can be variable. To ensure that a new token does not exceed
-        the exclusion boundary for the C2PA structure, we need to align the length of
-        the Claim Signature using the pad field, similar to the Data Hash Assertion.
-        """
+        # The length of a TSA token can be variable. To ensure that a new token does not exceed
+        # the exclusion boundary for the C2PA structure, we need to align the length of
+        # the Claim Signature using the pad field, similar to the Data Hash Assertion.
         if self.serialized_length == 0:
             self.serialized_length = len(cose_sign1_tagged_cbor)
         elif self.serialized_length != len(cose_sign1_tagged_cbor):
@@ -162,7 +156,16 @@ class ClaimSignature(SuperBox):
             if difference > len(cose_sign1[1]["pad"]):
                 raise ValueError("Difference in length exceeds the predefined pad")
 
-            cose_sign1[1]["pad"] = b"\x00" * (len(cose_sign1[1]["pad"]) + difference)
+            updated_pad_length = len(cose_sign1[1]["pad"]) + difference
+
+            # If a CBOR overflow is not handled, the extra length byte that
+            # would be added in this case will not be taken into account.
+            if updated_pad_length > 23:
+                difference += 1
+            elif updated_pad_length > 255:
+                difference += 2
+
+            cose_sign1[1]["pad"] = b"\x00" * updated_pad_length
             cose_sign1_tagged_cbor = cbor2.dumps(
                 cbor2.CBORTag(18, cose_sign1),
                 canonical=True,
