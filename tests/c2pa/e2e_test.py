@@ -112,3 +112,39 @@ def test_e2e_signing_with_c2patool_validation(tmp_path):
 
             manifests_list = list(manifests.values())
             assert manifests_list, "empty manifests list after normalization"
+
+
+@pytest.mark.e2e
+@pytest.mark.parametrize(
+    "iteration",
+    range(30),
+)
+def test_e2e_signature_stability(
+    iteration,
+    tmp_path,
+):
+    if not has_c2patool():
+        pytest.skip("c2patool not available")
+
+    if not sign_file:
+        pytest.skip("sign_file function not available yet")
+
+    for content_type in C2PA_ContentTypes:
+        input_file = tmp_path / f"in.{content_type.name}"
+        output_file = tmp_path / f"out.{content_type.name}"
+
+        for test_file in test_files_by_extension[content_type.name]:
+            copy_test_file(
+                test_file,
+                input_file,
+            )
+
+            sign_file(
+                input_path=input_file,
+                output_path=output_file,
+            )
+
+            report = _validate_using_c2patool_and_return_json_report(output_file)
+            validation_state = report.get("validation_state")
+
+            assert validation_state == "Valid"
