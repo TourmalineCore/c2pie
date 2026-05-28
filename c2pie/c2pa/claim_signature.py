@@ -148,16 +148,12 @@ class ClaimSignature(SuperBox):
         # The length of a TSA token can be variable. To ensure that a new token does not exceed
         # the exclusion boundary for the C2PA structure, we need to align the length of
         # the Claim Signature using the pad field, similar to the Data Hash Assertion.
-        if self.serialized_length == 0:
-            self.serialized_length = len(cose_sign1_tagged_cbor)
-        elif self.serialized_length != len(cose_sign1_tagged_cbor):
-            difference = self.serialized_length - len(cose_sign1_tagged_cbor)
         if self.serialized_cose_sign1_length == 0:
             self.serialized_cose_sign1_length = len(cose_sign1_tagged_cbor)
         elif self.serialized_cose_sign1_length != len(cose_sign1_tagged_cbor):
             difference = self.serialized_cose_sign1_length - len(cose_sign1_tagged_cbor)
 
-            if difference > len(cose_sign1[1]["pad"]):
+            if -difference > len(cose_sign1[1]["pad"]):
                 raise ValueError("Difference in length exceeds the predefined pad")
 
             updated_pad_length = len(cose_sign1[1]["pad"]) + difference

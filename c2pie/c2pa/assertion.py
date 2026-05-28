@@ -114,7 +114,7 @@ class HashDataAssertion(Assertion):
 
         difference = previous_exclusion_lenght - current_exclusion_lenght
 
-        if difference > len(self.schema["pad"]):
+        if -difference > len(self.schema["pad"]):
             raise ValueError("Difference in length exceeds the predefined pad")
 
         # Important! If the pad is less than 24 bytes the size of the cbor header
