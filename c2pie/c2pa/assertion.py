@@ -112,23 +112,22 @@ class HashDataAssertion(Assertion):
 
         current_exclusion_lenght = len(cbor_to_bytes(exclusions))
 
-        difference = current_exclusion_lenght - previous_exclusion_lenght
+        difference = previous_exclusion_lenght - current_exclusion_lenght
 
-        """
-        Important! If the Data Hash Assertion is less than 24 bytes or greater than
-        255 bytes, the size of the cbor header will change during conversion to cbor
-        and will occupy less than 2 bytes or more than 2 bytes, correspondingly.
-        """
+        if difference > len(self.schema["pad"]):
+            raise ValueError("Difference in length exceeds the predefined pad")
 
-        schema_length = len(cbor_to_bytes(self.schema))
-        additional_byte = 0  # 2 byte CBOR header case
+        # Important! If the pad is less than 24 bytes the size of the cbor header
+        # will change during conversion to cbor and will occupy less than 2 bytes.
+        additional_byte = 0
+        updated_pad_length = len(self.schema["pad"]) + difference
 
-        if schema_length < 24:  # 1 byte CBOR header case
-            additional_byte = -1
-        elif schema_length > 255:  # 3 byte CBOR header case
-            additional_byte = 1
+        # If a CBOR overflow is not handled, the extra length byte that
+        # would be added in this case will not be taken into account.
+        if updated_pad_length < 24:
+            additional_byte -= 1
 
-        self.schema["pad"] = self.schema["pad"][difference + additional_byte :]
+        self.schema["pad"] = b"\x00" * updated_pad_length
 
         payload = self.get_payload_from_schema()
 
