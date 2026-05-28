@@ -131,7 +131,7 @@ class ClaimSignature(SuperBox):
                         },
                     ],
                 },
-                "pad": b"\x00\x00\x00\x00",
+                "pad": b"\x00" * 4,
             }
 
         return unprotected_header
@@ -162,8 +162,6 @@ class ClaimSignature(SuperBox):
             # would be added in this case will not be taken into account.
             if updated_pad_length > 23:
                 updated_pad_length += 1
-            elif updated_pad_length > 255:
-                updated_pad_length += 2
 
             cose_sign1[1]["pad"] = b"\x00" * updated_pad_length
             cose_sign1_tagged_cbor = cbor2.dumps(
