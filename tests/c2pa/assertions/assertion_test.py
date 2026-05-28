@@ -76,4 +76,3 @@ def test_serialize_cbor_assertion():
 def test_assertion_content_boxes_not_empty():  # noqa: F811
     actions_assertion = Assertion(C2PA_AssertionTypes.actions, {})
     assert len(actions_assertion.content_boxes) != 0
-
