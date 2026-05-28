@@ -126,7 +126,7 @@ def test_exceed_cbor_23_bytes_limit_add_1_byte_to_lenght():
 
     # We need to set the exclusion so that the difference
     # is less than 24 bytes:
-    # current pad - x <= 23
+    # current pad - x (difference) <= 23
     # ~ 64 > x >= 41 (64 - 23)
 
     # Example not empty list (exclusions) serialized in CBOR:
@@ -141,7 +141,7 @@ def test_exceed_cbor_23_bytes_limit_add_1_byte_to_lenght():
 
     # not empty list - empty list = difference
     # x - 1 = 41
-    # x = 42
+    # x (not empty list) = 42
     # 42 - 17 - 1 (CBOR header additional byte, because pad > 23) = 24
     fake_payload = b"\x00" * 24
 
