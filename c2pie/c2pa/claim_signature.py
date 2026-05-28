@@ -131,7 +131,7 @@ class ClaimSignature(SuperBox):
                         },
                     ],
                 },
-                "pad": b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",
+                "pad": b"\x00\x00\x00\x00",
             }
 
         return unprotected_header
