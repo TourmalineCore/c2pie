@@ -69,7 +69,7 @@ def test_serialization_cose_sign1_is_performed_with_alignment():
     cose_sign1 = [
         "protected_header",
         {
-            "pad": b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",
+            "pad": b"\x00\x00\x00\x00",
         },
         "payload",
         "signature",
@@ -83,7 +83,7 @@ def test_serialization_cose_sign1_is_performed_with_alignment():
     cose_sign1 = [
         "protected_header",
         {
-            "pad": b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",
+            "pad": b"\x00\x00\x00\x00",
         },
         "payload",
         "signature2",
@@ -96,7 +96,7 @@ def test_serialization_cose_sign1_is_performed_with_alignment():
     cose_sign1 = [
         "protected_header",
         {
-            "pad": b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",
+            "pad": b"\x00\x00\x00\x00",
         },
         "",
         "signature",
@@ -114,7 +114,7 @@ def test_align_cose_sign1_with_large_difference_causes_error():
     cose_sign1 = [
         "protected_header",
         {
-            "pad": b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",
+            "pad": b"\x00\x00\x00\x00",
         },
         "payload",
         "signature",
@@ -131,7 +131,7 @@ def test_check():
     cose_sign1 = [
         "protected_header",
         {
-            "pad": b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",
+            "pad": b"\x00\x00\x00\x00",
         },
         "payload",
         "signature",
