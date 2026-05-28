@@ -78,7 +78,6 @@ def test_serialization_cose_sign1_is_performed_with_alignment():
     serialized_cose_sign1_cbor_1 = claim_signature.serialize_cose_sign1_tagged_with_alignment(cose_sign1)
 
     assert claim_signature.serialized_cose_sign1_length != 0
-    assert cbor2.loads(serialized_cose_sign1_cbor_1).tag == 18
     assert cbor2.loads(serialized_cose_sign1_cbor_1).value[1]["pad"] == cose_sign1[1]["pad"]
 
     cose_sign1 = [
@@ -123,3 +122,21 @@ def test_align_cose_sign1_with_large_difference_causes_error():
 
     with pytest.raises(ValueError, match="Difference in length exceeds the predefined pad"):
         claim_signature.serialize_cose_sign1_tagged_with_alignment(cose_sign1)
+
+
+def test_check():
+    claim_signature = ClaimSignature.__new__(ClaimSignature)
+    claim_signature.serialized_cose_sign1_length = 0
+
+    cose_sign1 = [
+        "protected_header",
+        {
+            "pad": b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",
+        },
+        "payload",
+        "signature",
+    ]
+
+    serialized_cose_sign1_cbor = claim_signature.serialize_cose_sign1_tagged_with_alignment(cose_sign1)
+
+    assert cbor2.loads(serialized_cose_sign1_cbor).tag == 18
