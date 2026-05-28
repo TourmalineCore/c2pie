@@ -64,7 +64,7 @@ class ClaimSignature(SuperBox):
         self.require_tsa = require_tsa
         self.tsa_log_dir = tsa_log_dir
 
-        self.serialized_length = 0
+        self.serialized_cose_sign1_length = 0
 
         content_boxes = self._generate_payload()
 
@@ -152,6 +152,10 @@ class ClaimSignature(SuperBox):
             self.serialized_length = len(cose_sign1_tagged_cbor)
         elif self.serialized_length != len(cose_sign1_tagged_cbor):
             difference = self.serialized_length - len(cose_sign1_tagged_cbor)
+        if self.serialized_cose_sign1_length == 0:
+            self.serialized_cose_sign1_length = len(cose_sign1_tagged_cbor)
+        elif self.serialized_cose_sign1_length != len(cose_sign1_tagged_cbor):
+            difference = self.serialized_cose_sign1_length - len(cose_sign1_tagged_cbor)
 
             if difference > len(cose_sign1[1]["pad"]):
                 raise ValueError("Difference in length exceeds the predefined pad")

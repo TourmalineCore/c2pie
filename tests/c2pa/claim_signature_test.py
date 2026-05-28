@@ -63,7 +63,7 @@ def test_create_claim_signature_with_non_empty_claim():
 
 def test_serialization_cose_sign1_is_performed_with_alignment():
     claim_signature = ClaimSignature.__new__(ClaimSignature)
-    claim_signature.serialized_length = 0
+    claim_signature.serialized_cose_sign1_length = 0
 
     cose_sign1 = [
         "protected_header",
@@ -76,7 +76,7 @@ def test_serialization_cose_sign1_is_performed_with_alignment():
 
     serialized_cose_sign1_cbor_1 = claim_signature.serialize_cose_sign1_tagged_with_alignment(cose_sign1)
 
-    assert claim_signature.serialized_length != 0
+    assert claim_signature.serialized_cose_sign1_length != 0
     assert cbor2.loads(serialized_cose_sign1_cbor_1).tag == 18
     assert cbor2.loads(serialized_cose_sign1_cbor_1).value[1]["pad"] == cose_sign1[1]["pad"]
 
