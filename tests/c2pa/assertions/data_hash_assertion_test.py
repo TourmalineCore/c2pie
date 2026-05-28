@@ -114,3 +114,42 @@ def test_align_hash_data_with_large_difference_causes_error():
             CAI_OFFSET,
             200,
         )
+
+
+def test_exceed_cbor_23_bytes_limit_add_1_byte_to_lenght():
+    data_hash_assertion = HashDataAssertion(hashed_data=HASHED_DATA)
+
+    # Example empty list (exclusions) serialized in CBOR:
+    # []
+    #
+    # has 1 bytes in length
+
+    # We need to set the exclusion so that the difference
+    # is less than 24 bytes:
+    # current pad - x <= 23
+    # ~ 64 > x >= 41 (64 - 23)
+
+    # Example not empty list (exclusions) serialized in CBOR:
+    # [
+    #     {
+    #         "start": 2,
+    #         "length": "",
+    #     }
+    # ]
+    #
+    # has 17 bytes in length
+
+    # not empty list - empty list = difference
+    # x - 1 = 41
+    # x = 42
+    # 42 - 17 - 1 (CBOR header additional byte, because pad > 23) = 24
+    fake_payload = b"\x00" * 24
+
+    data_hash_assertion.add_full_c2pa_structure_exclusion(
+        CAI_OFFSET,
+        fake_payload,
+    )
+
+    # current pad - difference - additional_byte = aligned pad
+    # 64 - 41 = 23 - 1 (additional_byte) = 22
+    assert len(data_hash_assertion.schema["pad"]) == 22

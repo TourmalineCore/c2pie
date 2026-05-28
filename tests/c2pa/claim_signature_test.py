@@ -124,7 +124,7 @@ def test_align_cose_sign1_with_large_difference_causes_error():
         claim_signature.serialize_cose_sign1_tagged_with_alignment(cose_sign1)
 
 
-def test_check():
+def test_cose_sign1_tagged_tag_value_is_18():
     claim_signature = ClaimSignature.__new__(ClaimSignature)
     claim_signature.serialized_cose_sign1_length = 0
 
@@ -140,3 +140,45 @@ def test_check():
     serialized_cose_sign1_cbor = claim_signature.serialize_cose_sign1_tagged_with_alignment(cose_sign1)
 
     assert cbor2.loads(serialized_cose_sign1_cbor).tag == 18
+
+
+def test_exceed_cbor_limit_add_1_bytes_to_lenght():
+    claim_signature = ClaimSignature.__new__(ClaimSignature)
+
+    # We must ensure that the difference is such
+    # that the pad size is greater than 23 bytes.
+
+    # Current length of cose_sign1 serialized in CBOR is 47 bytes.
+    cose_sign1 = [
+        "protected_header",
+        {
+            "pad": b"\x00" * 4,
+        },
+        "payload",
+        "signature",
+    ]
+
+    # cose_sign1 CBOR encoded + CBOR limit - current pad
+    # ~ 47 + 24 - 4
+    claim_signature.serialized_cose_sign1_length = 67
+
+    serialized_cose_sign1_cbor = claim_signature.serialize_cose_sign1_tagged_with_alignment(cose_sign1)
+
+    assert len(cbor2.loads(serialized_cose_sign1_cbor).value[1]["pad"]) == 25
+
+    # # We must ensure that the difference is such
+    # # that the pad size is greater than 255 bytes.
+
+    # # Current length of cose_sign1 serialized in CBOR is 108 bytes.
+    # cose_sign1 = [
+    #     "protected_header",
+    #     {
+    #         "pad": b"\x00" * 64,
+    #     },
+    #     "payload",
+    #     "signature",
+    # ]
+
+    # serialized_cose_sign1_cbor = claim_signature.serialize_cose_sign1_tagged_with_alignment(cose_sign1)
+
+    # assert len(cbor2.loads(serialized_cose_sign1_cbor).value[1]["pad"]) == 42
