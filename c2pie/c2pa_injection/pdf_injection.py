@@ -63,6 +63,23 @@ def _xref_entry(offset: int) -> bytes:
     return f"{offset:010d} 00000 n \n".encode("ascii")
 
 
+def prepare_pdf_bytes(content: bytes) -> bytes:
+    """
+    Returns the PDF bytes ready for signing repaired via pypdf if the raw
+    bytes lack a parseable structure.
+
+    Must be called before hashing so that the hash and cai_offset are
+    computed against the same byte sequence that will be written to disk.
+    """
+    try:
+        _scan_pdf_to_get_its_data(content)
+        return content
+    except ValueError:
+        repaired = _read_pdf_using_pypdf(content)
+        _scan_pdf_to_get_its_data(repaired)
+        return repaired
+
+
 def emplace_manifest_into_pdf(
     initial_content: bytes,
     manifest_store: ManifestStore,
@@ -75,11 +92,7 @@ def emplace_manifest_into_pdf(
     - Exception c2pa.hash.data: start == len(initial_content), length == length of the entire tail (see C2PA 2.2).
     - Sign the claim, build the jumbf store, place it as EmbeddedFile, write xref/trailer correctly.
     """
-    try:
-        info = _scan_pdf_to_get_its_data(initial_content)
-    except ValueError:
-        initial_content = _read_pdf_using_pypdf(initial_content=initial_content)
-        info = _scan_pdf_to_get_its_data(initial_content)
+    info = _scan_pdf_to_get_its_data(initial_content)
 
     initial_length_of_file = len(initial_content)
     pointer_on_previous_xref = info.startxref
