@@ -1,4 +1,5 @@
 import cbor2
+import pytest
 
 from c2pie.c2pa.assertion import Assertion
 from c2pie.c2pa.assertion_store import AssertionStore
@@ -105,3 +106,20 @@ def test_serialization_cose_sign1_is_performed_with_alignment():
     serialized_cose_sign1_cbor_3 = claim_signature.serialize_cose_sign1_tagged_with_alignment(cose_sign1)
 
     assert len(serialized_cose_sign1_cbor_1) == len(serialized_cose_sign1_cbor_3)
+
+
+def test_align_cose_sign1_with_large_difference_causes_error():
+    claim_signature = ClaimSignature.__new__(ClaimSignature)
+    claim_signature.serialized_cose_sign1_length = 1
+
+    cose_sign1 = [
+        "protected_header",
+        {
+            "pad": b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",
+        },
+        "payload",
+        "signature",
+    ]
+
+    with pytest.raises(ValueError, match="Difference in length exceeds the predefined pad"):
+        claim_signature.serialize_cose_sign1_tagged_with_alignment(cose_sign1)

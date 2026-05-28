@@ -1,3 +1,5 @@
+import pytest
+
 from c2pie.c2pa.assertion import HashDataAssertion
 from c2pie.utils.assertion_schemas import C2PA_AssertionTypes, cbor_to_bytes
 from c2pie.utils.content_types import jumbf_content_types
@@ -73,12 +75,29 @@ def test_hash_data_assertion_without_additional_exclusions_has_not_exclusions():
 
 def test_set_hash_data_length_updates_exclusion():
     data_hash_assertion = HashDataAssertion(hashed_data=HASHED_DATA)
-    data_hash_assertion.add_full_c2pa_structure_exclusion(CAI_OFFSET, 200)
+    data_hash_assertion.add_full_c2pa_structure_exclusion(
+        CAI_OFFSET,
+        200,
+    )
     assert data_hash_assertion.schema["exclusions"][0]["length"] == 200
 
 
 def test_set_hash_data_length_updates_content_box_payload():
     data_hash_assertion = HashDataAssertion(hashed_data=HASHED_DATA)
-    data_hash_assertion.add_full_c2pa_structure_exclusion(CAI_OFFSET, 200)
+    data_hash_assertion.add_full_c2pa_structure_exclusion(
+        CAI_OFFSET,
+        200,
+    )
     expected_payload = cbor_to_bytes(data_hash_assertion.schema)
     assert data_hash_assertion.content_boxes[0].payload == expected_payload
+
+
+def test_align_hash_data_with_large_difference_causes_error():
+    data_hash_assertion = HashDataAssertion(hashed_data=HASHED_DATA)
+    data_hash_assertion.schema["pad"] = b"\x00"
+
+    with pytest.raises(ValueError, match="Difference in length exceeds the predefined pad"):
+        data_hash_assertion.add_full_c2pa_structure_exclusion(
+            CAI_OFFSET,
+            200,
+        )
