@@ -12,9 +12,6 @@ jobs:
   run-linting:
     name: Linting and Formatting
     runs-on: ubuntu-latest
-    strategy: 
-      matrix:
-        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
 
     steps:
       - name: Checkout
@@ -22,8 +19,9 @@ jobs:
 
       - name: Set up Python
         uses: actions/setup-python@v5
+        # using the version we're working with in development
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: 3.13
 
       - name: Install Poetry
         uses: snok/install-poetry@v1
