@@ -212,6 +212,7 @@ def emplace_manifest_into_pdf(
     )
 
     serialized_manifest_store = manifest_store.serialize()
+    serialized_manifest_store_lenght = len(serialized_manifest_store)
 
     object_1 = (
         f"{starting_value} 0 obj\n".encode("ascii")
