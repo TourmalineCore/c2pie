@@ -160,7 +160,7 @@ def test_data_hash_assertion_exclusions_more_then_23():
     data_hash_assertion.schema = {
         "exclusions": [{"start": 0, "length": 0}] * 23,
         "alg": "sha256",
-        "hash": b"\x00\x00\x00",
+        "hash": HASHED_DATA,
         "pad": b"\x00" * 64,
     }
 
