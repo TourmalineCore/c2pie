@@ -1,11 +1,13 @@
 from pathlib import Path
 
+from c2pie.c2pa.assertion import IngredientThumbnailAssertion
 from c2pie.c2pa.manifest_store import ManifestStore
 from c2pie.interface import (
     c2pie_EmplaceManifest,
     c2pie_GenerateActionsAssertion,
     c2pie_GenerateAssertion,
     c2pie_GenerateHashDataAssertion,
+    c2pie_GenerateIngredientThumbnailAssertion,
     c2pie_GenerateManifestStore,
     c2pie_GenerateThumbnailAssertion,
 )
@@ -61,6 +63,15 @@ def test_generate_thumbnail_assertion_returns_thumbnail_assertion_instance():
         image_data=JPEG_HEADER,
     )
     assert isinstance(thumbnail_assertion, ThumbnailAssertion)
+
+
+def test_generate_ingredient_thumbnail_assertion_returns_ingredient_thumbnail_assertion_instance():
+    ingredient_thumbnail_assertion = c2pie_GenerateIngredientThumbnailAssertion(
+        media_type=MEDIA_TYPE,
+        image_data=JPEG_HEADER,
+    )
+
+    assert isinstance(ingredient_thumbnail_assertion, IngredientThumbnailAssertion)
 
 
 def test_generate_manifest_returns_manifest_store():
