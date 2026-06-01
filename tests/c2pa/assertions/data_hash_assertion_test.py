@@ -153,3 +153,20 @@ def test_exceed_cbor_23_bytes_limit_add_1_byte_to_lenght():
     # current pad - difference - additional_byte = aligned pad
     # 64 - 41 = 23 - 1 (additional_byte) = 22
     assert len(data_hash_assertion.schema["pad"]) == 22
+
+
+def test_data_hash_assertion_exclusions_more_then_23():
+    data_hash_assertion = HashDataAssertion(hashed_data=HASHED_DATA)
+    data_hash_assertion.schema = {
+        "exclusions": [{"start": 0, "length": 0}] * 23,
+        "alg": "sha256",
+        "hash": b"\x00\x00\x00",
+        "pad": b"\x00" * 64,
+    }
+
+    data_hash_assertion.add_full_c2pa_structure_exclusion(
+        CAI_OFFSET,
+        0,
+    )
+
+    assert len(data_hash_assertion.schema["pad"]) == 47
