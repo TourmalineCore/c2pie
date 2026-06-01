@@ -131,7 +131,10 @@ class ClaimSignature(SuperBox):
                         },
                     ],
                 },
-                "pad": b"\x00" * 4,
+                # The specification recommends setting the pad to at least 16 bytes. We use 64 bytes
+                # to allow for some extra space before the 23-byte limit is exceeded, since otherwise
+                # the CBOR header of the pad field would be reduced by 1 byte.
+                "pad": b"\x00" * 8,
             }
 
         return unprotected_header

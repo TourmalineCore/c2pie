@@ -83,6 +83,9 @@ class HashDataAssertion(Assertion):
             "exclusions": exclusions,
             "alg": "sha256",
             "hash": hashed_data,
+            # The specification recommends setting the pad to at least 16 bytes. We use 64 bytes
+            # to allow for some extra space before the 23-byte limit is exceeded, since otherwise
+            # the CBOR header of the pad field would be reduced by 1 byte.
             "pad": b"\x00" * 64,
         }
 
