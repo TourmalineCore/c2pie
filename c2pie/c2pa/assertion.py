@@ -108,6 +108,9 @@ class HashDataAssertion(Assertion):
             ]
         )
 
+        # NOTE: If the number of exclusions exceeds 23, an additional length byte
+        # will be added to the CBOR header of serialized exclusions array. This byte
+        # is included in the recalculation of the serialized exclusions.
         current_exclusion_lenght = len(cbor_to_bytes(exclusions))
 
         difference = previous_exclusion_lenght - current_exclusion_lenght
