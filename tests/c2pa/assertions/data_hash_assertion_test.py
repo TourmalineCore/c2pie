@@ -157,12 +157,7 @@ def test_exceed_cbor_23_bytes_limit_add_1_byte_to_lenght():
 
 def test_data_hash_assertion_exclusions_more_then_23():
     data_hash_assertion = HashDataAssertion(hashed_data=HASHED_DATA)
-    data_hash_assertion.schema = {
-        "exclusions": [{"start": 0, "length": 0}] * 23,
-        "alg": "sha256",
-        "hash": HASHED_DATA,
-        "pad": b"\x00" * 64,
-    }
+    data_hash_assertion.schema["exclusions"] = [{"start": 0, "length": 0}] * 23
 
     data_hash_assertion.add_full_c2pa_structure_exclusion(
         CAI_OFFSET,
@@ -170,3 +165,14 @@ def test_data_hash_assertion_exclusions_more_then_23():
     )
 
     assert len(data_hash_assertion.schema["pad"]) == 47
+
+
+def test_calculation_of_pad_inside_data_hash_assertion_was_performed_correctly():
+    data_hash_assertion = HashDataAssertion(hashed_data=HASHED_DATA)
+
+    data_hash_assertion.add_full_c2pa_structure_exclusion(
+        CAI_OFFSET,
+        0,
+    )
+
+    assert len(data_hash_assertion.schema["pad"]) == 48
