@@ -76,7 +76,6 @@ def prepare_pdf_bytes(content: bytes) -> bytes:
         return content
     except ValueError:
         repaired = _read_pdf_using_pypdf(content)
-        _scan_pdf_to_get_its_data(repaired)
         return repaired
 
 
