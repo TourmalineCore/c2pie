@@ -3,19 +3,21 @@ import os
 from pathlib import Path
 from typing import Literal
 
-from c2pie.c2pa_parsing.jumbf_parsing import extract_manifest_boxes, get_active_manifest_uuid
+from c2pie.c2pa_parsing.jumbf_parsing import extract_manifest_boxes, find_in_box, get_active_manifest_uuid
 from c2pie.c2pa_parsing.manifest_extractor import extract_manifest_store_bytes
 from c2pie.interface import (
     c2pie_EmplaceManifest,
     c2pie_GenerateActionsAssertion,
     c2pie_GenerateHashDataAssertion,
     c2pie_GenerateIngredientAssertion,
+    c2pie_GenerateIngredientThumbnailAssertion,
     c2pie_GenerateManifestStore,
     c2pie_GenerateThumbnailAssertion,
 )
-from c2pie.jumbf_boxes.box import Box
+from c2pie.jumbf_boxes.box import Box, iter_boxes
 from c2pie.utils.content_types import C2PA_ContentTypes, iana_media_types
 from c2pie.utils.generate_hashed_uri_map import generate_hashed_uri_map
+from c2pie.utils.image_generation import generate_solid_jpeg
 
 
 def _ensure_path_type_for_filepath(path: str | Path) -> Path:
@@ -147,6 +149,9 @@ def sign_file(
 
     assertions = []
 
+    thumbnail_media_type = iana_media_types[C2PA_ContentTypes(thumbnail_file_path.suffix)]
+    thumbnail_raw_bytes = None
+
     if thumbnail_file_path:
         thumbnail_file_path = _validate_general_filepath(
             file_path=thumbnail_file_path,
@@ -164,7 +169,7 @@ def sign_file(
                 thumbnail_raw_bytes = f.read()
 
             thumbnail_assertion = c2pie_GenerateThumbnailAssertion(
-                iana_media_types[C2PA_ContentTypes(thumbnail_file_path.suffix)],
+                thumbnail_media_type,
                 thumbnail_raw_bytes,
             )
             assertions.append(thumbnail_assertion)
@@ -183,6 +188,69 @@ def sign_file(
 
     active_manifest_urn: str | None = get_active_manifest_uuid(manifest_store_bytes)
     previous_manifest_boxes: list[Box] = extract_manifest_boxes(manifest_store_bytes)
+    ingredient_thumbnail_assertion = None
+
+    if previous_manifest_boxes:
+        for manifest in previous_manifest_boxes:
+            active_manifest = find_in_box(
+                manifest,
+                active_manifest_urn,
+            )
+
+
+        possibles_thumbnail_assertion_labels = [
+            "c2pa.thumbnail.claim",
+            "c2pa.thumbnail.claim.jpeg",
+        ]
+
+        previous_thumbnail_assertion = None
+        for thumbnail_assertion_label in possibles_thumbnail_assertion_labels:
+            previous_thumbnail_assertion = find_in_box(
+                active_manifest,
+                thumbnail_assertion_label,
+            )
+
+            if previous_thumbnail_assertion:
+                break
+
+        if previous_thumbnail_assertion:
+            bfdb_type = b"bfdb".hex()
+            bidb_type = b"bidb".hex()
+
+            bfdb_box = None
+            bidb_box = None
+            for box in iter_boxes(previous_thumbnail_assertion.get_payload()):
+                if box.get_type() == bfdb_type:
+                    bfdb_box = box
+                elif box.get_type() == bidb_type:
+                    bidb_box = box
+
+            if bfdb_box and bidb_type:
+                # A Content Box with the type 'bfdb' contains a required MEDIA_TYPE field,
+                # which holds an IANA type value. The MEDIA_TYPE field is null-terminated
+                # and begins immediately after the toggles byte.
+                bfdb_payload = bfdb_box.get_payload()
+                first_null = bfdb_payload.index(b"\x00", 1)
+                media_type = bfdb_payload[1:first_null].decode("utf-8")
+
+                # TODO: #93: The resulting boxes ('bfdb' and 'bidb') is a ready-to-use payload
+                # for the Ingredient Thumbnail Assertion, with the exception of the Description Box
+                # (the label must be replaced with 'c2pa.thumbnail.ingredient').
+                #
+                # It is possible to implement the logic for assigning this 'payload' without
+                # having to rebuild and serialize the data.
+                ingredient_thumbnail_assertion = c2pie_GenerateIngredientThumbnailAssertion(
+                    media_type,
+                    bidb_box.get_payload(),
+                )
+                assertions.append(ingredient_thumbnail_assertion)
+    else:
+        if thumbnail_raw_bytes:
+            ingredient_thumbnail_assertion = c2pie_GenerateIngredientThumbnailAssertion(
+                thumbnail_media_type,
+                thumbnail_raw_bytes,
+            )
+            assertions.append(ingredient_thumbnail_assertion)
 
     ingredient_assertion = c2pie_GenerateIngredientAssertion(
         title=input_path.name,
@@ -190,6 +258,7 @@ def sign_file(
         ingredient_bytes=raw_bytes,
         active_manifest_urn=active_manifest_urn,
         previous_manifest_boxes=previous_manifest_boxes,
+        ingredient_thumbnail_assertion=ingredient_thumbnail_assertion,
     )
     assertions.append(ingredient_assertion)
 

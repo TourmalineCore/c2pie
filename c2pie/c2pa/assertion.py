@@ -152,7 +152,6 @@ class EmbeddedDataAssertion(Assertion):
 
     Can be used for the following assertions:
     - c2pa.thumbnail.claim,
-    - c2pa.ingredient,
     - c2pa.ingredient.thumbnail
     - c2pa.embedded-data
 
