@@ -11,9 +11,10 @@ from c2pie.interface import (
     c2pie_GenerateHashDataAssertion,
     c2pie_GenerateIngredientAssertion,
     c2pie_GenerateManifestStore,
+    c2pie_GenerateThumbnailAssertion,
 )
 from c2pie.jumbf_boxes.box import Box
-from c2pie.utils.content_types import C2PA_ContentTypes
+from c2pie.utils.content_types import C2PA_ContentTypes, iana_media_types
 from c2pie.utils.generate_hashed_uri_map import generate_hashed_uri_map
 
 
@@ -38,6 +39,7 @@ _DC_FORMAT_BY_CONTENT_TYPE: dict[str, str] = {
 def _check_file_extension_is_supported(file_path: Path) -> None:
     supported_extensions: list[str] = [_type.value for _type in C2PA_ContentTypes]
     file_extension = file_path.suffix
+
     if file_extension not in supported_extensions:
         raise ValueError(
             f"The file has an incorrect extension: {file_extension}"
@@ -116,6 +118,7 @@ def _load_certificates_and_key(
 def sign_file(
     input_path: Path | str,
     output_path: Path | str | None = None,
+    thumbnail_file_path: Path | str | None = None,
     key_path: str | None = None,
     certificates_path: str | None = None,
     tsa_url: str | None = None,
@@ -143,6 +146,28 @@ def sign_file(
         cai_offset = 2
 
     assertions = []
+
+    if thumbnail_file_path:
+        thumbnail_file_path = _validate_general_filepath(
+            file_path=thumbnail_file_path,
+            file_path_type="other",
+        )
+
+        supported_extensions: list[str] = [C2PA_ContentTypes.jpeg.value, C2PA_ContentTypes.jpg.value]
+        if thumbnail_file_path.suffix not in supported_extensions:
+            raise ValueError(
+                f"The thumbnail file has an incorrect extension: {thumbnail_file_path.suffix}. "
+                f"Currently, only the following extensions are supported: {supported_extensions}.",
+            )
+        else:
+            with open(thumbnail_file_path, "rb") as f:
+                thumbnail_raw_bytes = f.read()
+
+            thumbnail_assertion = c2pie_GenerateThumbnailAssertion(
+                iana_media_types[C2PA_ContentTypes(thumbnail_file_path.suffix)],
+                thumbnail_raw_bytes,
+            )
+            assertions.append(thumbnail_assertion)
 
     hash_data_assertion = c2pie_GenerateHashDataAssertion(
         cai_offset=cai_offset,
