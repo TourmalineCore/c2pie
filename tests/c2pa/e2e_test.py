@@ -8,7 +8,7 @@ import pytest
 from c2pie.signing import sign_file
 from c2pie.utils.content_types import C2PA_ContentTypes
 
-FIXTURES_DIR = Path(__file__).parent.parent / "test_files"
+TEST_FILES_DIR = Path(__file__).parent.parent / "test_files"
 
 test_files_by_extension = {
     "pdf": [
@@ -25,8 +25,7 @@ test_files_by_extension = {
 
 
 def get_test_file_full_path(filename: str) -> Path:
-    path = FIXTURES_DIR / filename
-
+    path = TEST_FILES_DIR / filename
     if not path.exists():
         raise FileNotFoundError(f"Fixture not found: {path}")
 
