@@ -18,10 +18,24 @@ def parse_arguments() -> argparse.Namespace:
     )
 
     global_parser.add_argument("-V", "--version", action="version", version=f"c2pie {version('c2pie')}")
+    global_parser.add_argument(
+        "-V",
+        "--version",
+        action="version",
+        version=f"c2pie {version('c2pie')}",
+    )
 
     subparsers = global_parser.add_subparsers(title="subcommands", help="commands")
+    subparsers = global_parser.add_subparsers(
+        title="subcommands",
+        help="commands",
+    )
 
     sign_parser = subparsers.add_parser("sign", help="embed c2pa signature into a file")
+    sign_parser = subparsers.add_parser(
+        "sign",
+        help="embed c2pa signature into a file",
+    )
 
     sign_parser.add_argument(
         "--input_file",
@@ -42,7 +56,7 @@ def parse_arguments() -> argparse.Namespace:
         "--tsa_url",
         type=str,
         default=None,
-        help="TimeStamp Authority URL for timestamping (e.g. http://timestamp.digicert.com). "
+        help="time-stamp authority URL for timestamping (e.g. http://timestamp.digicert.com). "
         "Falls back to C2PIE_TSA_URL env variable.",
     )
 
