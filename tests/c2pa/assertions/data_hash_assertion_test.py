@@ -28,7 +28,7 @@ def test_hash_data_assertion_schema_alg_is_sha256():
     assert data_hash_assertion.schema["alg"] == "sha256"
 
 
-def test_hash_data_assertion_schema_pad_is_64_bytes_lenght():
+def test_hash_data_assertion_schema_pad_is_64_bytes_length():
     data_hash_assertion = HashDataAssertion(hashed_data=HASHED_DATA)
     assert data_hash_assertion.schema["pad"] == b"\x00" * 64
 
@@ -116,7 +116,7 @@ def test_align_hash_data_with_large_difference_causes_error():
         )
 
 
-def test_exceed_cbor_23_bytes_limit_add_1_byte_to_lenght():
+def test_exceed_cbor_23_bytes_limit_add_1_byte_to_length():
     data_hash_assertion = HashDataAssertion(hashed_data=HASHED_DATA)
 
     # Example empty list (exclusions) serialized in CBOR:

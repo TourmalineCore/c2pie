@@ -207,7 +207,7 @@ def test_calculated_exclusion_covers_the_full_storage(file):
 
         More info about APP11 segment you can see here: docs/JPG-structure-overview.md
         """
-        expected_serialized_lenght = 2 + 2 + 2 + 2 + 4 + len(manifest_store.serialize())
+        expected_serialized_length = 2 + 2 + 2 + 2 + 4 + len(manifest_store.serialize())
     elif file_extension == C2PA_ContentTypes.pdf:
         """
         Expected length of serialized data in PDF format consists 
@@ -215,7 +215,7 @@ def test_calculated_exclusion_covers_the_full_storage(file):
 
         More info about PDF Incremental Update you can see here: docs/PDF-structure-overview.md
         """
-        expected_serialized_lenght = 7148
+        expected_serialized_length = 7148
 
     with patch("c2pie.c2pa.manifest_store.ManifestStore.add_full_c2pa_structure_exclusion") as mock_func:
         c2pie_EmplaceManifest(
@@ -227,4 +227,4 @@ def test_calculated_exclusion_covers_the_full_storage(file):
 
         last_call = mock_func.call_args
 
-        assert expected_serialized_lenght == last_call.args[1]
+        assert expected_serialized_length == last_call.args[1]

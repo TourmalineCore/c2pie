@@ -142,7 +142,7 @@ def test_cose_sign1_tagged_tag_value_is_18():
     assert cbor2.loads(serialized_cose_sign1_cbor).tag == 18
 
 
-def test_exceed_cbor_limit_add_1_bytes_to_lenght():
+def test_exceed_cbor_limit_add_1_bytes_to_length():
     claim_signature = ClaimSignature.__new__(ClaimSignature)
 
     # We must ensure that the difference is such

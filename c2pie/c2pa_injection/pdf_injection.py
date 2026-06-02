@@ -104,11 +104,11 @@ def emplace_manifest_into_pdf(
 
     serialized_manifest_store = manifest_store.serialize()
 
-    serialized_manifest_store_lenght = len(serialized_manifest_store)
+    serialized_manifest_store_length = len(serialized_manifest_store)
 
     object_1 = (
         f"{starting_value} 0 obj\n".encode("ascii")
-        + f"<< /Type /EmbeddedFile /Subtype {subtype} /Length {serialized_manifest_store_lenght} >>\n".encode("ascii")
+        + f"<< /Type /EmbeddedFile /Subtype {subtype} /Length {serialized_manifest_store_length} >>\n".encode("ascii")
         + b"stream\n"
         + serialized_manifest_store
         + b"\nendstream\nendobj\n"
@@ -211,11 +211,11 @@ def emplace_manifest_into_pdf(
     )
 
     serialized_manifest_store = manifest_store.serialize()
-    serialized_manifest_store_lenght = len(serialized_manifest_store)
+    serialized_manifest_store_length = len(serialized_manifest_store)
 
     object_1 = (
         f"{starting_value} 0 obj\n".encode("ascii")
-        + f"<< /Type /EmbeddedFile /Subtype {subtype} /Length {serialized_manifest_store_lenght} >>\n".encode("ascii")
+        + f"<< /Type /EmbeddedFile /Subtype {subtype} /Length {serialized_manifest_store_length} >>\n".encode("ascii")
         + b"stream\n"
         + serialized_manifest_store
         + b"\nendstream\nendobj\n"
