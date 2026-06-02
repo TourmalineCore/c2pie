@@ -5,6 +5,7 @@ from c2pie.c2pa.assertion import (
     Assertion,
     HashDataAssertion,
     IngredientAssertion,
+    IngredientThumbnailAssertion,
     ThumbnailAssertion,
 )
 from c2pie.c2pa.assertion_store import AssertionStore
@@ -57,12 +58,26 @@ def c2pie_GenerateThumbnailAssertion(
     )
 
 
+# Currently not in use.
+# If APP11 exceeds the allowed size (65,535 bytes), an error will occur.
+# It is necessary to add logic to handle this case by splitting APP11.
+def c2pie_GenerateIngredientThumbnailAssertion(
+    media_type: str,
+    image_data: bytes,
+) -> IngredientThumbnailAssertion:
+    return IngredientThumbnailAssertion(
+        media_type=media_type,
+        image_data=image_data,
+    )
+
+
 def c2pie_GenerateIngredientAssertion(
     title: str,
     dc_format: str,
     ingredient_bytes: bytes,
     active_manifest_urn: str | None,
     previous_manifest_boxes: list[Box],
+    ingredient_thumbnail_assertion: IngredientThumbnailAssertion | None = None,
 ) -> IngredientAssertion:
     return IngredientAssertion(
         title=title,
@@ -70,6 +85,7 @@ def c2pie_GenerateIngredientAssertion(
         ingredient_bytes=ingredient_bytes,
         active_manifest_urn=active_manifest_urn,
         previous_manifest_boxes=previous_manifest_boxes,
+        ingredient_thumbnail_assertion=ingredient_thumbnail_assertion,
     )
 
 

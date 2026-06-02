@@ -37,7 +37,12 @@ class Assertion(SuperBox):
         if not content_boxes:
             payload = self.get_payload_from_schema()
             box_type_hex = get_assertion_content_box_type(self.type)
-            content_boxes = [ContentBox(box_type=box_type_hex, payload=payload)]
+            content_boxes = [
+                ContentBox(
+                    box_type=box_type_hex,
+                    payload=payload,
+                )
+            ]
 
         super().__init__(
             content_type=get_assertion_content_type(self.type),
@@ -205,6 +210,21 @@ class ThumbnailAssertion(EmbeddedDataAssertion):
         )
 
 
+class IngredientThumbnailAssertion(EmbeddedDataAssertion):
+    """An assertion (c2pa.thumbnail.ingredient) containing an ingredient thumbnail"""
+
+    def __init__(
+        self,
+        media_type: str,
+        image_data: bytes,
+    ):
+        super().__init__(
+            media_type=media_type,
+            image_data=image_data,
+            assertion_type=C2PA_AssertionTypes.ingredient_thumbnail,
+        )
+
+
 class IngredientAssertion(Assertion):
     """c2pa.ingredient.v3 asset-binding assertion."""
 
@@ -215,12 +235,23 @@ class IngredientAssertion(Assertion):
         ingredient_bytes: bytes,
         active_manifest_urn: str | None,
         previous_manifest_boxes: list[Box],
+        ingredient_thumbnail_assertion: IngredientThumbnailAssertion | None = None,
     ):
         schema: dict[str, Any] = {
             "dc:title": title,
             "dc:format": dc_format,
             "relationship": "parentOf",
         }
+
+        if ingredient_thumbnail_assertion:
+            ingredient_thumbnail_hash = hashlib.sha256(ingredient_thumbnail_assertion.payload).digest()
+
+            ingredient_thumbnail: dict[str, str | bytes] = generate_hashed_uri_map(
+                url=f"self#jumbf=c2pa.assertions/{ingredient_thumbnail_assertion.get_label()}",
+                hash_value=ingredient_thumbnail_hash,
+                hash_algorithm="sha256",
+            )
+            schema["thumbnail"] = ingredient_thumbnail
 
         if active_manifest_urn and previous_manifest_boxes:
             validation_results = self.validate_ingredient(
