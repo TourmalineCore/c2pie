@@ -17,7 +17,6 @@ from c2pie.interface import (
 from c2pie.jumbf_boxes.box import Box, iter_boxes
 from c2pie.utils.content_types import C2PA_ContentTypes, iana_media_types
 from c2pie.utils.generate_hashed_uri_map import generate_hashed_uri_map
-from c2pie.utils.image_generation import generate_solid_jpeg
 
 
 def _ensure_path_type_for_filepath(path: str | Path) -> Path:
@@ -158,7 +157,7 @@ def sign_file(
             file_path_type="other",
         )
 
-        supported_extensions: list[str] = [C2PA_ContentTypes.jpeg.value, C2PA_ContentTypes.jpg.value]
+        supported_extensions: list[str] = iana_media_types.keys()
         if thumbnail_file_path.suffix not in supported_extensions:
             raise ValueError(
                 f"The thumbnail file has an incorrect extension: {thumbnail_file_path.suffix}. "
@@ -167,7 +166,7 @@ def sign_file(
         else:
             with open(thumbnail_file_path, "rb") as f:
                 thumbnail_raw_bytes = f.read()
-            thumbnail_media_type = iana_media_types[C2PA_ContentTypes(thumbnail_file_path.suffix)]
+            thumbnail_media_type = iana_media_types[thumbnail_file_path.suffix]
 
             thumbnail_assertion = c2pie_GenerateThumbnailAssertion(
                 thumbnail_media_type,

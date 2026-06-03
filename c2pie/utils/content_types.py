@@ -8,9 +8,10 @@ class C2PA_ContentTypes(enum.Enum):
 
 
 iana_media_types = {
-    C2PA_ContentTypes.jpg: "image/jpeg",
-    C2PA_ContentTypes.jpeg: "image/jpeg",
-    C2PA_ContentTypes.pdf: "application/pdf",
+    ".jpeg": "image/jpeg",
+    ".jpg": "image/jpeg",
+    ".png": "image/png",
+    ".pdf": "application/pdf",
 }
 
 jumbf_content_types = {
