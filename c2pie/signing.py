@@ -157,7 +157,7 @@ def sign_file(
             file_path_type="other",
         )
 
-        supported_extensions: list[str] = iana_media_types.keys()
+        supported_extensions: list[str] = [".jpeg", ".jpg", ".png"]
         if thumbnail_file_path.suffix not in supported_extensions:
             raise ValueError(
                 f"The thumbnail file has an incorrect extension: {thumbnail_file_path.suffix}. "

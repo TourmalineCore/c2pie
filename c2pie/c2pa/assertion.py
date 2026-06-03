@@ -252,7 +252,7 @@ class IngredientAssertion(Assertion):
             )
             schema["thumbnail"] = ingredient_thumbnail
 
-        if active_manifest:
+        if active_manifest_urn and active_manifest:
             validation_results = self.validate_ingredient(
                 ingredient_bytes,
                 dc_format,
@@ -266,8 +266,8 @@ class IngredientAssertion(Assertion):
                 )
                 return
 
-            # We should not include information about the active manifest if validation was unsuccessful
-            if not active_manifest or not active_manifest_urn:
+            # We should not include information about the active manifest if active_manifest_urn is None
+            if not active_manifest_urn:
                 super().__init__(
                     C2PA_AssertionTypes.ingredient,
                     schema,
