@@ -15,9 +15,6 @@ from c2pie.interface import (
     c2pie_GenerateThumbnailAssertion,
 )
 from c2pie.jumbf_boxes.box import Box
-from c2pie.jumbf_boxes.description_box import DescriptionBox
-from c2pie.jumbf_boxes.super_box import SuperBox
-from c2pie.utils.assertion_schemas import C2PA_AssertionTypes, get_assertion_label
 from c2pie.utils.content_types import C2PA_ContentTypes, iana_media_types
 from c2pie.utils.generate_hashed_uri_map import generate_hashed_uri_map
 
@@ -199,45 +196,14 @@ def sign_file(
                 manifest,
                 active_manifest_urn,
             )
-
-    ingredient_thumbnail_assertion = None
-
-    if active_manifest:
-        possibles_thumbnail_assertion_labels = [
-            "c2pa.thumbnail.claim",
-            "c2pa.thumbnail.claim.jpeg",
-        ]
-
-        previous_thumbnail_assertion = None
-        for thumbnail_assertion_label in possibles_thumbnail_assertion_labels:
-            previous_thumbnail_assertion = find_in_box(
-                active_manifest,
-                thumbnail_assertion_label,
-            )
-
-            if previous_thumbnail_assertion:
-                break
-
-        if previous_thumbnail_assertion:
-            ingredient_thumbnail_assertion = SuperBox.from_box(previous_thumbnail_assertion)
-
-            # The type field is used when searching for a Data Hash Assertion 
-            # in the Assertion Store when the set_hash_data_length() method is called
-            ingredient_thumbnail_assertion.type = C2PA_AssertionTypes.ingredient_thumbnail
-            ingredient_thumbnail_assertion.description_box = DescriptionBox(
-                content_type=ingredient_thumbnail_assertion.get_content_type(),
-                label=get_assertion_label(C2PA_AssertionTypes.ingredient_thumbnail),
-            )
-            ingredient_thumbnail_assertion.sync_payload()
-
-            assertions.append(ingredient_thumbnail_assertion)
-    else:
-        if thumbnail_media_type and thumbnail_raw_bytes:
-            ingredient_thumbnail_assertion = c2pie_GenerateIngredientThumbnailAssertion(
-                thumbnail_media_type,
-                thumbnail_raw_bytes,
-            )
-            assertions.append(ingredient_thumbnail_assertion)
+    
+    ingredient_thumbnail_assertion = c2pie_GenerateIngredientThumbnailAssertion(
+        thumbnail_media_type,
+        thumbnail_raw_bytes,
+        active_manifest=active_manifest,
+    )
+    if ingredient_thumbnail_assertion:
+        assertions.append(ingredient_thumbnail_assertion)
 
     ingredient_assertion = c2pie_GenerateIngredientAssertion(
         title=input_path.name,
