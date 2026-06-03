@@ -14,7 +14,10 @@ from c2pie.interface import (
     c2pie_GenerateManifestStore,
     c2pie_GenerateThumbnailAssertion,
 )
-from c2pie.jumbf_boxes.box import Box, iter_boxes
+from c2pie.jumbf_boxes.box import Box
+from c2pie.jumbf_boxes.description_box import DescriptionBox
+from c2pie.jumbf_boxes.super_box import SuperBox
+from c2pie.utils.assertion_schemas import C2PA_AssertionTypes, get_assertion_label
 from c2pie.utils.content_types import C2PA_ContentTypes, iana_media_types
 from c2pie.utils.generate_hashed_uri_map import generate_hashed_uri_map
 
@@ -216,36 +219,18 @@ def sign_file(
                 break
 
         if previous_thumbnail_assertion:
-            bfdb_type = b"bfdb".hex()
-            bidb_type = b"bidb".hex()
+            ingredient_thumbnail_assertion = SuperBox.from_box(previous_thumbnail_assertion)
 
-            bfdb_box = None
-            bidb_box = None
-            for box in iter_boxes(previous_thumbnail_assertion.get_payload()):
-                if box.get_type() == bfdb_type:
-                    bfdb_box = box
-                elif box.get_type() == bidb_type:
-                    bidb_box = box
+            # The type field is used when searching for a Data Hash Assertion 
+            # in the Assertion Store when the set_hash_data_length() method is called
+            ingredient_thumbnail_assertion.type = C2PA_AssertionTypes.ingredient_thumbnail
+            ingredient_thumbnail_assertion.description_box = DescriptionBox(
+                content_type=ingredient_thumbnail_assertion.get_content_type(),
+                label=get_assertion_label(C2PA_AssertionTypes.ingredient_thumbnail),
+            )
+            ingredient_thumbnail_assertion.sync_payload()
 
-            if bfdb_box and bidb_type:
-                # A Content Box with the type 'bfdb' contains a required MEDIA_TYPE field,
-                # which holds an IANA type value. The MEDIA_TYPE field is null-terminated
-                # and begins immediately after the toggles byte.
-                bfdb_payload = bfdb_box.get_payload()
-                first_null = bfdb_payload.index(b"\x00", 1)
-                media_type = bfdb_payload[1:first_null].decode("utf-8")
-
-                # TODO: #93: The resulting boxes ('bfdb' and 'bidb') is a ready-to-use payload
-                # for the Ingredient Thumbnail Assertion, with the exception of the Description Box
-                # (the label must be replaced with 'c2pa.thumbnail.ingredient').
-                #
-                # It is possible to implement the logic for assigning this 'payload' without
-                # having to rebuild and serialize the data.
-                ingredient_thumbnail_assertion = c2pie_GenerateIngredientThumbnailAssertion(
-                    media_type,
-                    bidb_box.get_payload(),
-                )
-                assertions.append(ingredient_thumbnail_assertion)
+            assertions.append(ingredient_thumbnail_assertion)
     else:
         if thumbnail_media_type and thumbnail_raw_bytes:
             ingredient_thumbnail_assertion = c2pie_GenerateIngredientThumbnailAssertion(
