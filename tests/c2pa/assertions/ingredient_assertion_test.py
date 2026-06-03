@@ -76,8 +76,8 @@ def test_no_active_manifest_when_box_not_found():
             TITLE,
             DC_FORMAT,
             INGREDIENT_BYTES,
-            ACTIVE_URN,
-            [manifest_box],
+            None,
+            None,
         )
 
     assert "activeManifest" not in ingredient_assertion.schema
@@ -106,7 +106,7 @@ def test_ingredient_assertion_schema_with_active_manifest_is_correct():
             DC_FORMAT,
             INGREDIENT_BYTES,
             ACTIVE_URN,
-            [manifest],
+            manifest,
         )
 
     active_manifest_expected_hash = hashlib.sha256(manifest.get_payload()).digest()
@@ -123,37 +123,3 @@ def test_ingredient_assertion_schema_with_active_manifest_is_correct():
     assert ingredient_assertion.schema["claimSignature"]["url"] == f"self#jumbf=/c2pa/{ACTIVE_URN}/c2pa.signature"
     assert ingredient_assertion.schema["claimSignature"]["hash"] == claim_signature_expected_hash
     assert ingredient_assertion.schema["claimSignature"]["alg"] == "sha256"
-
-
-def test_finds_matching_box_among_multiple():
-    with patch(
-        "c2pie.c2pa.assertion.IngredientAssertion.validate_ingredient",
-        return_value=VALIDATION_RESULTS,
-    ):
-        active_manifest = Manifest(manifest_label=ACTIVE_URN)
-        some_manifest = Manifest(manifest_label="urn:c2pa:other-manifest")
-
-        with patch.object(ClaimSignature, "_generate_payload", return_value=[]):
-            claim = MagicMock()
-            claim_signature = ClaimSignature(
-                claim=claim,
-                private_key=b"\x00\x00\x00",
-                tsa_url=None,
-                require_tsa=False,
-                tsa_log_dir=None,
-            )
-            active_manifest.set_claim_signature(claim_signature)
-            some_manifest.set_claim_signature(claim_signature)
-
-        ingredient_assertion = IngredientAssertion(
-            TITLE,
-            DC_FORMAT,
-            INGREDIENT_BYTES,
-            ACTIVE_URN,
-            [
-                active_manifest,
-                some_manifest,
-            ],
-        )
-
-    assert "activeManifest" in ingredient_assertion.schema

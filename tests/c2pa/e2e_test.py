@@ -102,7 +102,7 @@ def test_e2e_signing_with_c2patool_validation(tmp_path):
 def test_calling_sign_file_with_thumbnail_file_extension_that_is_not_supported_causes_error():
     expected_error_message = (
         "The thumbnail file has an incorrect extension: .pdf. "
-        "Currently, only the following extensions are supported: ['.jpeg', '.jpg']."
+        "Currently, only the following extensions are supported: ['.jpeg', '.jpg', '.png']"
     )
 
     with pytest.raises(

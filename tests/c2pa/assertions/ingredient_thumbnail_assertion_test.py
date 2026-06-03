@@ -60,7 +60,7 @@ def test_ingredient_thumbnail_assertion_has_correct_bfdb_payload_lenght():
     )
     bfdb_payload = ingredient_thumbnail_assertion.content_boxes[0].get_payload()
 
-    assert len(bfdb_payload) == MEDIA_TYPE.encode("utf-8") + 2
+    assert len(bfdb_payload) == len(MEDIA_TYPE.encode("utf-8")) + 2
 
 
 def test_ingredient_thumbnail_assertion_has_correct_toggles_inside_bfdb_payload():
