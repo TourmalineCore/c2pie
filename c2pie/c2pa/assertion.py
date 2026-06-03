@@ -70,14 +70,8 @@ class HashDataAssertion(Assertion):
     def __init__(
         self,
         hashed_data: bytes,
-        # TODO: #91: Need to add handling for exclusions during
-        # hash calculation in order to use additional_exclusions
-        # additional_exclusions: list[dict[str, int]] | None = None,
     ):
         exclusions: list[dict[str, int]] = []
-
-        # if additional_exclusions:
-        #     exclusions.extend(additional_exclusions)
 
         schema: dict[str, Any] = {
             "exclusions": exclusions,
