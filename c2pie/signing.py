@@ -149,7 +149,7 @@ def sign_file(
 
     assertions = []
 
-    thumbnail_media_type = iana_media_types[C2PA_ContentTypes(thumbnail_file_path.suffix)]
+    thumbnail_media_type = None
     thumbnail_raw_bytes = None
 
     if thumbnail_file_path:
@@ -167,6 +167,7 @@ def sign_file(
         else:
             with open(thumbnail_file_path, "rb") as f:
                 thumbnail_raw_bytes = f.read()
+            thumbnail_media_type = iana_media_types[C2PA_ContentTypes(thumbnail_file_path.suffix)]
 
             thumbnail_assertion = c2pie_GenerateThumbnailAssertion(
                 thumbnail_media_type,
@@ -188,7 +189,7 @@ def sign_file(
 
     active_manifest_urn: str | None = get_active_manifest_uuid(manifest_store_bytes)
     previous_manifest_boxes: list[Box] = extract_manifest_boxes(manifest_store_bytes)
-    ingredient_thumbnail_assertion = None
+    active_manifest: Box | None = None
 
     if previous_manifest_boxes:
         for manifest in previous_manifest_boxes:
@@ -197,7 +198,9 @@ def sign_file(
                 active_manifest_urn,
             )
 
+    ingredient_thumbnail_assertion = None
 
+    if active_manifest:
         possibles_thumbnail_assertion_labels = [
             "c2pa.thumbnail.claim",
             "c2pa.thumbnail.claim.jpeg",
@@ -245,7 +248,7 @@ def sign_file(
                 )
                 assertions.append(ingredient_thumbnail_assertion)
     else:
-        if thumbnail_raw_bytes:
+        if thumbnail_media_type and thumbnail_raw_bytes:
             ingredient_thumbnail_assertion = c2pie_GenerateIngredientThumbnailAssertion(
                 thumbnail_media_type,
                 thumbnail_raw_bytes,
@@ -257,7 +260,7 @@ def sign_file(
         dc_format=_DC_FORMAT_BY_CONTENT_TYPE[file_type.name],
         ingredient_bytes=raw_bytes,
         active_manifest_urn=active_manifest_urn,
-        previous_manifest_boxes=previous_manifest_boxes,
+        active_manifest=active_manifest,
         ingredient_thumbnail_assertion=ingredient_thumbnail_assertion,
     )
     assertions.append(ingredient_assertion)

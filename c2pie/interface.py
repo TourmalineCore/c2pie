@@ -76,7 +76,7 @@ def c2pie_GenerateIngredientAssertion(
     dc_format: str,
     ingredient_bytes: bytes,
     active_manifest_urn: str | None,
-    previous_manifest_boxes: list[Box],
+    active_manifest: Box | None,
     ingredient_thumbnail_assertion: IngredientThumbnailAssertion | None = None,
 ) -> IngredientAssertion:
     return IngredientAssertion(
@@ -84,7 +84,7 @@ def c2pie_GenerateIngredientAssertion(
         dc_format=dc_format,
         ingredient_bytes=ingredient_bytes,
         active_manifest_urn=active_manifest_urn,
-        previous_manifest_boxes=previous_manifest_boxes,
+        active_manifest=active_manifest,
         ingredient_thumbnail_assertion=ingredient_thumbnail_assertion,
     )
 
