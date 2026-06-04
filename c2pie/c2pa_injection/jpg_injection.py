@@ -91,7 +91,7 @@ class JpgSegmentApp11Storage:
 
         remaining = len(self.payload)
 
-        # Every segment after Z=1 must repeat the LBox + TBox (first 8 bytes of the JUMBF box) 
+        # Every segment after Z=1 must repeat the LBox + TBox (first 8 bytes of the JUMBF box)
         # immediately after CI + EN + Z. This frees 8 bytes from the max chunk size for those segments.
         lbox_tbox = self.payload[0:8]
 

@@ -43,5 +43,5 @@ class ManifestStore(SuperBox):
                 f"Manifest Store is too large to serialize: {self.l_box:,} bytes. "
                 "The JUMBF LBox field is limited to 4 bytes (max 4,294,967,295 bytes)."
             )
-        
+
         return super().serialize()
