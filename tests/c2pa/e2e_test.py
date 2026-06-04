@@ -1,4 +1,5 @@
 import json
+import os
 import shutil
 import subprocess
 from pathlib import Path
@@ -6,7 +7,10 @@ from pathlib import Path
 import pytest
 
 from c2pie.signing import sign_file
+from c2pie.tsa.exceptions import TSAConnectionError
 from c2pie.utils.content_types import C2PA_ContentTypes
+
+_TSA_URL = os.getenv("C2PIE_TSA_URL", "http://timestamp.digicert.com")
 
 TEST_FILES_DIR = Path(__file__).parent.parent / "test_files"
 
@@ -111,6 +115,57 @@ def test_e2e_signing_with_c2patool_validation(tmp_path):
 
             manifests_list = list(manifests.values())
             assert manifests_list, "empty manifests list after normalization"
+
+
+
+
+@pytest.mark.e2e
+@pytest.mark.parametrize(
+    "content_type",
+    list(C2PA_ContentTypes),
+    ids=lambda ct: ct.name,
+)
+def test_e2e_double_signing_creates_linked_manifests(
+    content_type,
+    tmp_path,
+):
+    if not has_c2patool():
+        pytest.skip("c2patool not available")
+
+    for test_file in test_files_by_extension[content_type.name]:
+        first_signed = tmp_path / f"first.{content_type.name}"
+        second_signed = tmp_path / f"second.{content_type.name}"
+
+        copy_test_file(test_file, first_signed)
+
+        sign_file(
+            input_path=first_signed,
+            output_path=first_signed,
+        )
+
+        sign_file(
+            input_path=first_signed,
+            output_path=second_signed,
+        )
+
+        report = _validate_using_c2patool_and_return_json_report(second_signed)
+
+        assert report.get("validation_state") == "Valid"
+
+        manifests = report.get("manifests", {})
+        assert len(manifests) == 2
+
+        active_urn = report["active_manifest"]
+        active_manifest = manifests[active_urn]
+        ingredient = active_manifest["assertion_store"]["c2pa.ingredient.v3"]
+
+        assert ingredient["relationship"] == "parentOf"
+
+        previous_urns = [urn for urn in manifests if urn != active_urn]
+        assert len(previous_urns) == 1
+
+        previous_urn = previous_urns[0]
+        assert previous_urn in ingredient["activeManifest"]["url"]
 
 
 @pytest.mark.e2e
