@@ -117,6 +117,37 @@ def test_e2e_signing_with_c2patool_validation(tmp_path):
             assert manifests_list, "empty manifests list after normalization"
 
 
+@pytest.mark.e2e
+@pytest.mark.parametrize(
+    "content_type",
+    list(C2PA_ContentTypes),
+    ids=lambda ct: ct.name,
+)
+def test_e2e_signing_with_tsa_produces_valid_file_with_timestamp(content_type, tmp_path):
+    if not has_c2patool():
+        pytest.skip("c2patool not available")
+
+    test_file = test_files_by_extension[content_type.name][0]
+    input_file = tmp_path / f"input.{content_type.name}"
+    output_file = tmp_path / f"output.{content_type.name}"
+
+    copy_test_file(test_file, input_file)
+
+    try:
+        sign_file(
+            input_path=input_file,
+            output_path=output_file,
+            tsa_url=_TSA_URL,
+        )
+    except TSAConnectionError:
+        pytest.skip(f"TSA server not reachable: {_TSA_URL}")
+
+    report = _validate_using_c2patool_and_return_json_report(output_file)
+    assert report.get("validation_state") == "Valid"
+
+    active_urn = report["active_manifest"]
+    active_manifest = report["manifests"][active_urn]
+    assert "time" in active_manifest["signature"]
 
 
 @pytest.mark.e2e
