@@ -117,6 +117,17 @@ def _load_certificates_and_key(
     return key, certificates
 
 
+def _read_and_check_size_of_thumbnail_file(thumbnail_file_path: Path):
+    with open(thumbnail_file_path, "rb") as f:
+        thumbnail_raw_bytes = f.read()
+
+    # The 1024x1024 requirement is specified in the C2PA specification.
+    if len(thumbnail_raw_bytes) > 1024 * 1024:
+        raise ValueError("The thumbnail file is too large! The size must not exceed 1024x1024. Recomended 512x512.")
+
+    return thumbnail_raw_bytes
+
+
 def sign_file(
     input_path: Path | str,
     output_path: Path | str | None = None,
@@ -166,8 +177,8 @@ def sign_file(
                 f"Currently, only the following extensions are supported: {supported_extensions}.",
             )
         else:
-            with open(thumbnail_file_path, "rb") as f:
-                thumbnail_raw_bytes = f.read()
+            thumbnail_raw_bytes = _read_and_check_size_of_thumbnail_file(thumbnail_file_path)
+
             thumbnail_media_type = iana_media_types[thumbnail_file_path.suffix]
 
             thumbnail_assertion = c2pie_GenerateThumbnailAssertion(
