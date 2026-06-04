@@ -1,5 +1,4 @@
 import json
-import os
 import shutil
 import subprocess
 from pathlib import Path
@@ -10,8 +9,7 @@ from c2pie.signing import sign_file
 from c2pie.tsa.exceptions import TSAConnectionError
 from c2pie.utils.content_types import C2PA_ContentTypes
 
-_TSA_URL = os.getenv("C2PIE_TSA_URL", "http://timestamp.digicert.com")
-
+TSA_URL = "http://timestamp.digicert.com"
 TEST_FILES_DIR = Path(__file__).parent.parent / "test_files"
 
 test_files_by_extension = {
@@ -137,10 +135,10 @@ def test_e2e_signing_with_tsa_produces_valid_file_with_timestamp(content_type, t
         sign_file(
             input_path=input_file,
             output_path=output_file,
-            tsa_url=_TSA_URL,
+            tsa_url=TSA_URL,
         )
     except TSAConnectionError:
-        pytest.skip(f"TSA server not reachable: {_TSA_URL}")
+        pytest.skip(f"TSA server not reachable: {TSA_URL}")
 
     report = _validate_using_c2patool_and_return_json_report(output_file)
     assert report.get("validation_state") == "Valid"
