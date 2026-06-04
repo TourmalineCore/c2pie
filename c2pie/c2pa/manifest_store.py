@@ -25,11 +25,15 @@ class ManifestStore(SuperBox):
     def sync_payload(self):
         super().sync_payload()
 
-    def set_hash_data_length_for_all(
+    def add_full_c2pa_structure_exclusion(
         self,
+        offset: int,
         length: int,
     ) -> None:
-        self.manifests[-1].set_hash_data_length(length)
+        self.manifests[-1].add_full_c2pa_structure_exclusion(
+            offset,
+            length,
+        )
 
         super().sync_payload()
 

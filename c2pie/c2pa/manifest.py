@@ -44,8 +44,9 @@ class Manifest(SuperBox):
             return self.assertion_store.get_assertions()
         return
 
-    def set_hash_data_length(
+    def add_full_c2pa_structure_exclusion(
         self,
+        offset: int,
         length: int,
     ):
         """
@@ -53,7 +54,10 @@ class Manifest(SuperBox):
         and ClaimSignature (COSE Sign1 detached over Claim CBOR).
         """
         if self.assertion_store and self.claim and self.claim_signature:
-            self.assertion_store.set_hash_data_length(length)
+            self.assertion_store.add_full_c2pa_structure_exclusion(
+                offset,
+                length,
+            )
             self.claim.set_assertion_store(self.assertion_store)
             self.claim_signature.set_claim(self.claim)
 

@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 from typing import Literal
 
+from c2pie.c2pa_injection.pdf_injection import prepare_pdf_bytes
 from c2pie.c2pa_parsing.jumbf_parsing import extract_manifest_boxes, get_active_manifest_uuid
 from c2pie.c2pa_parsing.manifest_extractor import extract_manifest_store_bytes
 from c2pie.interface import (
@@ -138,6 +139,7 @@ def sign_file(
     file_type: C2PA_ContentTypes = _get_content_type_by_filepath(input_path)
 
     if file_type.name == "pdf":
+        raw_bytes = prepare_pdf_bytes(raw_bytes)
         cai_offset = len(raw_bytes)
     else:
         cai_offset = 2
@@ -145,7 +147,6 @@ def sign_file(
     assertions = []
 
     hash_data_assertion = c2pie_GenerateHashDataAssertion(
-        cai_offset=cai_offset,
         hashed_data=hashlib.sha256(raw_bytes).digest(),
     )
 

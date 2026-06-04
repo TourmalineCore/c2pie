@@ -77,7 +77,6 @@ def test_manifest_store_with_previous_manifests_serializes_without_error():
 
 def test_manifest_store_set_hash_data_length_only_affects_new_manifests():
     data_hash_assertion = HashDataAssertion(
-        0,
         b"\x00\x00\x00",
     )
 
@@ -115,7 +114,7 @@ def test_manifest_store_set_hash_data_length_only_affects_new_manifests():
         ]
     )
 
-    manifest_store.set_hash_data_length_for_all(1024)
+    manifest_store.add_full_c2pa_structure_exclusion(2, 1024)
 
     previous_box = manifest_store.content_boxes[0]
     assert previous_box == previous_manifest

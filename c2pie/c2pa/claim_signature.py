@@ -64,6 +64,8 @@ class ClaimSignature(SuperBox):
         self.require_tsa = require_tsa
         self.tsa_log_dir = tsa_log_dir
 
+        self.serialized_cose_sign1_length = 0
+
         content_boxes = self._generate_payload()
 
         super().__init__(
@@ -129,9 +131,48 @@ class ClaimSignature(SuperBox):
                         },
                     ],
                 },
+                # The specification recommends setting the pad to at least 16 bytes. We use 64 bytes
+                # to allow for some extra space before the 23-byte limit is exceeded, since otherwise
+                # the CBOR header of the pad field would be reduced by 1 byte.
+                "pad": b"\x00" * 8,
             }
 
         return unprotected_header
+
+    def serialize_cose_sign1_tagged_with_alignment(
+        self,
+        cose_sign1: list,
+    ) -> bytes:
+        cose_sign1_tagged_cbor = cbor2.dumps(
+            cbor2.CBORTag(18, cose_sign1),
+            canonical=True,
+        )
+
+        # The length of a TSA token can be variable. To ensure that a new token does not exceed
+        # the exclusion boundary for the C2PA structure, we need to align the length of
+        # the Claim Signature using the pad field, similar to the Data Hash Assertion.
+        if self.serialized_cose_sign1_length == 0:
+            self.serialized_cose_sign1_length = len(cose_sign1_tagged_cbor)
+        elif self.serialized_cose_sign1_length != len(cose_sign1_tagged_cbor):
+            difference = self.serialized_cose_sign1_length - len(cose_sign1_tagged_cbor)
+
+            if -difference > len(cose_sign1[1]["pad"]):
+                raise ValueError("Difference in length exceeds the predefined pad")
+
+            updated_pad_length = len(cose_sign1[1]["pad"]) + difference
+
+            # If a CBOR overflow is not handled, the extra length byte that
+            # would be added in this case will not be taken into account.
+            if updated_pad_length > 23:
+                updated_pad_length += 1
+
+            cose_sign1[1]["pad"] = b"\x00" * updated_pad_length
+            cose_sign1_tagged_cbor = cbor2.dumps(
+                cbor2.CBORTag(18, cose_sign1),
+                canonical=True,
+            )
+
+        return cose_sign1_tagged_cbor
 
     def _create_cose_sign1_tagged(self) -> bytes:
         """
@@ -179,4 +220,6 @@ class ClaimSignature(SuperBox):
 
         cose_sign1 = [serialized_protected_header, unprotected_header, None, signature]
 
-        return cbor2.dumps(cbor2.CBORTag(18, cose_sign1), canonical=True)
+        cose_sign1_tagged_cbor = self.serialize_cose_sign1_tagged_with_alignment(cose_sign1)
+
+        return cose_sign1_tagged_cbor

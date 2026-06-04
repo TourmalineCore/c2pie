@@ -10,10 +10,9 @@ from c2pie.c2pa.assertion import (
 from c2pie.c2pa.assertion_store import AssertionStore
 from c2pie.c2pa.claim import Claim
 from c2pie.c2pa.claim_signature import ClaimSignature
-from c2pie.c2pa.config import RETRY_SIGNATURE
 from c2pie.c2pa.manifest import Manifest
 from c2pie.c2pa.manifest_store import ManifestStore
-from c2pie.c2pa_injection.jpg_injection import JpgSegmentApp11Storage
+from c2pie.c2pa_injection.jpg_injection import emplace_manifest_into_jpeg
 from c2pie.c2pa_injection.pdf_injection import emplace_manifest_into_pdf
 from c2pie.jumbf_boxes.box import Box
 from c2pie.utils.assertion_schemas import C2PA_AssertionTypes
@@ -25,13 +24,9 @@ def c2pie_GenerateAssertion(assertion_type: C2PA_AssertionTypes, assertion_schem
 
 
 def c2pie_GenerateHashDataAssertion(
-    cai_offset: int,
     hashed_data: bytes,
 ) -> HashDataAssertion:
-    return HashDataAssertion(
-        cai_offset,
-        hashed_data,
-    )
+    return HashDataAssertion(hashed_data)
 
 
 def c2pie_GenerateActionsAssertion(
@@ -78,7 +73,7 @@ def c2pie_GenerateManifestStore(
     private_key: bytes,
     certificate_chain: bytes,
     file_name: str,
-    # TODO: #66  : move that variables to configfile
+    # TODO: #66: move that variables to configfile
     tsa_url: str | None,
     require_tsa: bool,
     tsa_log_dir: str | None,
@@ -123,32 +118,16 @@ def c2pie_EmplaceManifest(
     manifest_store: ManifestStore,
 ) -> bytes:
     if format_type == C2PA_ContentTypes.jpg or format_type == C2PA_ContentTypes.jpeg:
-        assumed_hash_data_len = 0
-        final_length = -1
-        tail = b""
-
-        for _ in range(RETRY_SIGNATURE):
-            manifest_store.set_hash_data_length_for_all(assumed_hash_data_len)
-
-            payload = manifest_store.serialize()
-            storage = JpgSegmentApp11Storage(
-                app11_segment_box_length=manifest_store.get_length(),
-                app11_segment_box_type=manifest_store.get_type(),
-                payload=payload,
-            )
-
-            tail = storage.serialize()
-            total_len = len(tail)
-
-            if total_len == final_length:
-                break
-
-            final_length = total_len
-            assumed_hash_data_len = total_len
-
-        return content_bytes[:c2pa_offset] + tail + content_bytes[c2pa_offset:]
-
-    if format_type == C2PA_ContentTypes.pdf:
-        return emplace_manifest_into_pdf(content_bytes, manifest_store)
-
-    raise ValueError(f"Unsupported content type {format_type}!")
+        return emplace_manifest_into_jpeg(
+            content_bytes,
+            manifest_store,
+            c2pa_offset,
+        )
+    elif format_type == C2PA_ContentTypes.pdf:
+        return emplace_manifest_into_pdf(
+            content_bytes,
+            manifest_store,
+            c2pa_offset,
+        )
+    else:
+        raise ValueError(f"Unsupported content type {format_type}!")
