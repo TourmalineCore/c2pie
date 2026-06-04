@@ -37,19 +37,33 @@ class JpgSegment:
 
 
 class JpgSegmentApp11(JpgSegment):
-    def __init__(self, segment_id, sequence_number, payload_length, payload):
+    def __init__(
+        self,
+        segment_id,
+        sequence_number,
+        payload_length,
+        payload,
+    ):
         self.ci = bytes.fromhex(b"JP".hex())  # 2 bytes
         self.en = segment_id  # 2 bytes
         self.z = sequence_number  # 4 bytes
 
         self.app11_payload = payload
 
-        super().__init__(payload_length=self.get_payload_length(payload_length))
+        super().__init__(
+            payload_length=self.get_payload_length(payload_length),
+        )
 
-    def get_payload_length(self, payload_length):
+    def get_payload_length(
+        self,
+        payload_length,
+    ):
         return 2 + 2 + 4 + 4 + 4 + payload_length
 
-    def serialize(self, payload=None):
+    def serialize(
+        self,
+        payload=None,
+    ):
         _en = self.en.to_bytes(2, "big")
         _z = self.z.to_bytes(4, "big")
 
