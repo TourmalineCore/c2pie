@@ -86,7 +86,7 @@ def c2pie_GenerateIngredientThumbnailAssertion(
             # The type field is used when searching for a Data Hash Assertion
             # in the Assertion Store when the set_hash_data_length() method is called
             ingredient_thumbnail_assertion.type = C2PA_AssertionTypes.ingredient_thumbnail
-            
+
             ingredient_thumbnail_assertion.description_box = DescriptionBox(
                 content_type=ingredient_thumbnail_assertion.get_content_type(),
                 label=get_assertion_label(C2PA_AssertionTypes.ingredient_thumbnail),

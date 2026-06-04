@@ -147,5 +147,3 @@ def test_e2e_signature_stability(
             validation_state = report.get("validation_state")
 
             assert validation_state == "Valid"
-
-
