@@ -1,3 +1,13 @@
+from c2pie.c2pa.manifest_store import ManifestStore
+
+# JPG_SEGMENT_MAX_PAYLOAD_LENGTH =
+#   65535 (max segment length)
+#   - 2 (bytes of length)
+#   - 2 (bytes of CI)
+#   - 2 (bytes of EN)
+#   - 4 (bytes of Z)
+#   - 4 (bytes of LBox)
+#   - 4 (bytes of TBox)
 JPG_SEGMENT_MAX_PAYLOAD_LENGTH = 65517
 
 
@@ -98,3 +108,36 @@ class JpgSegmentApp11Storage:
 
         self.serialized_length = len(serialized_storage_data)
         return serialized_storage_data
+
+
+def create_and_serialize_app11_storage(
+    manifest_store: ManifestStore,
+) -> bytes:
+    serialized_manifest_store = manifest_store.serialize()
+
+    app11_storage = JpgSegmentApp11Storage(
+        app11_segment_box_length=manifest_store.get_length(),
+        app11_segment_box_type=manifest_store.get_type(),
+        payload=serialized_manifest_store,
+    )
+
+    return app11_storage.serialize()
+
+
+def emplace_manifest_into_jpeg(
+    content_bytes: bytes,
+    manifest_store: ManifestStore,
+    c2pa_offset: int,
+) -> bytes:
+    serialized_app11_storage = create_and_serialize_app11_storage(manifest_store)
+
+    serialized_app11_storage_length = len(serialized_app11_storage)
+
+    manifest_store.add_full_c2pa_structure_exclusion(
+        c2pa_offset,
+        serialized_app11_storage_length,
+    )
+
+    tail = create_and_serialize_app11_storage(manifest_store)
+
+    return content_bytes[:c2pa_offset] + tail + content_bytes[c2pa_offset:]

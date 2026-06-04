@@ -15,7 +15,11 @@ class SuperBox(Box):
         label: str = "",
         content_boxes: list | None = None,
     ):
-        self.description_box = DescriptionBox(content_type=content_type, label=label)
+        self.description_box = DescriptionBox(
+            content_type=content_type,
+            label=label,
+        )
+
         self.content_boxes = [] if content_boxes is None else content_boxes
 
         payload = self.description_box.serialize() + self.serialize_content_boxes()

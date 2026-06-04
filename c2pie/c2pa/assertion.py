@@ -37,7 +37,12 @@ class Assertion(SuperBox):
         if not content_boxes:
             payload = self.get_payload_from_schema()
             box_type_hex = get_assertion_content_box_type(self.type)
-            content_boxes = [ContentBox(box_type=box_type_hex, payload=payload)]
+            content_boxes = [
+                ContentBox(
+                    box_type=box_type_hex,
+                    payload=payload,
+                )
+            ]
 
         super().__init__(
             content_type=get_assertion_content_type(self.type),
@@ -64,56 +69,71 @@ class HashDataAssertion(Assertion):
 
     def __init__(
         self,
-        cai_offset: int,
         hashed_data: bytes,
-        additional_exclusions: list[dict[str, int]] | None = None,
     ):
-        exclusions: list[dict[str, int]] = [
-            {
-                "start": cai_offset,
-                "length": 65535,
-            },
-        ]
-
-        if additional_exclusions:
-            exclusions.extend(additional_exclusions)
+        exclusions: list[dict[str, int]] = []
 
         schema: dict[str, Any] = {
-            "name": "jumbf manifest",
             "exclusions": exclusions,
             "alg": "sha256",
             "hash": hashed_data,
-            "pad": [],
+            # The specification recommends setting the pad to at least 16 bytes. We use 64 bytes
+            # to allow for some extra space before the 23-byte limit is exceeded, since otherwise
+            # the CBOR header of the pad field would be reduced by 1 byte.
+            "pad": b"\x00" * 64,
         }
-        super().__init__(C2PA_AssertionTypes.data_hash, schema)
 
-    def set_hash_data_length(
+        super().__init__(
+            C2PA_AssertionTypes.data_hash,
+            schema,
+        )
+
+    def add_full_c2pa_structure_exclusion(
         self,
+        offset: int,
         length: int,
     ) -> None:
-        if self.schema.get("name") != "jumbf manifest":
-            raise ValueError("c2pa.hash.data: jumbf manifest is missing")
+        exclusions = self.schema["exclusions"]
+        previous_exclusion_length = len(cbor_to_bytes(exclusions))
 
-        exclusions = self.schema.get("exclusions", [])
+        self.schema["exclusions"].extend(
+            [
+                {
+                    "start": offset,
+                    "length": length,
+                },
+            ]
+        )
 
-        if not exclusions:
-            raise ValueError("c2pa.hash.data: exclusions are missing")
+        # NOTE: If the number of exclusions exceeds 23, an additional length byte
+        # will be added to the CBOR header of serialized exclusions array. This byte
+        # is included in the recalculation of the serialized exclusions.
+        current_exclusion_length = len(cbor_to_bytes(exclusions))
 
-        exclusions[0]["length"] = int(length)
+        difference = previous_exclusion_length - current_exclusion_length
+
+        if -difference > len(self.schema["pad"]):
+            raise ValueError("Difference in length exceeds the predefined pad")
+
+        # If the pad is less than 24 bytes the size of the cbor header
+        # will change during conversion to cbor and will occupy less than 2 bytes.
+        updated_pad_length = len(self.schema["pad"]) + difference
+
+        # If a CBOR overflow is not handled, the extra length byte that
+        # would be added in this case will not be taken into account.
+        if updated_pad_length < 24:
+            updated_pad_length -= 1
+
+        self.schema["pad"] = b"\x00" * updated_pad_length
 
         payload = self.get_payload_from_schema()
-        if self.content_boxes:
-            self.content_boxes[0] = ContentBox(
+
+        self.content_boxes = [
+            ContentBox(
                 box_type=get_assertion_content_box_type(self.type),
                 payload=payload,
             )
-        else:
-            self.content_boxes = [
-                ContentBox(
-                    box_type=get_assertion_content_box_type(self.type),
-                    payload=payload,
-                )
-            ]
+        ]
 
         self.sync_payload()
 
@@ -147,7 +167,6 @@ class EmbeddedDataAssertion(Assertion):
 
     Can be used for the following assertions:
     - c2pa.thumbnail.claim,
-    - c2pa.ingredient,
     - c2pa.ingredient.thumbnail
     - c2pa.embedded-data
 
@@ -205,6 +224,21 @@ class ThumbnailAssertion(EmbeddedDataAssertion):
         )
 
 
+class IngredientThumbnailAssertion(EmbeddedDataAssertion):
+    """An assertion (c2pa.thumbnail.ingredient) containing an ingredient thumbnail"""
+
+    def __init__(
+        self,
+        media_type: str,
+        image_data: bytes,
+    ):
+        super().__init__(
+            media_type=media_type,
+            image_data=image_data,
+            assertion_type=C2PA_AssertionTypes.ingredient_thumbnail,
+        )
+
+
 class IngredientAssertion(Assertion):
     """c2pa.ingredient.v3 asset-binding assertion."""
 
@@ -214,7 +248,8 @@ class IngredientAssertion(Assertion):
         dc_format: str,
         ingredient_bytes: bytes,
         active_manifest_urn: str | None,
-        previous_manifest_boxes: list[Box],
+        active_manifest: Box | None,
+        ingredient_thumbnail_assertion: IngredientThumbnailAssertion | None = None,
     ):
         schema: dict[str, Any] = {
             "dc:title": title,
@@ -222,7 +257,17 @@ class IngredientAssertion(Assertion):
             "relationship": "parentOf",
         }
 
-        if active_manifest_urn and previous_manifest_boxes:
+        if ingredient_thumbnail_assertion:
+            ingredient_thumbnail_hash = hashlib.sha256(ingredient_thumbnail_assertion.payload).digest()
+
+            ingredient_thumbnail: dict[str, str | bytes] = generate_hashed_uri_map(
+                url=f"self#jumbf=c2pa.assertions/{ingredient_thumbnail_assertion.get_label()}",
+                hash_value=ingredient_thumbnail_hash,
+                hash_algorithm="sha256",
+            )
+            schema["thumbnail"] = ingredient_thumbnail
+
+        if active_manifest_urn and active_manifest:
             validation_results = self.validate_ingredient(
                 ingredient_bytes,
                 dc_format,
@@ -236,34 +281,15 @@ class IngredientAssertion(Assertion):
                 )
                 return
 
-            active_manifest_box: Box = None
-            for box in previous_manifest_boxes:
-                found_box = find_in_box(
-                    box,
-                    active_manifest_urn,
-                )
+            active_manifest_hash = hashlib.sha256(active_manifest.payload).digest()
 
-                if found_box:
-                    active_manifest_box = found_box
-                    break
-
-            # We should not include information about the active manifest if validation was unsuccessful
-            if not active_manifest_box:
-                super().__init__(
-                    C2PA_AssertionTypes.ingredient,
-                    schema,
-                )
-                return
-
-            active_manifest_hash = hashlib.sha256(active_manifest_box.payload).digest()
-
-            active_manifest: dict[str, str | bytes] = generate_hashed_uri_map(
+            active_manifest_map: dict[str, str | bytes] = generate_hashed_uri_map(
                 url=f"self#jumbf=/c2pa/{active_manifest_urn}",
                 hash_value=active_manifest_hash,
                 hash_algorithm="sha256",
             )
 
-            claim_signature_box = find_in_box(active_manifest_box, "c2pa.signature")
+            claim_signature_box = find_in_box(active_manifest, "c2pa.signature")
 
             claim_signature_hash = hashlib.sha256(claim_signature_box.payload).digest()
 
@@ -273,7 +299,7 @@ class IngredientAssertion(Assertion):
                 hash_algorithm="sha256",
             )
 
-            schema["activeManifest"] = active_manifest
+            schema["activeManifest"] = active_manifest_map
             schema["validationResults"] = validation_results
             schema["claimSignature"] = claim_signature
 

@@ -17,11 +17,22 @@ def parse_arguments() -> argparse.Namespace:
         f"supported extensions are: {supported_extensions}.",
     )
 
-    global_parser.add_argument("-V", "--version", action="version", version=f"c2pie {version('c2pie')}")
+    global_parser.add_argument(
+        "-V",
+        "--version",
+        action="version",
+        version=f"c2pie {version('c2pie')}",
+    )
 
-    subparsers = global_parser.add_subparsers(title="subcommands", help="commands")
+    subparsers = global_parser.add_subparsers(
+        title="subcommands",
+        help="commands",
+    )
 
-    sign_parser = subparsers.add_parser("sign", help="embed c2pa signature into a file")
+    sign_parser = subparsers.add_parser(
+        "sign",
+        help="embed c2pa signature into a file",
+    )
 
     sign_parser.add_argument(
         "--input_file",
@@ -39,10 +50,17 @@ def parse_arguments() -> argparse.Namespace:
     )
 
     sign_parser.add_argument(
+        "--thumbnail_file",
+        type=Path,
+        default=None,
+        help="optional path to the file whose bytes are to be written as a thumbnail of the file being signed.",
+    )
+
+    sign_parser.add_argument(
         "--tsa_url",
         type=str,
         default=None,
-        help="TimeStamp Authority URL for timestamping (e.g. http://timestamp.digicert.com). "
+        help="time-stamp authority URL for timestamping (e.g. http://timestamp.digicert.com). "
         "Falls back to C2PIE_TSA_URL env variable.",
     )
 
@@ -71,10 +89,12 @@ def sign(arguments: argparse.Namespace) -> None:
     tsa_url = arguments.tsa_url or os.getenv("C2PIE_TSA_URL")
     require_tsa = arguments.require_tsa or (os.getenv("C2PIE_TSA_REQUIRED", "").lower() == "true")
     tsa_log_dir = arguments.tsa_log_dir or os.getenv("C2PIE_TSA_LOG_DIR")
+    thumbnail_file_path = arguments.thumbnail_file
 
     sign_file(
         input_path=input_file_path,
         output_path=output_file_path,
+        thumbnail_file_path=thumbnail_file_path,
         tsa_url=tsa_url,
         require_tsa=require_tsa,
         tsa_log_dir=tsa_log_dir,

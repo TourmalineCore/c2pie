@@ -2,10 +2,17 @@ import enum
 
 
 class C2PA_ContentTypes(enum.Enum):
+    jpeg = ".jpeg"
     jpg = ".jpg"
     pdf = ".pdf"
-    jpeg = ".jpeg"
 
+
+iana_media_types = {
+    ".jpeg": "image/jpeg",
+    ".jpg": "image/jpeg",
+    ".png": "image/png",
+    ".pdf": "application/pdf",
+}
 
 jumbf_content_types = {
     "embedded_file": b"\x40\xcb\x0c\x32\xbb\x8a\x48\x9d\xa7\x0b\x2a\xd6\xf4\x7f\x43\x69",

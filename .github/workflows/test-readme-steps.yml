@@ -1,9 +1,11 @@
 name: Execute Readme Steps
 
 on:
+  pull_request:
+    types: [opened, synchronize, reopened]
   push:
     branches:
-      - feature/*
+      - master
 
 jobs:
   sign-steps:

@@ -1,3 +1,6 @@
+import cbor2
+import pytest
+
 from c2pie.c2pa.assertion import Assertion
 from c2pie.c2pa.assertion_store import AssertionStore
 from c2pie.c2pa.claim import Claim
@@ -57,3 +60,138 @@ def test_create_claim_signature_with_non_empty_claim():
 
     assert claim_signature.claim is not None  # noqa: B015
     assert claim_signature.content_boxes[0].get_type() == b"cbor".hex()  # noqa: B015
+
+
+def test_serialize_cose_sign1_sets_initial_length_on_first_call():
+    claim_signature = ClaimSignature.__new__(ClaimSignature)
+    claim_signature.serialized_cose_sign1_length = 0
+
+    cose_sign1 = [
+        "protected_header",
+        {
+            "pad": b"\x00\x00\x00\x00",
+        },
+        "payload",
+        "signature",
+    ]
+
+    serialized_cose_sign1_cbor = claim_signature.serialize_cose_sign1_tagged_with_alignment(cose_sign1)
+
+    assert claim_signature.serialized_cose_sign1_length != 0
+    assert cbor2.loads(serialized_cose_sign1_cbor).value[1]["pad"] == cose_sign1[1]["pad"]
+
+
+def test_serialize_cose_sign1_aligns_larger_subsequent_output():
+    claim_signature = ClaimSignature.__new__(ClaimSignature)
+    claim_signature.serialized_cose_sign1_length = 0
+
+    first = claim_signature.serialize_cose_sign1_tagged_with_alignment(
+        [
+            "protected_header",
+            {
+                "pad": b"\x00\x00\x00\x00",
+            },
+            "payload",
+            "signature",
+        ]
+    )
+    second = claim_signature.serialize_cose_sign1_tagged_with_alignment(
+        [
+            "protected_header",
+            {
+                "pad": b"\x00\x00\x00\x00",
+            },
+            "payload",
+            "signature2",
+        ]
+    )
+
+    assert len(first) == len(second)
+
+
+def test_serialize_cose_sign1_aligns_shorter_subsequent_output():
+    claim_signature = ClaimSignature.__new__(ClaimSignature)
+    claim_signature.serialized_cose_sign1_length = 0
+
+    first = claim_signature.serialize_cose_sign1_tagged_with_alignment(
+        [
+            "protected_header",
+            {
+                "pad": b"\x00\x00\x00\x00",
+            },
+            "payload",
+            "signature",
+        ]
+    )
+    second = claim_signature.serialize_cose_sign1_tagged_with_alignment(
+        [
+            "protected_header",
+            {
+                "pad": b"\x00\x00\x00\x00",
+            },
+            "",
+            "signature",
+        ]
+    )
+
+    assert len(first) == len(second)
+
+
+def test_align_cose_sign1_with_large_difference_causes_error():
+    claim_signature = ClaimSignature.__new__(ClaimSignature)
+    claim_signature.serialized_cose_sign1_length = 1
+
+    cose_sign1 = [
+        "protected_header",
+        {
+            "pad": b"\x00\x00\x00\x00",
+        },
+        "payload",
+        "signature",
+    ]
+
+    with pytest.raises(ValueError, match="Difference in length exceeds the predefined pad"):
+        claim_signature.serialize_cose_sign1_tagged_with_alignment(cose_sign1)
+
+
+def test_cose_sign1_tagged_tag_value_is_18():
+    claim_signature = ClaimSignature.__new__(ClaimSignature)
+    claim_signature.serialized_cose_sign1_length = 0
+
+    cose_sign1 = [
+        "protected_header",
+        {
+            "pad": b"\x00\x00\x00\x00",
+        },
+        "payload",
+        "signature",
+    ]
+
+    serialized_cose_sign1_cbor = claim_signature.serialize_cose_sign1_tagged_with_alignment(cose_sign1)
+
+    assert cbor2.loads(serialized_cose_sign1_cbor).tag == 18
+
+
+def test_exceed_cbor_limit_add_1_bytes_to_length():
+    claim_signature = ClaimSignature.__new__(ClaimSignature)
+
+    # We must ensure that the difference is such
+    # that the pad size is greater than 23 bytes.
+
+    # Current length of cose_sign1 serialized in CBOR is 50 bytes.
+    cose_sign1 = [
+        "protected_header",
+        {
+            "pad": b"\x00" * 8,
+        },
+        "payload",
+        "signature",
+    ]
+
+    # cose_sign1 CBOR encoded + CBOR limit - current pad + 1 (COSE tag)
+    # ~ 50 + 24 - 8 + 1
+    claim_signature.serialized_cose_sign1_length = 67
+
+    serialized_cose_sign1_cbor = claim_signature.serialize_cose_sign1_tagged_with_alignment(cose_sign1)
+
+    assert len(cbor2.loads(serialized_cose_sign1_cbor).value[1]["pad"]) == 25

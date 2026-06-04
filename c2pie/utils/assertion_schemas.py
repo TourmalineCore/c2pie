@@ -13,6 +13,7 @@ class C2PA_AssertionTypes(enum.Enum):
     thumbnail = 2
     actions = 3
     ingredient = 4
+    ingredient_thumbnail = 5
 
 
 def json_to_bytes(json_object: dict[str, Any]) -> bytes:
@@ -34,6 +35,8 @@ def get_assertion_content_type(assertion_type: C2PA_AssertionTypes) -> bytes:
         return jumbf_content_types["embedded_file"]
     elif assertion_type == C2PA_AssertionTypes.ingredient:
         return jumbf_content_types["cbor"]
+    elif assertion_type == C2PA_AssertionTypes.ingredient_thumbnail:
+        return jumbf_content_types["embedded_file"]
     else:
         return b""
 
@@ -60,5 +63,7 @@ def get_assertion_label(assertion_type: C2PA_AssertionTypes) -> str:
         return "c2pa.thumbnail.claim"
     elif assertion_type == C2PA_AssertionTypes.ingredient:
         return "c2pa.ingredient.v3"
+    elif assertion_type == C2PA_AssertionTypes.ingredient_thumbnail:
+        return "c2pa.thumbnail.ingredient"
     else:
         return ""
