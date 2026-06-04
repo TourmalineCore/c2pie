@@ -167,7 +167,6 @@ class EmbeddedDataAssertion(Assertion):
 
     Can be used for the following assertions:
     - c2pa.thumbnail.claim,
-    - c2pa.ingredient,
     - c2pa.ingredient.thumbnail
     - c2pa.embedded-data
 
@@ -225,6 +224,21 @@ class ThumbnailAssertion(EmbeddedDataAssertion):
         )
 
 
+class IngredientThumbnailAssertion(EmbeddedDataAssertion):
+    """An assertion (c2pa.thumbnail.ingredient) containing an ingredient thumbnail"""
+
+    def __init__(
+        self,
+        media_type: str,
+        image_data: bytes,
+    ):
+        super().__init__(
+            media_type=media_type,
+            image_data=image_data,
+            assertion_type=C2PA_AssertionTypes.ingredient_thumbnail,
+        )
+
+
 class IngredientAssertion(Assertion):
     """c2pa.ingredient.v3 asset-binding assertion."""
 
@@ -234,7 +248,8 @@ class IngredientAssertion(Assertion):
         dc_format: str,
         ingredient_bytes: bytes,
         active_manifest_urn: str | None,
-        previous_manifest_boxes: list[Box],
+        active_manifest: Box | None,
+        ingredient_thumbnail_assertion: IngredientThumbnailAssertion | None = None,
     ):
         schema: dict[str, Any] = {
             "dc:title": title,
@@ -242,7 +257,17 @@ class IngredientAssertion(Assertion):
             "relationship": "parentOf",
         }
 
-        if active_manifest_urn and previous_manifest_boxes:
+        if ingredient_thumbnail_assertion:
+            ingredient_thumbnail_hash = hashlib.sha256(ingredient_thumbnail_assertion.payload).digest()
+
+            ingredient_thumbnail: dict[str, str | bytes] = generate_hashed_uri_map(
+                url=f"self#jumbf=c2pa.assertions/{ingredient_thumbnail_assertion.get_label()}",
+                hash_value=ingredient_thumbnail_hash,
+                hash_algorithm="sha256",
+            )
+            schema["thumbnail"] = ingredient_thumbnail
+
+        if active_manifest_urn and active_manifest:
             validation_results = self.validate_ingredient(
                 ingredient_bytes,
                 dc_format,
@@ -256,34 +281,15 @@ class IngredientAssertion(Assertion):
                 )
                 return
 
-            active_manifest_box: Box = None
-            for box in previous_manifest_boxes:
-                found_box = find_in_box(
-                    box,
-                    active_manifest_urn,
-                )
+            active_manifest_hash = hashlib.sha256(active_manifest.payload).digest()
 
-                if found_box:
-                    active_manifest_box = found_box
-                    break
-
-            # We should not include information about the active manifest if validation was unsuccessful
-            if not active_manifest_box:
-                super().__init__(
-                    C2PA_AssertionTypes.ingredient,
-                    schema,
-                )
-                return
-
-            active_manifest_hash = hashlib.sha256(active_manifest_box.payload).digest()
-
-            active_manifest: dict[str, str | bytes] = generate_hashed_uri_map(
+            active_manifest_map: dict[str, str | bytes] = generate_hashed_uri_map(
                 url=f"self#jumbf=/c2pa/{active_manifest_urn}",
                 hash_value=active_manifest_hash,
                 hash_algorithm="sha256",
             )
 
-            claim_signature_box = find_in_box(active_manifest_box, "c2pa.signature")
+            claim_signature_box = find_in_box(active_manifest, "c2pa.signature")
 
             claim_signature_hash = hashlib.sha256(claim_signature_box.payload).digest()
 
@@ -293,7 +299,7 @@ class IngredientAssertion(Assertion):
                 hash_algorithm="sha256",
             )
 
-            schema["activeManifest"] = active_manifest
+            schema["activeManifest"] = active_manifest_map
             schema["validationResults"] = validation_results
             schema["claimSignature"] = claim_signature
 

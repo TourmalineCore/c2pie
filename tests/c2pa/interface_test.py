@@ -1,17 +1,20 @@
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
+from c2pie.c2pa.assertion import IngredientThumbnailAssertion
 from c2pie.c2pa.manifest_store import ManifestStore
 from c2pie.interface import (
     c2pie_EmplaceManifest,
     c2pie_GenerateActionsAssertion,
     c2pie_GenerateAssertion,
     c2pie_GenerateHashDataAssertion,
+    c2pie_GenerateIngredientThumbnailAssertion,
     c2pie_GenerateManifestStore,
     c2pie_GenerateThumbnailAssertion,
 )
+from c2pie.jumbf_boxes.super_box import SuperBox
 from c2pie.utils.assertion_schemas import C2PA_AssertionTypes
 from c2pie.utils.content_types import C2PA_ContentTypes
 
@@ -63,6 +66,75 @@ def test_generate_thumbnail_assertion_returns_thumbnail_assertion_instance():
         image_data=JPEG_HEADER,
     )
     assert isinstance(thumbnail_assertion, ThumbnailAssertion)
+
+
+def test_generate_ingredient_thumbnail_assertion_returns_ingredient_thumbnail_assertion_instance():
+    ingredient_thumbnail_assertion = c2pie_GenerateIngredientThumbnailAssertion(
+        media_type=MEDIA_TYPE,
+        image_data=JPEG_HEADER,
+    )
+
+    assert isinstance(ingredient_thumbnail_assertion, IngredientThumbnailAssertion)
+
+
+def test_generate_ingredient_thumbnail_assertion_returns_none_when_no_arguments():
+    ingredient_thumbnail_assertion = c2pie_GenerateIngredientThumbnailAssertion()
+
+    assert ingredient_thumbnail_assertion is None
+
+
+def test_generate_ingredient_thumbnail_assertion_returns_none_when_only_media_type_given():
+    ingredient_thumbnail_assertion = c2pie_GenerateIngredientThumbnailAssertion(media_type=MEDIA_TYPE)
+
+    assert ingredient_thumbnail_assertion is None
+
+
+def test_generate_ingredient_thumbnail_assertion_returns_none_when_only_image_data_given():
+    ingredient_thumbnail_assertion = c2pie_GenerateIngredientThumbnailAssertion(image_data=JPEG_HEADER)
+
+    assert ingredient_thumbnail_assertion is None
+
+
+def test_generate_ingredient_thumbnail_assertion_with_active_manifest_and_no_thumbnail_returns_none():
+    mock_manifest = MagicMock()
+
+    with patch("c2pie.interface.find_in_box", return_value=None):
+        ingredient_thumbnail_assertion = c2pie_GenerateIngredientThumbnailAssertion(active_manifest=mock_manifest)
+
+    assert ingredient_thumbnail_assertion is None
+
+
+def test_generate_ingredient_thumbnail_assertion_with_active_manifest_and_found_thumbnail_returns_super_box():
+    mock_manifest = MagicMock()
+    mock_super_box = MagicMock(spec=SuperBox)
+
+    with patch("c2pie.interface.find_in_box", return_value=MagicMock()):
+        with patch("c2pie.interface.SuperBox.from_box", return_value=mock_super_box):
+            ingredient_thumbnail_assertion = c2pie_GenerateIngredientThumbnailAssertion(active_manifest=mock_manifest)
+
+    assert ingredient_thumbnail_assertion is mock_super_box
+
+
+def test_generate_ingredient_thumbnail_assertion_with_active_manifest_sets_ingredient_thumbnail_type():
+    mock_manifest = MagicMock()
+    mock_super_box = MagicMock(spec=SuperBox)
+
+    with patch("c2pie.interface.find_in_box", return_value=MagicMock()):
+        with patch("c2pie.interface.SuperBox.from_box", return_value=mock_super_box):
+            c2pie_GenerateIngredientThumbnailAssertion(active_manifest=mock_manifest)
+
+    assert mock_super_box.type == C2PA_AssertionTypes.ingredient_thumbnail
+
+
+def test_generate_ingredient_thumbnail_assertion_with_active_manifest_sets_correct_description_label():
+    mock_manifest = MagicMock()
+    mock_super_box = MagicMock(spec=SuperBox)
+
+    with patch("c2pie.interface.find_in_box", return_value=MagicMock()):
+        with patch("c2pie.interface.SuperBox.from_box", return_value=mock_super_box):
+            c2pie_GenerateIngredientThumbnailAssertion(active_manifest=mock_manifest)
+
+    assert mock_super_box.description_box.label == "c2pa.thumbnail.ingredient"
 
 
 def test_generate_manifest_returns_manifest_store():

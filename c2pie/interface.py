@@ -5,6 +5,7 @@ from c2pie.c2pa.assertion import (
     Assertion,
     HashDataAssertion,
     IngredientAssertion,
+    IngredientThumbnailAssertion,
     ThumbnailAssertion,
 )
 from c2pie.c2pa.assertion_store import AssertionStore
@@ -14,8 +15,11 @@ from c2pie.c2pa.manifest import Manifest
 from c2pie.c2pa.manifest_store import ManifestStore
 from c2pie.c2pa_injection.jpg_injection import emplace_manifest_into_jpeg
 from c2pie.c2pa_injection.pdf_injection import emplace_manifest_into_pdf
+from c2pie.c2pa_parsing.jumbf_parsing import find_in_box
 from c2pie.jumbf_boxes.box import Box
-from c2pie.utils.assertion_schemas import C2PA_AssertionTypes
+from c2pie.jumbf_boxes.description_box import DescriptionBox
+from c2pie.jumbf_boxes.super_box import SuperBox
+from c2pie.utils.assertion_schemas import C2PA_AssertionTypes, get_assertion_label
 from c2pie.utils.content_types import C2PA_ContentTypes
 
 
@@ -52,19 +56,69 @@ def c2pie_GenerateThumbnailAssertion(
     )
 
 
+# Currently not in use.
+# If APP11 exceeds the allowed size (65,535 bytes), an error will occur.
+# It is necessary to add logic to handle this case by splitting APP11.
+def c2pie_GenerateIngredientThumbnailAssertion(
+    media_type: str | None = None,
+    image_data: bytes | None = None,
+    active_manifest: Box | None = None,
+) -> SuperBox | IngredientThumbnailAssertion | None:
+    if active_manifest:
+        possibles_thumbnail_assertion_labels = [
+            "c2pa.thumbnail.claim",
+            "c2pa.thumbnail.claim.jpeg",
+        ]
+
+        previous_thumbnail_assertion = None
+        for thumbnail_assertion_label in possibles_thumbnail_assertion_labels:
+            previous_thumbnail_assertion = find_in_box(
+                active_manifest,
+                thumbnail_assertion_label,
+            )
+
+            if previous_thumbnail_assertion:
+                break
+
+        if previous_thumbnail_assertion:
+            ingredient_thumbnail_assertion = SuperBox.from_box(previous_thumbnail_assertion)
+
+            # The type field is used when searching for a Data Hash Assertion
+            # in the Assertion Store when the set_hash_data_length() method is called
+            ingredient_thumbnail_assertion.type = C2PA_AssertionTypes.ingredient_thumbnail
+
+            ingredient_thumbnail_assertion.description_box = DescriptionBox(
+                content_type=ingredient_thumbnail_assertion.get_content_type(),
+                label=get_assertion_label(C2PA_AssertionTypes.ingredient_thumbnail),
+            )
+            ingredient_thumbnail_assertion.sync_payload()
+
+            return ingredient_thumbnail_assertion
+    else:
+        if media_type and image_data:
+            return IngredientThumbnailAssertion(
+                media_type,
+                image_data,
+            )
+
+    return None
+
+
 def c2pie_GenerateIngredientAssertion(
     title: str,
     dc_format: str,
     ingredient_bytes: bytes,
     active_manifest_urn: str | None,
-    previous_manifest_boxes: list[Box],
+    active_manifest: Box | None,
+    ingredient_thumbnail_assertion: IngredientThumbnailAssertion | None = None,
 ) -> IngredientAssertion:
     return IngredientAssertion(
         title=title,
         dc_format=dc_format,
         ingredient_bytes=ingredient_bytes,
         active_manifest_urn=active_manifest_urn,
-        previous_manifest_boxes=previous_manifest_boxes,
+        active_manifest=active_manifest,
+        ingredient_thumbnail_assertion=ingredient_thumbnail_assertion,
     )
 
 

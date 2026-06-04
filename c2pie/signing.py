@@ -4,17 +4,19 @@ from pathlib import Path
 from typing import Literal
 
 from c2pie.c2pa_injection.pdf_injection import prepare_pdf_bytes
-from c2pie.c2pa_parsing.jumbf_parsing import extract_manifest_boxes, get_active_manifest_uuid
+from c2pie.c2pa_parsing.jumbf_parsing import extract_manifest_boxes, find_in_box, get_active_manifest_uuid
 from c2pie.c2pa_parsing.manifest_extractor import extract_manifest_store_bytes
 from c2pie.interface import (
     c2pie_EmplaceManifest,
     c2pie_GenerateActionsAssertion,
     c2pie_GenerateHashDataAssertion,
     c2pie_GenerateIngredientAssertion,
+    c2pie_GenerateIngredientThumbnailAssertion,
     c2pie_GenerateManifestStore,
+    c2pie_GenerateThumbnailAssertion,
 )
 from c2pie.jumbf_boxes.box import Box
-from c2pie.utils.content_types import C2PA_ContentTypes
+from c2pie.utils.content_types import C2PA_ContentTypes, iana_media_types
 from c2pie.utils.generate_hashed_uri_map import generate_hashed_uri_map
 
 
@@ -39,6 +41,7 @@ _DC_FORMAT_BY_CONTENT_TYPE: dict[str, str] = {
 def _check_file_extension_is_supported(file_path: Path) -> None:
     supported_extensions: list[str] = [_type.value for _type in C2PA_ContentTypes]
     file_extension = file_path.suffix
+
     if file_extension not in supported_extensions:
         raise ValueError(
             f"The file has an incorrect extension: {file_extension}"
@@ -114,9 +117,21 @@ def _load_certificates_and_key(
     return key, certificates
 
 
+def _read_and_check_size_of_thumbnail_file(thumbnail_file_path: Path):
+    with open(thumbnail_file_path, "rb") as f:
+        thumbnail_raw_bytes = f.read()
+
+    # The 1024x1024 requirement is specified in the C2PA specification.
+    if len(thumbnail_raw_bytes) > 1024 * 1024:
+        raise ValueError("The thumbnail file is too large! The size must not exceed 1024x1024. Recommended 512x512.")
+
+    return thumbnail_raw_bytes
+
+
 def sign_file(
     input_path: Path | str,
     output_path: Path | str | None = None,
+    thumbnail_file_path: Path | str | None = None,
     key_path: str | None = None,
     certificates_path: str | None = None,
     tsa_url: str | None = None,
@@ -146,6 +161,32 @@ def sign_file(
 
     assertions = []
 
+    thumbnail_media_type = None
+    thumbnail_raw_bytes = None
+
+    if thumbnail_file_path:
+        thumbnail_file_path = _validate_general_filepath(
+            file_path=thumbnail_file_path,
+            file_path_type="other",
+        )
+
+        supported_extensions: list[str] = [".jpeg", ".jpg", ".png"]
+        if thumbnail_file_path.suffix not in supported_extensions:
+            raise ValueError(
+                f"The thumbnail file has an incorrect extension: {thumbnail_file_path.suffix}. "
+                f"Currently, only the following extensions are supported: {supported_extensions}.",
+            )
+        else:
+            thumbnail_raw_bytes = _read_and_check_size_of_thumbnail_file(thumbnail_file_path)
+
+            thumbnail_media_type = iana_media_types[thumbnail_file_path.suffix]
+
+            thumbnail_assertion = c2pie_GenerateThumbnailAssertion(
+                thumbnail_media_type,
+                thumbnail_raw_bytes,
+            )
+            assertions.append(thumbnail_assertion)
+
     hash_data_assertion = c2pie_GenerateHashDataAssertion(
         hashed_data=hashlib.sha256(raw_bytes).digest(),
     )
@@ -159,13 +200,30 @@ def sign_file(
 
     active_manifest_urn: str | None = get_active_manifest_uuid(manifest_store_bytes)
     previous_manifest_boxes: list[Box] = extract_manifest_boxes(manifest_store_bytes)
+    active_manifest: Box | None = None
+
+    if previous_manifest_boxes:
+        for manifest in previous_manifest_boxes:
+            active_manifest = find_in_box(
+                manifest,
+                active_manifest_urn,
+            )
+
+    ingredient_thumbnail_assertion = c2pie_GenerateIngredientThumbnailAssertion(
+        thumbnail_media_type,
+        thumbnail_raw_bytes,
+        active_manifest=active_manifest,
+    )
+    if ingredient_thumbnail_assertion:
+        assertions.append(ingredient_thumbnail_assertion)
 
     ingredient_assertion = c2pie_GenerateIngredientAssertion(
         title=input_path.name,
         dc_format=_DC_FORMAT_BY_CONTENT_TYPE[file_type.name],
         ingredient_bytes=raw_bytes,
         active_manifest_urn=active_manifest_urn,
-        previous_manifest_boxes=previous_manifest_boxes,
+        active_manifest=active_manifest,
+        ingredient_thumbnail_assertion=ingredient_thumbnail_assertion,
     )
     assertions.append(ingredient_assertion)
 
