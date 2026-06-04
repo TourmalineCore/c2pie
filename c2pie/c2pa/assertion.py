@@ -281,14 +281,6 @@ class IngredientAssertion(Assertion):
                 )
                 return
 
-            # We should not include information about the active manifest if active_manifest_urn is None
-            if not active_manifest_urn:
-                super().__init__(
-                    C2PA_AssertionTypes.ingredient,
-                    schema,
-                )
-                return
-
             active_manifest_hash = hashlib.sha256(active_manifest.payload).digest()
 
             active_manifest_map: dict[str, str | bytes] = generate_hashed_uri_map(
