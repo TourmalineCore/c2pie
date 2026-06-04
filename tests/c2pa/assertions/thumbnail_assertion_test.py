@@ -53,12 +53,12 @@ def test_thumbnail_assertion_contains_two_correct_boxes():
     assert thumbnail_assertion.content_boxes[1].get_type() == b"bidb".hex()
 
 
-def test_thumbnail_assertion_has_correct_bfdb_payload_lenght():
-    ingredient_thumbnail_assertion = ThumbnailAssertion(
+def test_thumbnail_assertion_has_correct_bfdb_payload_length():
+    thumbnail_assertion = ThumbnailAssertion(
         media_type=MEDIA_TYPE,
         image_data=TEST_DATA,
     )
-    bfdb_payload = ingredient_thumbnail_assertion.content_boxes[0].get_payload()
+    bfdb_payload = thumbnail_assertion.content_boxes[0].get_payload()
 
     assert len(bfdb_payload) == len(MEDIA_TYPE.encode("utf-8")) + 2
 

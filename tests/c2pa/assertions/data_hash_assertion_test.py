@@ -51,7 +51,7 @@ def test_hash_data_assertion_without_additional_exclusions_has_not_exclusions():
     assert len(data_hash_assertion.schema["exclusions"]) == 0
 
 
-def test_set_hash_data_length_updates_exclusion():
+def test_add_full_c2pa_structure_exclusion_updates_exclusion():
     data_hash_assertion = HashDataAssertion(hashed_data=HASHED_DATA)
     data_hash_assertion.add_full_c2pa_structure_exclusion(
         CAI_OFFSET,
@@ -60,7 +60,7 @@ def test_set_hash_data_length_updates_exclusion():
     assert data_hash_assertion.schema["exclusions"][0]["length"] == 200
 
 
-def test_set_hash_data_length_updates_content_box_payload():
+def test_add_full_c2pa_structure_exclusion_updates_content_box_payload():
     data_hash_assertion = HashDataAssertion(hashed_data=HASHED_DATA)
     data_hash_assertion.add_full_c2pa_structure_exclusion(
         CAI_OFFSET,

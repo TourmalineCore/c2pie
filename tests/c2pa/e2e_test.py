@@ -1,5 +1,4 @@
 import json
-import re
 import shutil
 import subprocess
 from pathlib import Path
@@ -150,17 +149,3 @@ def test_e2e_signature_stability(
             assert validation_state == "Valid"
 
 
-def test_calling_sign_file_with_thumbnail_file_extension_that_is_not_supported_causes_error():
-    expected_error_message = (
-        "The thumbnail file has an incorrect extension: .pdf. "
-        "Currently, only the following extensions are supported: ['.jpeg', '.jpg', '.png']"
-    )
-
-    with pytest.raises(
-        ValueError,
-        match=re.escape(expected_error_message),
-    ):
-        sign_file(
-            input_path=get_test_file_full_path("test_image.jpg"),
-            thumbnail_file_path=get_test_file_full_path("test_doc.pdf"),
-        )

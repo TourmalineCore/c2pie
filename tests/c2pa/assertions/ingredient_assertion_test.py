@@ -22,7 +22,7 @@ def test_ingredient_assertion_schema_is_correct():
         DC_FORMAT,
         INGREDIENT_BYTES,
         None,
-        [],
+        None,
     )
     assert ingredient_assertion.type == C2PA_AssertionTypes.ingredient
     assert ingredient_assertion.get_label() == "c2pa.ingredient.v3"
@@ -33,13 +33,13 @@ def test_ingredient_assertion_schema_is_correct():
     assert "validationResults" not in ingredient_assertion.schema
 
 
-def test_no_active_manifest_when_boxes_empty():
+def test_no_active_manifest_when_active_manifest_is_none():
     ingredient_assertion = IngredientAssertion(
         TITLE,
         DC_FORMAT,
         INGREDIENT_BYTES,
         ACTIVE_URN,
-        [],
+        None,
     )
     assert "activeManifest" not in ingredient_assertion.schema
 
@@ -57,28 +57,21 @@ def test_no_active_manifest_when_validation_fails():
             DC_FORMAT,
             INGREDIENT_BYTES,
             ACTIVE_URN,
-            [manifest_box],
+            manifest_box,
         )
 
     assert "activeManifest" not in ingredient_assertion.schema
     assert "validationResults" not in ingredient_assertion.schema
 
 
-def test_no_active_manifest_when_box_not_found():
-    with patch(
-        "c2pie.c2pa.assertion.IngredientAssertion.validate_ingredient",
-        return_value=VALIDATION_RESULTS,
-    ):
-        manifest_box, _ = Box.parse_from_bytes(
-            _mock_make_superbox("urn:c2pa:other-manifest"),
-        )
-        ingredient_assertion = IngredientAssertion(
-            TITLE,
-            DC_FORMAT,
-            INGREDIENT_BYTES,
-            None,
-            None,
-        )
+def test_no_active_manifest_when_urn_and_manifest_are_none():
+    ingredient_assertion = IngredientAssertion(
+        TITLE,
+        DC_FORMAT,
+        INGREDIENT_BYTES,
+        None,
+        None,
+    )
 
     assert "activeManifest" not in ingredient_assertion.schema
 
