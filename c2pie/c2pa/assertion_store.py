@@ -20,11 +20,16 @@ class AssertionStore(SuperBox):
     def get_assertions(self) -> list:
         return self.assertions
 
-    def set_hash_data_length(
+    def add_full_c2pa_structure_exclusion(
         self,
+        offset: int,
         length: int,
     ) -> None:
         for assertion in self.assertions:
             if assertion.type == C2PA_AssertionTypes.data_hash:
-                assertion.set_hash_data_length(length)
+                assertion.add_full_c2pa_structure_exclusion(
+                    offset,
+                    length,
+                )
+
         self.sync_payload()

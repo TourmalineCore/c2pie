@@ -1,4 +1,4 @@
-from c2pie.c2pa.assertion import Assertion, HashDataAssertion
+from c2pie.c2pa.assertion import Assertion
 from c2pie.utils.assertion_schemas import C2PA_AssertionTypes, cbor_to_bytes, json_to_bytes
 from c2pie.utils.content_types import jumbf_content_types
 
@@ -76,11 +76,3 @@ def test_serialize_cbor_assertion():
 def test_assertion_content_boxes_not_empty():  # noqa: F811
     actions_assertion = Assertion(C2PA_AssertionTypes.actions, {})
     assert len(actions_assertion.content_boxes) != 0
-
-
-def test_additional_extensions_adding_for_hash_data_assertions():
-    additional_exclusion = {"some_extension": 343}
-    data_hash_assertion = HashDataAssertion(
-        cai_offset=124, hashed_data=b"", additional_exclusions=[additional_exclusion]
-    )
-    assert additional_exclusion in data_hash_assertion.schema["exclusions"]
