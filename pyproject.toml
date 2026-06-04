@@ -1,7 +1,3 @@
-[[tool.poetry.source]]
-name = "PyPI"
-priority = "primary"
-
 [project]
 name = "c2pie"
 version = "0.1.0"
