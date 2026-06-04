@@ -123,7 +123,7 @@ def _read_and_check_size_of_thumbnail_file(thumbnail_file_path: Path):
 
     # The 1024x1024 requirement is specified in the C2PA specification.
     if len(thumbnail_raw_bytes) > 1024 * 1024:
-        raise ValueError("The thumbnail file is too large! The size must not exceed 1024x1024. Recomended 512x512.")
+        raise ValueError("The thumbnail file is too large! The size must not exceed 1024x1024. Recommended 512x512.")
 
     return thumbnail_raw_bytes
 
