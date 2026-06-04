@@ -62,11 +62,12 @@ def test_calling_sign_file_with_thumbnail_in_unsupported_format_causes_error():
         "Currently, only the following extensions are supported: ['.jpeg', '.jpg', '.png']"
     )
 
-    with pytest.raises(
-        ValueError,
-        match=re.escape(expected_error_message),
-    ):
-        sign_file(
-            input_path=TEST_FILES_DIR / "test_image.jpg",
-            thumbnail_file_path=TEST_FILES_DIR / "test_doc.pdf",
-        )
+    with patch("c2pie.signing._load_certificates_and_key", return_value=(b"key", b"cert")):
+        with pytest.raises(
+            ValueError,
+            match=re.escape(expected_error_message),
+        ):
+            sign_file(
+                input_path=TEST_FILES_DIR / "test_image.jpg",
+                thumbnail_file_path=TEST_FILES_DIR / "test_doc.pdf",
+            )
