@@ -142,16 +142,41 @@ class TestJpegManifestExtractor:
     def test_binary_data_preserved(self):
         data = STORE + bytes(range(256))
 
-        result, _ = extract_manifest_store_bytes_and_ranges_from_jpeg(_mock_make_jpeg(_mock_make_app11(1, 1, data)))
+        result, _ = extract_manifest_store_bytes_and_ranges_from_jpeg(
+            _mock_make_jpeg(
+                _mock_make_app11(1, 1, data),
+            ),
+        )
 
         assert result == data
 
 
 class TestFragmentedApp11:
-    def test_two_fragments_assembled_in_order(self):
-        part1 = C2PA_MARK + b"first_"
-        part2 = b"second"
-        segs = _mock_make_jpeg(_mock_make_app11(1, 1, part1), _mock_make_app11(1, 2, part2))
+    def test_z1_segment_data_starts_at_byte_8_of_payload(self):
+        # For Z = 1 the full payload[8:] is the JUMBF data —
+        # LBox + TBox are included as-is, they are not a duplicated prefix here.
+        data = C2PA_MARK + b"AAA"
+
+        result, _ = extract_manifest_store_bytes_and_ranges_from_jpeg(
+            _mock_make_jpeg(
+                _mock_make_app11(1, 1, data),
+            ),
+        )
+
+        assert result == data
+
+    def test_z_greater_than_1_skips_lbox_tbox_prefix(self):
+        part1 = C2PA_MARK + b"AAA"
+        part2 = b"BBB"
+
+        # For Z > 1 the first 8 bytes after CI + EN + Z are the repeated LBox + TBox prefix
+        # and must be stripped; only bytes[16:] contain the continuation data.
+        lbox_tbox = part1[:8]
+
+        segs = _mock_make_jpeg(
+            _mock_make_app11(1, 1, part1),
+            _mock_make_app11(1, 2, lbox_tbox + part2),
+        )
 
         result, _ = extract_manifest_store_bytes_and_ranges_from_jpeg(segs)
 
@@ -160,7 +185,11 @@ class TestFragmentedApp11:
     def test_fragments_sorted_by_z_not_file_order(self):
         part1 = C2PA_MARK + b"AAA"
         part2 = b"BBB"
-        segs = _mock_make_jpeg(_mock_make_app11(1, 2, part2), _mock_make_app11(1, 1, part1))
+        lbox_tbox = part1[:8]
+        segs = _mock_make_jpeg(
+            _mock_make_app11(1, 2, lbox_tbox + part2),
+            _mock_make_app11(1, 1, part1),
+        )
 
         result, _ = extract_manifest_store_bytes_and_ranges_from_jpeg(segs)
 
@@ -168,7 +197,13 @@ class TestFragmentedApp11:
 
     def test_many_fragments_assembled(self):
         chunks = [C2PA_MARK] + [bytes([i] * 100) for i in range(10)]
-        segs = _mock_make_jpeg(*[_mock_make_app11(1, z + 1, chunk) for z, chunk in enumerate(chunks)])
+        lbox_tbox = chunks[0][:8]
+
+        def make_fragment(z: int, chunk: bytes) -> bytes:
+            payload = chunk if z == 1 else lbox_tbox + chunk
+            return _mock_make_app11(1, z, payload)
+
+        segs = _mock_make_jpeg(*[make_fragment(z + 1, chunk) for z, chunk in enumerate(chunks)])
 
         result, _ = extract_manifest_store_bytes_and_ranges_from_jpeg(segs)
 
@@ -207,9 +242,14 @@ class TestExtractManifestStoreFromJpegRanges:
         assert jpeg[:start] + jpeg[end:] == b"\xff\xd8\xff\xd9"
 
     def test_multi_segment_ranges_cover_all_fragments(self):
-        seg1 = _mock_make_app11(1, 1, C2PA_MARK + b"part_one")
-        seg2 = _mock_make_app11(1, 2, b"part_two")
+        seg1_data = C2PA_MARK + b"part_one"
+        lbox_tbox = seg1_data[:8]
+        
+        seg1 = _mock_make_app11(1, 1, seg1_data)
+        seg2 = _mock_make_app11(1, 2, lbox_tbox + b"part_two")
+
         jpeg = _mock_make_jpeg(seg1, seg2)
+
         result, ranges = extract_manifest_store_bytes_and_ranges_from_jpeg(jpeg)
 
         assert result == C2PA_MARK + b"part_one" + b"part_two"
