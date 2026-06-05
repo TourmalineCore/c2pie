@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 from typing import Literal
 
+from c2pie.c2pa_injection.jpg_injection import strip_c2pa_app11_segments
 from c2pie.c2pa_injection.pdf_injection import prepare_pdf_bytes
 from c2pie.c2pa_parsing.jumbf_parsing import extract_manifest_boxes, find_in_box, get_active_manifest_uuid
 from c2pie.c2pa_parsing.manifest_extractor import extract_manifest_store_bytes
@@ -154,11 +155,20 @@ def sign_file(
 
     file_type: C2PA_ContentTypes = _get_content_type_by_filepath(input_path)
 
+    # Extract the existing manifest store before stripping it from the bytes,
+    # because it is needed to build the Ingredient assertion for the new manifest.
+    manifest_store_bytes, segment_ranges = extract_manifest_store_bytes(
+        file_type,
+        raw_bytes,
+    )
+
     if file_type.name == "pdf":
         raw_bytes = prepare_pdf_bytes(raw_bytes)
         cai_offset = len(raw_bytes)
     else:
-        cai_offset = 2
+        # We need to set the updated Manifest Store to the same location
+        # where it was previously located (if it was there before).
+        cai_offset = segment_ranges[0][0] if segment_ranges else 2
 
     assertions = []
 
@@ -188,17 +198,6 @@ def sign_file(
             )
             assertions.append(thumbnail_assertion)
 
-    hash_data_assertion = c2pie_GenerateHashDataAssertion(
-        hashed_data=hashlib.sha256(raw_bytes).digest(),
-    )
-
-    assertions.append(hash_data_assertion)
-
-    manifest_store_bytes = extract_manifest_store_bytes(
-        file_type,
-        raw_bytes,
-    )
-
     active_manifest_urn: str | None = get_active_manifest_uuid(manifest_store_bytes)
     previous_manifest_boxes: list[Box] = extract_manifest_boxes(manifest_store_bytes)
     active_manifest: Box | None = None
@@ -215,6 +214,7 @@ def sign_file(
         thumbnail_raw_bytes,
         active_manifest=active_manifest,
     )
+
     if ingredient_thumbnail_assertion:
         assertions.append(ingredient_thumbnail_assertion)
 
@@ -245,6 +245,19 @@ def sign_file(
         parameters=actions_assertion_parameters,
     )
     assertions.append(actions_assertion)
+
+    # Remove old C2PA APP11 segments so the resulting
+    # file contains exactly one Manifest Store.
+    raw_bytes = strip_c2pa_app11_segments(
+        raw_bytes,
+        segment_ranges,
+    )
+
+    hash_data_assertion = c2pie_GenerateHashDataAssertion(
+        hashed_data=hashlib.sha256(raw_bytes).digest(),
+    )
+
+    assertions.append(hash_data_assertion)
 
     manifest_store = c2pie_GenerateManifestStore(
         assertions=assertions,

@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 
 from c2pie.c2pa_parsing.jumbf_parsing import extract_manifest_boxes, jumd_label
-from c2pie.c2pa_parsing.manifest_extractor import extract_manifest_store_bytes_from_pdf
+from c2pie.c2pa_parsing.manifest_extractor import extract_manifest_store_bytes_and_ranges_from_pdf
 from c2pie.jumbf_boxes.box import Box, iter_boxes
 from c2pie.jumbf_boxes.constants import JUMB_TYPE, LABEL_OFFSET
 from tests.helpers.jumbf_generators import (
@@ -135,7 +135,7 @@ class TestExtractManifestBoxes:
         self,
         signed_pdf_bytes: bytes,
     ):
-        manifest_store = extract_manifest_store_bytes_from_pdf(signed_pdf_bytes)
+        manifest_store, _ = extract_manifest_store_bytes_and_ranges_from_pdf(signed_pdf_bytes)
         manifest_boxes = extract_manifest_boxes(manifest_store)
         assert isinstance(manifest_boxes, list)
         for box in manifest_boxes:
