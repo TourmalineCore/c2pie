@@ -25,7 +25,7 @@ The package supports building claims, assertions, and COSE signatures and embedd
 
 🔸 **Supported Python versions**: `3.10.0 - 3.14.5`
 
-🔸 **Supported C2PA Spec Versions**: `1.4`. 
+🔸 **Supported C2PA Spec Versions**: `2.4`. 
 
 Support for C2PA 2.2 is planned for future releases.
 
@@ -202,9 +202,9 @@ Follow the steps:
 1. Clone the c2pie repository.
 
 2. Go to `example_app` directory:
-    ```bash
-    cd example_app
-    ```
+```bash
+cd example_app
+```
 
 >[!NOTE]
 >By default, example apps use the latest available stable c2pie version. If you'd like to test some particular version, you can change the value of `C2PIE_PACKAGE_VERSION` in `example_app/.example-app-env`. 
@@ -226,18 +226,22 @@ Follow the steps:
     The result was saved to test_files/signed_test_image.jpg. 
     c2patool_validation_results:
     {
-        "active_manifest": "urn:uuid:f0ce8560b76342d1bb3085cfbe6cc5e9",
+        "active_manifest": "urn:c2pa:f0ce8560b76342d1bb3085cfbe6cc5e9",
         "manifests": {
-        "urn:uuid:f0ce8560b76342d1bb3085cfbe6cc5e9": {
-            "claim_generator": "c2pie",
-        ................
+            "urn:c2pa:f0ce8560b76342d1bb3085cfbe6cc5e9": {
+            "claim_generator_info": {
+                "name": "c2pie",
+                ... 
+            },
+        ...
+        }
     },
     "validation_results": {
         "activeManifest": {
         "success": [
             {
                 "code": "claimSignature.insideValidity",
-                "url": "self#jumbf=/c2pa/urn:uuid:f0ce8560b76342d1bb3085cfbe6cc5e9/c2pa.signature",
+                "url": "self#jumbf=/c2pa/urn:c2pa:f0ce8560b76342d1bb3085cfbe6cc5e9/c2pa.signature",
                 "explanation": "claim signature valid"
             },
         ................
@@ -292,20 +296,23 @@ c2patool path/to/your_output.pdf
 
 If the file has been correctly signed and validation is successful, the results you'll see in the terminal will look similar to this:
 ```bash
-c2patool_validation_results:
 {
-    "active_manifest": "urn:uuid:f0ce8560b76342d1bb3085cfbe6cc5e9",
+    "active_manifest": "urn:c2pa:f0ce8560b76342d1bb3085cfbe6cc5e9",
     "manifests": {
-    "urn:uuid:f0ce8560b76342d1bb3085cfbe6cc5e9": {
-        "claim_generator": "c2pie",
-    ................
+        "urn:c2pa:f0ce8560b76342d1bb3085cfbe6cc5e9": {
+        "claim_generator_info": {
+            "name": "c2pie",
+            ... 
+        },
+    ...
+    }
 },
 "validation_results": {
     "activeManifest": {
     "success": [
         {
             "code": "claimSignature.insideValidity",
-            "url": "self#jumbf=/c2pa/urn:uuid:f0ce8560b76342d1bb3085cfbe6cc5e9/c2pa.signature",
+            "url": "self#jumbf=/c2pa/urn:c2pa:f0ce8560b76342d1bb3085cfbe6cc5e9/c2pa.signature",
             "explanation": "claim signature valid"
         },
     ................
@@ -342,18 +349,22 @@ cargo install c2patool
     ```bash
     c2patool_validation_results:
     {
-        "active_manifest": "urn:uuid:f0ce8560b76342d1bb3085cfbe6cc5e9",
+        "active_manifest": "urn:c2pa:f0ce8560b76342d1bb3085cfbe6cc5e9",
         "manifests": {
-        "urn:uuid:f0ce8560b76342d1bb3085cfbe6cc5e9": {
-            "claim_generator": "c2pie",
-        ................
+            "urn:c2pa:f0ce8560b76342d1bb3085cfbe6cc5e9": {
+            "claim_generator_info": {
+                "name": "c2pie",
+                ... 
+            },
+        ...
+        }
     },
     "validation_results": {
         "activeManifest": {
         "success": [
             {
                 "code": "claimSignature.insideValidity",
-                "url": "self#jumbf=/c2pa/urn:uuid:f0ce8560b76342d1bb3085cfbe6cc5e9/c2pa.signature",
+                "url": "self#jumbf=/c2pa/urn:c2pa:f0ce8560b76342d1bb3085cfbe6cc5e9/c2pa.signature",
                 "explanation": "claim signature valid"
             },
         ................
