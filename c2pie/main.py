@@ -91,14 +91,17 @@ def sign(arguments: argparse.Namespace) -> None:
     tsa_log_dir = arguments.tsa_log_dir or os.getenv("C2PIE_TSA_LOG_DIR")
     thumbnail_file_path = arguments.thumbnail_file
 
-    sign_file(
-        input_path=input_file_path,
-        output_path=output_file_path,
-        thumbnail_file_path=thumbnail_file_path,
-        tsa_url=tsa_url,
-        require_tsa=require_tsa,
-        tsa_log_dir=tsa_log_dir,
-    )
+    try:
+        sign_file(
+            input_path=input_file_path,
+            output_path=output_file_path,
+            thumbnail_file_path=thumbnail_file_path,
+            tsa_url=tsa_url,
+            require_tsa=require_tsa,
+            tsa_log_dir=tsa_log_dir,
+        )
+    except Exception as exception:
+        print(f"error: {exception}")
 
 
 def main() -> None:
