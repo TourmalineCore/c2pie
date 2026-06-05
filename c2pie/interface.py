@@ -43,9 +43,6 @@ def c2pie_GenerateActionsAssertion(
     )
 
 
-# Currently not in use.
-# If APP11 exceeds the allowed size (65,535 bytes), an error will occur.
-# It is necessary to add logic to handle this case by splitting APP11.
 def c2pie_GenerateThumbnailAssertion(
     media_type: str,
     image_data: bytes,
@@ -56,9 +53,6 @@ def c2pie_GenerateThumbnailAssertion(
     )
 
 
-# Currently not in use.
-# If APP11 exceeds the allowed size (65,535 bytes), an error will occur.
-# It is necessary to add logic to handle this case by splitting APP11.
 def c2pie_GenerateIngredientThumbnailAssertion(
     media_type: str | None = None,
     image_data: bytes | None = None,

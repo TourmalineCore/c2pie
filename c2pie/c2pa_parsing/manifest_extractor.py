@@ -38,7 +38,13 @@ def extract_manifest_store_bytes_from_jpeg(jpeg_bytes: bytes) -> bytes | None:
             z = int.from_bytes(payload[4:8], "big")
             if en not in first_offset:
                 first_offset[en] = i
-            streams[en].append((z, payload[8:]))
+
+            # Z = 1: payload[8:] includes LBox+TBox as the start of the JUMBF box.
+            # Z > 1: payload[8:16] is the repeated LBox+TBox prefix.
+            # We should skip it to get the continuation bytes only.
+            chunk = payload[8:] if z == 1 else payload[16:]
+
+            streams[en].append((z, chunk))
 
         i += 2 + seg_len
 
