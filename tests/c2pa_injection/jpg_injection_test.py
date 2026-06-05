@@ -123,7 +123,7 @@ class TestStripC2paApp11Segments:
             1,
             C2PA_MARK + b"manifest",
         )
-        
+
         jpeg = _mock_make_jpeg(c2pa_seg)
         result = _strip(jpeg)
 

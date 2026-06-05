@@ -165,7 +165,7 @@ def sign_file(
         raw_bytes = prepare_pdf_bytes(raw_bytes)
         cai_offset = len(raw_bytes)
     else:
-        # Remove old C2PA APP11 segments so the resulting 
+        # Remove old C2PA APP11 segments so the resulting
         # file contains exactly one Manifest Store.
         raw_bytes = strip_c2pa_app11_segments(
             raw_bytes,
