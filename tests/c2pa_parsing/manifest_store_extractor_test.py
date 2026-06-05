@@ -244,7 +244,7 @@ class TestExtractManifestStoreFromJpegRanges:
     def test_multi_segment_ranges_cover_all_fragments(self):
         seg1_data = C2PA_MARK + b"part_one"
         lbox_tbox = seg1_data[:8]
-        
+
         seg1 = _mock_make_app11(1, 1, seg1_data)
         seg2 = _mock_make_app11(1, 2, lbox_tbox + b"part_two")
 
