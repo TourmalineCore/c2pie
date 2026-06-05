@@ -16,7 +16,7 @@ from c2pie.interface import (
     c2pie_GenerateThumbnailAssertion,
 )
 from c2pie.jumbf_boxes.box import Box
-from c2pie.utils.content_types import C2PA_ContentTypes, iana_media_types
+from c2pie.utils.content_types import C2PA_ContentTypes
 from c2pie.utils.generate_hashed_uri_map import generate_hashed_uri_map
 
 
@@ -31,9 +31,10 @@ def _get_content_type_by_filepath(file_path: Path) -> C2PA_ContentTypes:
     return file_content_type
 
 
-_DC_FORMAT_BY_CONTENT_TYPE: dict[str, str] = {
+_IANA_MEDIA_TYPES: dict[str, str] = {
     "jpg": "image/jpeg",
     "jpeg": "image/jpeg",
+    "png": "image/png",
     "pdf": "application/pdf",
 }
 
@@ -179,7 +180,7 @@ def sign_file(
         else:
             thumbnail_raw_bytes = _read_and_check_size_of_thumbnail_file(thumbnail_file_path)
 
-            thumbnail_media_type = iana_media_types[thumbnail_file_path.suffix]
+            thumbnail_media_type = _IANA_MEDIA_TYPES[thumbnail_file_path.suffix[1:]]
 
             thumbnail_assertion = c2pie_GenerateThumbnailAssertion(
                 thumbnail_media_type,
@@ -219,7 +220,7 @@ def sign_file(
 
     ingredient_assertion = c2pie_GenerateIngredientAssertion(
         title=input_path.name,
-        dc_format=_DC_FORMAT_BY_CONTENT_TYPE[file_type.name],
+        dc_format=_IANA_MEDIA_TYPES[file_type.name],
         ingredient_bytes=raw_bytes,
         active_manifest_urn=active_manifest_urn,
         active_manifest=active_manifest,
