@@ -110,6 +110,29 @@ class JpgSegmentApp11Storage:
         return serialized_storage_data
 
 
+def strip_c2pa_app11_segments(
+    jpeg_bytes: bytes,
+    segment_ranges: list[tuple[int, int]],
+) -> bytes:
+    """
+    Return JPEG bytes with all C2PA APP11 segments removed.
+    """
+
+    if not segment_ranges:
+        return jpeg_bytes
+
+    result = bytearray()
+    cursor = 0
+
+    for start, end in segment_ranges:
+        result += jpeg_bytes[cursor:start]
+        cursor = end
+
+    result += jpeg_bytes[cursor:]
+
+    return bytes(result)
+
+
 def create_and_serialize_app11_storage(
     manifest_store: ManifestStore,
 ) -> bytes:
