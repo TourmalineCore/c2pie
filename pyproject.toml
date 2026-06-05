@@ -1,20 +1,14 @@
-[tool.poetry]
-name = "c2pie"
-version = "0.1.0"
-
-[[tool.poetry.source]]
-name = "PyPI"
-priority = "primary"
-
-
 [project]
 name = "c2pie"
+version = "0.1.0"
 description = "c2pie is a Python library that provides C2PA standard functionality."
 readme = 'README.md'
 authors = [ 
   { name="Tourmaline Core", email="contact@tourmalinecore.com" },
 ]
-license = {file = 'LICENSE'}
+license-files = [
+  "LICENSE"
+]
 requires-python = '>=3.10'
 classifiers = [
     "Development Status :: 5 - Production/Stable",
