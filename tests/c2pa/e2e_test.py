@@ -115,6 +115,38 @@ def test_e2e_signing_with_c2patool_validation(tmp_path):
 
 @pytest.mark.e2e
 @pytest.mark.parametrize(
+    "content_type",
+    list(C2PA_ContentTypes),
+    ids=lambda ct: ct.name,
+)
+def test_e2e_repeated_signing_produces_single_valid_manifest_store(content_type, tmp_path):
+    """Signing the same file three times must not leave orphaned manifest stores."""
+    if not has_c2patool():
+        pytest.skip("c2patool not available")
+
+    for file in test_files_by_extension[content_type.name]:
+        test_file = file
+        signed_file = tmp_path / f"signed.{content_type.name}"
+
+        copy_test_file(
+            test_file,
+            signed_file,
+        )
+
+        for _ in range(3):
+            sign_file(
+                input_path=signed_file,
+                output_path=signed_file,
+            )
+
+        report = _validate_using_c2patool_and_return_json_report(signed_file)
+
+        assert report.get("validation_state") == "Valid"
+        assert len(report.get("manifests", {})) == 3
+
+
+@pytest.mark.e2e
+@pytest.mark.parametrize(
     "iteration",
     range(30),
 )
