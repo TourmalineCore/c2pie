@@ -124,3 +124,13 @@ def test_manifest_store_empty_list_equivalent_to_no_args():
     manifest_store = ManifestStore([])
     assert len(manifest_store.manifests) == 0
     assert len(manifest_store.content_boxes) == 0
+
+
+def test_serialize_raises_when_manifest_store_exceeds_lbox_limit():
+    import pytest
+
+    manifest_store = ManifestStore()
+    manifest_store.l_box = 0xFFFFFFFF + 1  # One byte over 4-byte max.
+
+    with pytest.raises(ValueError, match="Manifest Store is too large to serialize"):
+        manifest_store.serialize()

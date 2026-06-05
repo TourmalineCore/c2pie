@@ -49,7 +49,11 @@ def extract_manifest_store_bytes_and_ranges_from_jpeg(
             if en not in first_offsets:
                 first_offsets[en] = i
 
-            streams[en].append((z, payload[8:]))
+            # Z = 1: payload[8:] includes LBox+TBox as the start of the JUMBF box.
+            # Z > 1: payload[8:16] is the repeated LBox+TBox prefix.
+            # We should skip it to get the continuation bytes only.
+            chunk = payload[8:] if z == 1 else payload[16:]
+            streams[en].append((z, chunk))
             segment_ranges[en].append((i, seg_end))
 
         i = seg_end
