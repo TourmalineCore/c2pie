@@ -109,7 +109,7 @@ def extract_manifest_store_bytes_and_ranges_from_pdf(
     return pdf_bytes[start : start + length], []
 
 
-_EXTRACTORS: dict[
+EXTRACTORS: dict[
     C2PA_ContentTypes,
     Callable[[bytes], tuple[bytes | None, list[tuple[int, int]]]],
 ] = {
@@ -123,5 +123,5 @@ def extract_manifest_store_bytes(
     content_type: C2PA_ContentTypes,
     raw_data: bytes,
 ) -> tuple[bytes | None, list[tuple[int, int]]]:
-    extractor = _EXTRACTORS[content_type]
+    extractor = EXTRACTORS[content_type]
     return extractor(raw_data)
