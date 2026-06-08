@@ -52,8 +52,8 @@ deptry = "^0.25.1"
 python-semantic-release = "^10.4.1"
 
 [build-system]
-requires = ["poetry>=1.8.3"]
-build-backend = "poetry.masonry.api"
+requires = ["poetry-core>=2.0.0"]
+build-backend = "poetry.core.masonry.api"
 
 [tool.pytest.ini_options]
 markers = [
