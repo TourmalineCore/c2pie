@@ -52,7 +52,7 @@ deptry = "^0.25.1"
 python-semantic-release = "^10.4.1"
 
 [build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
+requires = ["poetry-core>=2.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.pytest.ini_options]
