@@ -101,6 +101,10 @@ jobs:
 
       - name: Semantic Version Release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # this token should have at lease these permissions:
+          #   contents: write # to be able to publish a GitHub release
+          #   issues: write # to be able to comment on released issues
+          #   pull-requests: write # to be able to comment on released pull requests
+          GITHUB_TOKEN: ${{ secrets.C2PIE_SEMANTIC_RELEASE_GH_TOKEN  }}
         run: |
           npx semantic-release
