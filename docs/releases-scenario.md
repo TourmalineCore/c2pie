@@ -28,7 +28,7 @@
 
 1. Создание PR#1 с заголовком `ci: add semantic release workflow` из `feature/add-semantic-release-workflow` в `develop`
 1. Squash merge PR `ci: add semantic release workflow` в `develop`
-1. В `develop` ветке появляется коммит `ci: add semantic release workflow (#1)` (хеш `abc3`, тег `1.0.0-alpha.1`)
+1. В `develop` ветке появляется коммит `ci: add semantic release workflow (#1)` (хеш `abc3`)
 
 1. Запуск `.reuseable-semantic-release-workflow` воркфлоу на ветке `develop` 
     => ожидаем, что новая версия не будет выпущена
@@ -79,8 +79,34 @@
 1. Появляется релиз `1.0.0-alpha.1`
     ~ В PyPI публикуется релиз `1.0.0-alpha.1`
 
+1. Создание ветки `feature/add-multiple-function` от ветки `develop` от коммита `feat: add read logic (#2)` (хеш `abc6`)
+1. Коммит `test: add a test to verify the logic for multiple function` (хеш `abc7`)
+```python
+функция тест_на_умножение():
+    отловить_вызов считать() вернуть 5:
+        результат = считать()
 
+    проверить результат равен 5
+```
 
+1. Коммит `feat: add a multiple function` (хеш `abc8`)
+```python
+функция умножение(число1, число2):
+    вернуть считать()
+```
+
+1. Пуш коммитов `test: add a test to verify the logic for multiple function` (хеш `abc7`) и `feat: add a multiple function` (хеш `abc8`) `feature/add-multiple-function`.
+```python
+функция считать_число_с_консоли_и_вернуть_его():
+    число1 = считать()
+    вернуть число1
+```
+
+1. Запуск `.reuseable-semantic-release-workflow` воркфлоу на ветке `feature/add-multiple-function`
+    => ожидаем выпуск новой **feature** версии с тегом `1.0.0-sha-abc8`
+1. Коммит c хешем `abc8` помечен тегом `1.0.0-sha-abc8`
+1. Появляется релиз `1.0.0-sha-abc8`
+    ~ В PyPI публикуется релиз `1.0.0-sha-abc8`
 
 ---
 
