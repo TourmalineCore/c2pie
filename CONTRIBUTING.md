@@ -27,7 +27,7 @@ Pre-commit is also included in the dev dependency group for the project, so you'
 >Having this pre-commit hook isn't crucial at this point since we have additional secrets detection performed in CI on every push. If any secrets get to the repo, we'll immediately notice and will be able to remove them and change the credentials. Hence, as of now, we haven't made pre-commit check independent from a Python environment.
 
 After installing the package, for the hook to work you need to run the following command in the environment you perform your commits to this repo from (with pre-commit package installed):
-```bash
+```
 pre-commit install
 ``` 
 
