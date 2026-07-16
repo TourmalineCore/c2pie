@@ -3,4 +3,3 @@ repos:
     rev: v8.24.2
     hooks:
       - id: gitleaks
-        args: ["--config", ".gitleaks.toml"]
