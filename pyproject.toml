@@ -47,6 +47,7 @@ pytest = "^7.4.0"
 pytest-cov = "^7.0.0"
 ruff = "^0.13.2"
 deptry = "^0.25.1"
+pre-commit = "^4.6.0"
 
 [tool.poetry.group.semantic-release.dependencies]
 python-semantic-release = "^10.4.1"
