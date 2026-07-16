@@ -21,13 +21,17 @@ We have a pre-commit hook configured to run gitleaks secrets detection on commit
 
 Pre-commit is also included in the dev dependency group for the project, so you'll be able to work with it once you activate Poetry's virtual environment.
 
-However, for the hook to work, you need to run the following command in the environment that you perform your commits to this repo from:
+>[!WARNING]
+>Using pre-commit hook requires you to have Python installed locally. You can then install it either with Poetry or using `pip install pre-commit` even if you don't have Poetry locally, however, **Python is necessary**.
+>
+>Having this pre-commit hook isn't crucial at this point since we have additional secrets detection performed in CI on every push. If any secrets get to the repo, we'll immediately notice and will be able to remove them and change the credentials. Hence, as of now, we haven't made pre-commit check independent from a Python environment.
+
+After installing the package, for the hook to work you need to run the following command in the environment you perform your commits to this repo from (with pre-commit package installed):
 ```bash
 pre-commit install
 ``` 
 
-Meaning, if you're using a Git client for committing, for this command to work you'll need to install this hook in the local folder of this project, not inside the container! 
-
+Meaning, if you're using a Git client for committing (i.e. not CLI), for this command to work you'll need to install this hook **in the local folder of this project**, not inside the container.
 
 ### Using a Local Environment
 
