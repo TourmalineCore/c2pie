@@ -15,6 +15,20 @@ To contribute to the c2pie package development, you can use one of the following
 
 2. Open the repo in VS Code and Reopen in Container. The container installs Python, Poetry, the package in editable mode, and configures Ruff as a default formatter, which provides linting and formatting and enables auto-fixing files on save (see `.devcontainer/devcontainer.json`).
 
+### Automatic secrets detection
+
+We have a pre-commit hook configured to run gitleaks secrets detection on commit to prevent vulnerable data from being committed. 
+
+Pre-commit is also included in the dev dependency group for the project, so you'll be able to work with it once you activate Poetry's virtual environment.
+
+However, for the hook to work, you need to run the following command in the environment that you perform your commits to this repo from:
+```bash
+pre-commit install
+``` 
+
+Meaning, if you're using a Git client for committing, for this command to work you'll need to install this hook in the local folder of this project, not inside the container! 
+
+
 ### Using a Local Environment
 
 >[!NOTE]
