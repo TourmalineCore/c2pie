@@ -7,6 +7,7 @@ from c2pie.signing import sign_file
 from c2pie.utils.content_types import C2PA_ContentTypes
 
 supported_extensions: list[str] = [_type.value for _type in C2PA_ContentTypes]
+GH_TOKEN = "ghp_12345678901234567890123456"
 
 
 def parse_arguments() -> argparse.Namespace:
