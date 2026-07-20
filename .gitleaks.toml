@@ -7,4 +7,5 @@ useDefault = true
 description = "Ignore credentials used in tests and example app"
 paths = [
     '''(^|.*/)credentials/.*''',
+    '''(^|.*/)fixtures/.*''',
 ]
