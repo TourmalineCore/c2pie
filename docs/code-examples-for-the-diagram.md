@@ -153,13 +153,7 @@ def division(a: int, b: int) -> int:
 
 def division(a: int, b: int) -> int:
 -   if b == "0":
--       raise ValueError("The divisor cannot be zero")
--
--   return a / b
 +   if b == 0:
-+       raise ValueError("The divisor cannot be zero")
-+
-+   return a / b
 ```
 
 ## fix: #10 (Squash commit)
