@@ -42,7 +42,7 @@ module.exports = {
             },
         ],
         {
-            prepare: async (pluginConfig, context) => {
+            "prepare": async (pluginConfig, context) => {
                 process.env.PEP440_VERSION = normalizeToSemver(context.nextRelease.version);
             },
         },
