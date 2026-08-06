@@ -41,7 +41,7 @@ jobs:
           ref: ${{ github.ref_name }}
           fetch-depth: 0
           fetch-tags: true
-          token: ${{ secrets.TEMP_SEMANTIC_RELEASE_GH_TOKEN }}
+          token: ${{ secrets.C2PIE_SEMANTIC_RELEASE_GH_TOKEN }}
 
       - name: Force release branch to be at workflow sha
         run: |
@@ -119,6 +119,6 @@ jobs:
           #   contents: write # to be able to publish a GitHub release
           #   issues: write # to be able to comment on released issues
           #   pull-requests: write # to be able to comment on released pull requests
-          GH_TOKEN: ${{ secrets.TEMP_SEMANTIC_RELEASE_GH_TOKEN   }}
+          GH_TOKEN: ${{ secrets.C2PIE_SEMANTIC_RELEASE_GH_TOKEN   }}
         run: |
           npx semantic-release
