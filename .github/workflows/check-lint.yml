@@ -3,7 +3,7 @@ name: Linting
 on:
   pull_request:
     types: [opened, synchronize, reopened]
-
+    
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -11,11 +11,11 @@ concurrency:
 jobs:
   run-linting:
     name: Linting and Formatting
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: Set up Python
         uses: actions/setup-python@v5
