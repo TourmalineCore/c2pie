@@ -26,9 +26,6 @@ jobs:
   publish_release:
     name: Create and publish release 
     runs-on: ubuntu-24.04
-    needs:
-      - linting
-      - testing
 
     concurrency:
       group: ${{ github.workflow }}-release-${{ github.ref_name }}
