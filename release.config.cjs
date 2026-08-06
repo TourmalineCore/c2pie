@@ -64,7 +64,7 @@ module.exports = {
             },
         ],
         [
-            // Release to Github with builded files 
+            // Release to Github with built files 
             '@semantic-release/github', 
             {
                 "assets": [
