@@ -1,84 +1,24 @@
-from __future__ import annotations
-
 import hashlib
-import json
 import os
 from pathlib import Path
 from typing import Literal
 
+from c2pie.c2pa_injection.jpg_injection import strip_c2pa_app11_segments
+from c2pie.c2pa_injection.pdf_injection import prepare_pdf_bytes
+from c2pie.c2pa_parsing.jumbf_parsing import extract_manifest_boxes, find_in_box, get_active_manifest_uuid
+from c2pie.c2pa_parsing.manifest_extractor import extract_manifest_store_bytes
 from c2pie.interface import (
-    C2PA_AssertionTypes,
     c2pie_EmplaceManifest,
-    c2pie_GenerateAssertion,
+    c2pie_GenerateActionsAssertion,
     c2pie_GenerateHashDataAssertion,
-    c2pie_GenerateManifest,
+    c2pie_GenerateIngredientAssertion,
+    c2pie_GenerateIngredientThumbnailAssertion,
+    c2pie_GenerateManifestStore,
+    c2pie_GenerateThumbnailAssertion,
 )
+from c2pie.jumbf_boxes.box import Box
 from c2pie.utils.content_types import C2PA_ContentTypes
-
-
-def _read_schema_from_file(schema_filepath: Path) -> dict[str]:
-    try:
-        with open(schema_filepath) as schema_file:
-            schema = json.loads(schema_file.read())
-        return schema
-    except Exception as ex:
-        raise ex
-
-
-def _validate_schema(schema: dict[str]) -> None:
-    expected_items = {
-        "@context": "https://schema.org",
-        "@type": "CreativeWork",
-    }
-
-    # check whether the @context and @type properties match the expected values
-    for property in ["@context", "@type"]:
-        value = schema.get(property, None)
-        if value != expected_items[property]:
-            raise ValueError(
-                "Schema must include the following properties with these values: "
-                '{@context: "https://schema.org", "@type": "CreativeWork"}'
-            )
-
-    # check that "copyrightYear" and "copyrightHolder" exist
-    for property in ["copyrightYear", "copyrightHolder"]:
-        value = schema.get(property, None)
-        if not value:
-            raise ValueError('Schema must include "copyrightYear" and "copyrightHolder"')
-
-    # check that "author" is a non-empty list whose first item has "@type" and "name"
-    author = schema.get("author", None)
-    if not (isinstance(author, list) and author):
-        raise ValueError('author must be a non-empty list of objects with "@type" and "name"')
-    else:
-        author = author[0]
-
-    author_type = author.get("@type", None)
-    author_name = author.get("name", None)
-
-    if not author_type or not author_name:
-        raise ValueError('author[@"type"] and author[@"name"] must not be empty')
-
-    if author_type != "Organization" and author_type != "Person":
-        raise ValueError('author["@type"] must be "Organization" or "Person"')
-
-
-def _load_signature_schema(schema_path: str | Path | None) -> dict[str]:
-    default_schema = {
-        "@context": "https://schema.org",
-        "@type": "CreativeWork",
-        "author": [{"@type": "Organization", "name": "Tourmaline Core"}],
-        "copyrightYear": "2026",
-        "copyrightHolder": "c2pie",
-    }
-
-    if schema_path is None:
-        return default_schema
-
-    validated_schema_path = _validate_general_filepath(file_path=schema_path)
-    schema = _read_schema_from_file(schema_filepath=validated_schema_path)
-    _validate_schema(schema=schema)
-    return schema
+from c2pie.utils.generate_hashed_uri_map import generate_hashed_uri_map
 
 
 def _ensure_path_type_for_filepath(path: str | Path) -> Path:
@@ -92,9 +32,18 @@ def _get_content_type_by_filepath(file_path: Path) -> C2PA_ContentTypes:
     return file_content_type
 
 
+_IANA_MEDIA_TYPES: dict[str, str] = {
+    "jpg": "image/jpeg",
+    "jpeg": "image/jpeg",
+    "png": "image/png",
+    "pdf": "application/pdf",
+}
+
+
 def _check_file_extension_is_supported(file_path: Path) -> None:
     supported_extensions: list[str] = [_type.value for _type in C2PA_ContentTypes]
     file_extension = file_path.suffix
+
     if file_extension not in supported_extensions:
         raise ValueError(
             f"The file has an incorrect extension: {file_extension}"
@@ -170,12 +119,26 @@ def _load_certificates_and_key(
     return key, certificates
 
 
+def _read_and_check_size_of_thumbnail_file(thumbnail_file_path: Path):
+    with open(thumbnail_file_path, "rb") as f:
+        thumbnail_raw_bytes = f.read()
+
+    # The 1024x1024 requirement is specified in the C2PA specification.
+    if len(thumbnail_raw_bytes) > 1024 * 1024:
+        raise ValueError("The thumbnail file is too large! The size must not exceed 1024x1024. Recommended 512x512.")
+
+    return thumbnail_raw_bytes
+
+
 def sign_file(
     input_path: Path | str,
     output_path: Path | str | None = None,
+    thumbnail_file_path: Path | str | None = None,
     key_path: str | None = None,
     certificates_path: str | None = None,
-    schema_path: str | None = None,
+    tsa_url: str | None = None,
+    require_tsa: bool = False,
+    tsa_log_dir: str | None = None,
 ) -> None:
     key, certificates = _load_certificates_and_key(
         key_path=key_path,
@@ -187,40 +150,131 @@ def sign_file(
         output_file_path=output_path,
     )
 
-    schema = _load_signature_schema(schema_path=schema_path)
-
     with open(input_path, "rb") as f:
         raw_bytes = f.read()
 
-    file_type: C2PA_ContentTypes = _get_content_type_by_filepath(file_path=input_path)
+    file_type: C2PA_ContentTypes = _get_content_type_by_filepath(input_path)
+
+    # Extract the existing manifest store before stripping it from the bytes,
+    # because it is needed to build the Ingredient assertion for the new manifest.
+    manifest_store_bytes, segment_ranges = extract_manifest_store_bytes(
+        file_type,
+        raw_bytes,
+    )
 
     if file_type.name == "pdf":
+        raw_bytes = prepare_pdf_bytes(raw_bytes)
         cai_offset = len(raw_bytes)
     else:
-        cai_offset = 2
+        # We need to set the updated Manifest Store to the same location
+        # where it was previously located (if it was there before).
+        cai_offset = segment_ranges[0][0] if segment_ranges else 2
 
-    creative_work_assertion = c2pie_GenerateAssertion(
-        C2PA_AssertionTypes.creative_work,
-        schema,
+    assertions = []
+
+    thumbnail_media_type = None
+    thumbnail_raw_bytes = None
+
+    if thumbnail_file_path:
+        thumbnail_file_path = _validate_general_filepath(
+            file_path=thumbnail_file_path,
+            file_path_type="other",
+        )
+
+        supported_extensions: list[str] = [".jpeg", ".jpg", ".png"]
+        if thumbnail_file_path.suffix not in supported_extensions:
+            raise ValueError(
+                f"The thumbnail file has an incorrect extension: {thumbnail_file_path.suffix}. "
+                f"Currently, only the following extensions are supported: {supported_extensions}.",
+            )
+        else:
+            thumbnail_raw_bytes = _read_and_check_size_of_thumbnail_file(thumbnail_file_path)
+
+            thumbnail_media_type = _IANA_MEDIA_TYPES[thumbnail_file_path.suffix[1:]]
+
+            thumbnail_assertion = c2pie_GenerateThumbnailAssertion(
+                thumbnail_media_type,
+                thumbnail_raw_bytes,
+            )
+            assertions.append(thumbnail_assertion)
+
+    active_manifest_urn: str | None = get_active_manifest_uuid(manifest_store_bytes)
+    previous_manifest_boxes: list[Box] = extract_manifest_boxes(manifest_store_bytes)
+    active_manifest: Box | None = None
+
+    if previous_manifest_boxes:
+        for manifest in previous_manifest_boxes:
+            active_manifest = find_in_box(
+                manifest,
+                active_manifest_urn,
+            )
+
+    ingredient_thumbnail_assertion = c2pie_GenerateIngredientThumbnailAssertion(
+        thumbnail_media_type,
+        thumbnail_raw_bytes,
+        active_manifest=active_manifest,
+    )
+
+    if ingredient_thumbnail_assertion:
+        assertions.append(ingredient_thumbnail_assertion)
+
+    ingredient_assertion = c2pie_GenerateIngredientAssertion(
+        title=input_path.name,
+        dc_format=_IANA_MEDIA_TYPES[file_type.name],
+        ingredient_bytes=raw_bytes,
+        active_manifest_urn=active_manifest_urn,
+        active_manifest=active_manifest,
+        ingredient_thumbnail_assertion=ingredient_thumbnail_assertion,
+    )
+    assertions.append(ingredient_assertion)
+
+    ingredient_assertion_hash = hashlib.sha256(ingredient_assertion.payload).digest()
+
+    actions_assertion_parameters: dict[str, list[dict[str, str | bytes]]] = {
+        "ingredients": [
+            generate_hashed_uri_map(
+                url=f"self#jumbf=c2pa.assertions/{ingredient_assertion.get_label()}",
+                hash_value=ingredient_assertion_hash,
+                hash_algorithm="sha256",
+            ),
+        ],
+    }
+
+    actions_assertion = c2pie_GenerateActionsAssertion(
+        action="c2pa.opened",
+        parameters=actions_assertion_parameters,
+    )
+    assertions.append(actions_assertion)
+
+    # Remove old C2PA APP11 segments so the resulting
+    # file contains exactly one Manifest Store.
+    raw_bytes = strip_c2pa_app11_segments(
+        raw_bytes,
+        segment_ranges,
     )
 
     hash_data_assertion = c2pie_GenerateHashDataAssertion(
-        cai_offset=cai_offset, hashed_data=hashlib.sha256(raw_bytes).digest()
+        hashed_data=hashlib.sha256(raw_bytes).digest(),
     )
 
-    assertions = [creative_work_assertion, hash_data_assertion]
+    assertions.append(hash_data_assertion)
 
-    manifest = c2pie_GenerateManifest(
+    manifest_store = c2pie_GenerateManifestStore(
         assertions=assertions,
         private_key=key,
         certificate_chain=certificates,
+        file_name=output_path.name,
+        previous_manifest_boxes=previous_manifest_boxes,
+        tsa_url=tsa_url,
+        require_tsa=require_tsa,
+        tsa_log_dir=tsa_log_dir,
     )
 
     signed_bytes = c2pie_EmplaceManifest(
         format_type=file_type,
         content_bytes=raw_bytes,
         c2pa_offset=cai_offset,
-        manifests=manifest,
+        manifest_store=manifest_store,
     )
 
     with open(output_path, "wb") as output_file:

@@ -1,5 +1,11 @@
 # Base jumbf box class
 
+from c2pie.jumbf_boxes.constants import (
+    BYTE_ORDER,
+    HEADER_SIZE,
+    LBOX_SIZE,
+)
+
 
 class Box:
     def __init__(
@@ -7,11 +13,9 @@ class Box:
         box_type: str,
         payload: bytes = b"",
     ):
-        self.payload = payload  # Box payload
+        self.payload = payload
         self.t_box = box_type
-        self.l_box = (
-            len(bytes.fromhex(self.t_box)) + 4 + len(self.payload)
-        )  # Size of box_type (4 bytes) + self size (4 bytes)
+        self.l_box = 4 + 4 + len(self.payload)  # 4 bytes (LBox) + 4 bytes (TBox) + payload
 
     def get_length(self):
         return self.l_box
@@ -26,3 +30,41 @@ class Box:
         t_box = bytes.fromhex(self.t_box)
         l_box = self.l_box.to_bytes(4, "big")
         return l_box + t_box + self.payload
+
+    @classmethod
+    def parse_from_bytes(
+        cls,
+        data: bytes,
+        offset: int = 0,
+    ) -> tuple["Box", int]:
+        if offset + HEADER_SIZE > len(data):
+            raise ValueError("Not enough data for box header")
+
+        l_box = int.from_bytes(
+            data[offset : offset + LBOX_SIZE],
+            BYTE_ORDER,
+        )
+
+        t_box = data[offset + LBOX_SIZE : offset + HEADER_SIZE].hex()
+
+        # If the length of the box is unknown, the encoders may set the LBox value to 0.
+        # In this case, you must read until the end of the available bytes.
+        if l_box == 0:
+            end = len(data)
+        else:
+            end = offset + l_box
+
+        if end > len(data):
+            raise ValueError("Box length exceeds available data")
+
+        payload = data[offset + HEADER_SIZE : end]
+        box = cls(t_box, payload)
+
+        return box, end
+
+
+def iter_boxes(data: bytes):
+    offset = 0
+    while offset < len(data):
+        box, offset = Box.parse_from_bytes(data, offset)
+        yield box

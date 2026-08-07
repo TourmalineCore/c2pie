@@ -6,9 +6,11 @@
 
 -------
 
-[![Linting and Testing](https://github.com/TourmalineCore/c2pie/actions/workflows/lint-and-test.yml/badge.svg?branch=develop)](https://github.com/TourmalineCore/c2pie/actions/workflows/lint-and-test.yml)
+[![Linting](https://github.com/TourmalineCore/c2pie/actions/workflows/lint-on-pull-request.yml/badge.svg?branch=develop)](https://github.com/TourmalineCore/c2pie/actions/workflows/lint-on-pull-request.yml)
 [![c2pa](https://img.shields.io/badge/c2pa-v1.4-seagreen.svg)](https://c2pa.org/)
-[![coverage](https://img.shields.io/badge/coverage-87%25-olivedrab?logo=codecov&logoColor=ff9d1c)](https://github.com/TourmalineCore/c2pie/actions/workflows/lint-and-test.yml)
+[![coverage](https://img.shields.io/badge/e2e_coverage-82.33%25-olivedrab)](https://github.com/TourmalineCore/c2pie/actions/workflows/calculate-tests-coverage-on-pull-request.yml)
+[![coverage](https://img.shields.io/badge/units_coverage-86.53%25-olivedrab)](https://github.com/TourmalineCore/c2pie/actions/workflows/calculate-tests-coverage-on-pull-request.yml)
+[![coverage](https://img.shields.io/badge/full_coverage-92.17%25-forestgreen)](https://github.com/TourmalineCore/c2pie/actions/workflows/calculate-tests-coverage-on-pull-request.yml)
 [![latest](https://img.shields.io/pypi/v/c2pie?label=latest&colorB=fc8021)](https://pypi.org/project/c2pie/)
 
 <br>
@@ -21,9 +23,9 @@ The package supports building claims, assertions, and COSE signatures and embedd
 
 🔸 **Supported file extensions**: `JPG`, `JPEG`, `PDF`
 
-🔸 **Supported Python versions**: `3.9.2 - 3.14.0`
+🔸 **Supported Python versions**: `3.10.0 - 3.14.5`
 
-🔸 **Supported C2PA Spec Versions**: `1.4`. 
+🔸 **Supported C2PA Spec Versions**: `2.4`. 
 
 Support for C2PA 2.2 is planned for future releases.
 
@@ -122,7 +124,7 @@ After being copied to host machine, signed files can then be validated using eit
 
 ### Prerequisites
 
-1) Python environment. Currently supported Python versions: 3.9.2 - 3.14.0. Make sure to [create and activate virtual environment](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/) to avoid installing packages globally and any errors caused by that.
+1) Python environment. Currently supported Python versions: 3.10.0 - 3.14.5. Make sure to [create and activate virtual environment](https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/) to avoid installing packages globally and any errors caused by that.
 
 2) Private key and certificate chain pair. The repo contains pre-generated mock credentials in `tests/credentials`. You can either download and use them for a quick start or go to [Certificates](#-certificates) for instructions on how to generate a similar key-certificate pair.
 
@@ -200,9 +202,9 @@ Follow the steps:
 1. Clone the c2pie repository.
 
 2. Go to `example_app` directory:
-    ```bash
-    cd example_app
-    ```
+```bash
+cd example_app
+```
 
 >[!NOTE]
 >By default, example apps use the latest available stable c2pie version. If you'd like to test some particular version, you can change the value of `C2PIE_PACKAGE_VERSION` in `example_app/.example-app-env`. 
@@ -224,18 +226,22 @@ Follow the steps:
     The result was saved to test_files/signed_test_image.jpg. 
     c2patool_validation_results:
     {
-        "active_manifest": "urn:uuid:f0ce8560b76342d1bb3085cfbe6cc5e9",
+        "active_manifest": "urn:c2pa:f0ce8560b76342d1bb3085cfbe6cc5e9",
         "manifests": {
-        "urn:uuid:f0ce8560b76342d1bb3085cfbe6cc5e9": {
-            "claim_generator": "c2pie",
-        ................
+            "urn:c2pa:f0ce8560b76342d1bb3085cfbe6cc5e9": {
+            "claim_generator_info": {
+                "name": "c2pie",
+                ... 
+            },
+        ...
+        }
     },
     "validation_results": {
         "activeManifest": {
         "success": [
             {
                 "code": "claimSignature.insideValidity",
-                "url": "self#jumbf=/c2pa/urn:uuid:f0ce8560b76342d1bb3085cfbe6cc5e9/c2pa.signature",
+                "url": "self#jumbf=/c2pa/urn:c2pa:f0ce8560b76342d1bb3085cfbe6cc5e9/c2pa.signature",
                 "explanation": "claim signature valid"
             },
         ................
@@ -290,20 +296,23 @@ c2patool path/to/your_output.pdf
 
 If the file has been correctly signed and validation is successful, the results you'll see in the terminal will look similar to this:
 ```bash
-c2patool_validation_results:
 {
-    "active_manifest": "urn:uuid:f0ce8560b76342d1bb3085cfbe6cc5e9",
+    "active_manifest": "urn:c2pa:f0ce8560b76342d1bb3085cfbe6cc5e9",
     "manifests": {
-    "urn:uuid:f0ce8560b76342d1bb3085cfbe6cc5e9": {
-        "claim_generator": "c2pie",
-    ................
+        "urn:c2pa:f0ce8560b76342d1bb3085cfbe6cc5e9": {
+        "claim_generator_info": {
+            "name": "c2pie",
+            ... 
+        },
+    ...
+    }
 },
 "validation_results": {
     "activeManifest": {
     "success": [
         {
             "code": "claimSignature.insideValidity",
-            "url": "self#jumbf=/c2pa/urn:uuid:f0ce8560b76342d1bb3085cfbe6cc5e9/c2pa.signature",
+            "url": "self#jumbf=/c2pa/urn:c2pa:f0ce8560b76342d1bb3085cfbe6cc5e9/c2pa.signature",
             "explanation": "claim signature valid"
         },
     ................
@@ -340,18 +349,22 @@ cargo install c2patool
     ```bash
     c2patool_validation_results:
     {
-        "active_manifest": "urn:uuid:f0ce8560b76342d1bb3085cfbe6cc5e9",
+        "active_manifest": "urn:c2pa:f0ce8560b76342d1bb3085cfbe6cc5e9",
         "manifests": {
-        "urn:uuid:f0ce8560b76342d1bb3085cfbe6cc5e9": {
-            "claim_generator": "c2pie",
-        ................
+            "urn:c2pa:f0ce8560b76342d1bb3085cfbe6cc5e9": {
+            "claim_generator_info": {
+                "name": "c2pie",
+                ... 
+            },
+        ...
+        }
     },
     "validation_results": {
         "activeManifest": {
         "success": [
             {
                 "code": "claimSignature.insideValidity",
-                "url": "self#jumbf=/c2pa/urn:uuid:f0ce8560b76342d1bb3085cfbe6cc5e9/c2pa.signature",
+                "url": "self#jumbf=/c2pa/urn:c2pa:f0ce8560b76342d1bb3085cfbe6cc5e9/c2pa.signature",
                 "explanation": "claim signature valid"
             },
         ................
@@ -442,7 +455,7 @@ For detailed information on signing and certificates please explore the [corresp
 
 1) Load a sample asset (`tests/test_files/..`);
 
-2) Build a manifest with `c2pie_GenerateAssertion`, `c2pie_GenerateHashDataAssertion`, `c2pie_GenerateManifest`;
+2) Build a manifest with `c2pie_GenerateAssertion`, `c2pie_GenerateHashDataAssertion`, `c2pie_GenerateManifestStore`;
 
 3) Embed the manifest (`c2pie_EmplaceManifest`);  
 

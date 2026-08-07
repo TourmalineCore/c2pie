@@ -1,7 +1,8 @@
 # Jumbf super box class
 from __future__ import annotations
 
-from c2pie.jumbf_boxes.box import Box
+from c2pie.jumbf_boxes.box import Box, iter_boxes
+from c2pie.jumbf_boxes.constants import JUMB_TYPE
 from c2pie.jumbf_boxes.content_box import ContentBox
 from c2pie.jumbf_boxes.description_box import DescriptionBox
 from c2pie.utils.content_types import jumbf_content_types
@@ -14,11 +15,45 @@ class SuperBox(Box):
         label: str = "",
         content_boxes: list | None = None,
     ):
-        self.description_box = DescriptionBox(content_type=content_type, label=label)
+        self.description_box = DescriptionBox(
+            content_type=content_type,
+            label=label,
+        )
+
         self.content_boxes = [] if content_boxes is None else content_boxes
 
         payload = self.description_box.serialize() + self.serialize_content_boxes()
-        super().__init__(b"jumb".hex(), payload=payload)
+
+        super().__init__(
+            b"jumb".hex(),
+            payload=payload,
+        )
+
+    @classmethod
+    def from_box(
+        cls,
+        box: Box,
+    ) -> SuperBox:
+        if box.get_type() != JUMB_TYPE:
+            raise ValueError("Box is not a JUMBF superbox")
+
+        children = list(iter_boxes(box.get_payload()))
+        if not children:
+            raise ValueError("Empty JUMBF superbox")
+
+        description_box = DescriptionBox.from_box(children[0])
+        content_boxes = children[1:]
+
+        instance = cls.__new__(cls)
+        instance.t_box = box.get_type()
+        instance.l_box = box.get_length()
+        instance.payload = box.get_payload()
+        instance.description_box = description_box
+        instance.content_boxes = content_boxes
+        return instance
+
+    def _serialize_children(self) -> bytes:
+        return b"".join(content_box for content_box in self.content_boxes if content_box)
 
     def add_content_box(
         self,
@@ -31,7 +66,7 @@ class SuperBox(Box):
         serialized_content_boxes = b""
 
         for content_box in self.content_boxes:
-            if content_box is not None:
+            if content_box:
                 serialized_content_boxes += content_box.serialize()
 
         return serialized_content_boxes
