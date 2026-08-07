@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.0-alpha.1](https://github.com/TourmalineCore/c2pie/compare/0.2.0-alpha.1...1.0.0-alpha.1) (2026-08-07)
+
+### ⚠ BREAKING CHANGES
+
+* #67: remove redundant parameters and steps from semantic release workflow (#113)
+
+* [#67](https://github.com/TourmalineCore/c2pie/issues/67): remove redundant parameters and steps from semantic release workflow ([#113](https://github.com/TourmalineCore/c2pie/issues/113)) ([2d00e29](https://github.com/TourmalineCore/c2pie/commit/2d00e29d70cc4eb883b26a2504ca7f7d41316d33))
+
 ## [0.2.0-alpha.1](https://github.com/TourmalineCore/c2pie/compare/v0.1.0...0.2.0-alpha.1) (2026-08-07)
 
 ### Features

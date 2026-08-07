@@ -1,6 +1,6 @@
 [project]
 name = "c2pie"
-version = "0.2.0a1"
+version = "1.0.0a1"
 description = "c2pie is a Python library that provides C2PA standard functionality."
 readme = 'README.md'
 authors = [ 
