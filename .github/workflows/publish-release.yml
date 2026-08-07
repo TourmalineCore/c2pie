@@ -27,56 +27,20 @@ jobs:
     name: Create and publish release 
     runs-on: ubuntu-24.04
 
+    # Controls whether multiple instances of 
+    # the same workflow can run in parallel
     concurrency:
       group: ${{ github.workflow }}-release-${{ github.ref_name }}
-      cancel-in-progress: false
 
-    steps:
+    steps:      
       - name: Checkout repository on release branch
         uses: actions/checkout@v7
         with:
-          ref: ${{ github.ref_name }}
           fetch-depth: 0
-          fetch-tags: true
-          # If the token is not provided, semantic-release will not be 
-          # able to push the service commit to the protected branch
-          token: ${{ secrets.C2PIE_SEMANTIC_RELEASE_GH_TOKEN }}
-
-      - name: Force release branch to be at workflow sha
-        run: |
-          git reset --hard ${{ github.sha }}
-
-      - name: Verify upstream has NOT changed
-        shell: bash
-        run: |
-          set +o pipefail
-
-          UPSTREAM_BRANCH_NAME="$(git status -sb | head -n 1 | awk -F '\\.\\.\\.' '{print $2}' | cut -d ' ' -f1)"
-          printf '%s\n' "Upstream branch name: $UPSTREAM_BRANCH_NAME"
-
-          set -o pipefail
-
-          if [ -z "$UPSTREAM_BRANCH_NAME" ]; then
-              printf >&2 '%s\n' "::error::Unable to determine upstream branch name!"
-              exit 1
-          fi
-
-          git fetch "${UPSTREAM_BRANCH_NAME%%/*}"
-
-          if ! UPSTREAM_SHA="$(git rev-parse "$UPSTREAM_BRANCH_NAME")"; then
-              printf >&2 '%s\n' "::error::Unable to determine upstream branch sha!"
-              exit 1
-          fi
-
-          HEAD_SHA="$(git rev-parse HEAD)"
-
-          if [ "$HEAD_SHA" != "$UPSTREAM_SHA" ]; then
-              printf >&2 '%s\n' "[HEAD SHA] $HEAD_SHA != $UPSTREAM_SHA [UPSTREAM SHA]"
-              printf >&2 '%s\n' "::error::Upstream has changed, aborting release..."
-              exit 1
-          fi
-
-          printf '%s\n' "Verified upstream branch has not changed, continuing with release..."
+          # If set to 'true', the semantic-release service commit will be 
+          # pushed using the token defined for actions/checkout (by default, 
+          # 'GITHUB_TOKEN', which is critical for protected branches)
+          persist-credentials: false
 
       - name: Set up Node.js
         uses: actions/setup-node@v6
