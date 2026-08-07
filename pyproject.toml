@@ -34,23 +34,20 @@ c2pie = 'c2pie.main:main'
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.15"
-cbor2 = "^5.6.3"
-cryptography = ">=44.0.1"
-pypdf = "^6.1.1"
-c2pa-python = ">=0.32.6"
-requests = "^2.32"
-pyasn1 = "^0.6"
-pyasn1-modules = "^0.4"
+cbor2 = "^6.1.4"
+cryptography = ">=50.0.0"
+pypdf = "^6.15.0"
+c2pa-python = ">=0.37.5"
+requests = "^2.34.2"
+pyasn1 = "^0.6.4"
+pyasn1-modules = "^0.4.2"
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^7.4.0"
-pytest-cov = "^7.0.0"
-ruff = "^0.13.2"
+pytest = "^9.1.1"
+pytest-cov = "^7.1.0"
+ruff = "^0.16.1"
 deptry = "^0.25.1"
-pre-commit = "^4.6.0"
-
-[tool.poetry.group.semantic-release.dependencies]
-python-semantic-release = "^10.4.1"
+pre-commit = "^4.6.1"
 
 [build-system]
 requires = ["poetry-core>=2.0.0"]
