@@ -6,6 +6,8 @@ on:
       - 'feature/*'
       - '*/feature/*'
   release:
+    # The 'published' type triggers in cases of release 
+    # and prerelease publications, excluding draft releases
     types:
       - published
 
