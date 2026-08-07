@@ -86,14 +86,9 @@ function normalizeToSemver(version) {
 
     const identifier = rest.join('-');
 
-    const hotfixMatch = identifier.match(/^hotfix\.(\d+)$/);
-    if (hotfixMatch) {
-        const [, num] = hotfixMatch;
-        return `${base}-rc.${num}`;
-    }
-
-    const match = identifier.match(/^\d+x-(alpha|rc|hotfix)\.(\d+)$/);
-
+    // It searches the identifier for a substring such as 'alpha.N'
+    // and extracts the phase (e.g., 'alpha') and the increment
+    const match = identifier.match(/^(?:\d+x-)?(alpha|rc|hotfix)\.(\d+)$/);
     if (!match)
         return version;
 
