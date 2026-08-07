@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.1-hotfix.2](https://github.com/TourmalineCore/c2pie/compare/0.1.1-hotfix.1...0.1.1-hotfix.2) (2026-08-07)
+
+### Documentation
+
+* update changelog after updating semantic-release ([416704b](https://github.com/TourmalineCore/c2pie/commit/416704bdaa663fecc84f4d9a9c0e3db24e1845e4))
+
 ## [0.1.1-hotfix.1](https://github.com/TourmalineCore/c2pie/compare/v0.1.0...0.1.1-hotfix.1) (2026-08-07)
 
 ### Bug Fixes
