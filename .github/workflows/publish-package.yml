@@ -1,59 +1,92 @@
 name: Package Publishing
 
 on:
+  push:
+    branches:
+      - 'feature/*'
+      - '*/feature/*'
   release:
-    types: [created, published, released]
-  workflow_dispatch:
-
-permissions:
-  contents: write
-  packages: read
+    # The 'published' type triggers in cases of release 
+    # and prerelease publications, excluding draft releases
+    types:
+      - published
 
 concurrency:
   group: publishing-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
+  cancel-in-progress: false
+  
 jobs:
   release-build:
     name: Build package
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
 
     defaults:
       run:
         shell: bash
+    
+    env:
+      IS_DEV_VERSION: >-
+        ${{ github.event_name == 'push' ||
+            startsWith(github.event.release.target_commitish, 'release/') ||
+            contains(github.event.release.target_commitish, '/release/') }} ||
+            startsWith(github.event.release.target_commitish, 'hotfix/') ||
+            contains(github.event.release.target_commitish, '/hotfix/') }}
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
+          # For the `release` event, `github.sha` points at the default
+          # branch's HEAD, not at the released commit/tag - checkout by
+          # tag name explicitly so the correct commit gets built.
+          ref: ${{ github.event_name == 'release' && github.event.release.tag_name || github.ref_name }}
           fetch-depth: 0
-      
+          fetch-tags: true
+
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
-          python-version: "3.12"
+          python-version: "3.14"
 
       - name: Install Poetry
         uses: snok/install-poetry@v1
         with:
-          version: 'latest'
+          version: '2.4.1'
           virtualenvs-create: true
           virtualenvs-in-project: true
+
+      - name: Generate and setup version with .dev postfix
+        id: compute_dev_version
+        if: env.IS_DEV_VERSION == 'true'
+        run: |
+          SHORT_SHA=$(git rev-parse --short=8 HEAD)
+          DEV_NUM=$((16#$SHORT_SHA))
+          CURRENT_VERSION=$(poetry version -s)
+          VERSION="${CURRENT_VERSION}.dev${DEV_NUM}"
+          poetry version "${VERSION}"
+          echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Show released version of the package
+        if: env.IS_DEV_VERSION == 'true'
+        run: |
+          echo "Released version of the package is ${{ steps.compute_dev_version.outputs.VERSION }}"
 
       - name: Build the Package        
         run: |
           poetry build
 
       - name: Upload dists
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: dist
           path: dist
+          retention-days: 1
 
   pypi-publish:
     name: Publish package
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
     needs:
       - release-build
     permissions:
@@ -61,15 +94,13 @@ jobs:
 
     environment:
       name: pypi
-      url: https://pypi.org/p/c2pie
 
     steps:
       - name: Retrieve release distributions
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v7
         with:
           name: dist
           path: dist
 
       - name: Publish package distributions to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-
+        uses: pypa/gh-action-pypi-publish@v1.14.0
