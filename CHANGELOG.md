@@ -1,3 +1,58 @@
+# Changelog
+
+## [0.2.0-alpha.1](https://github.com/TourmalineCore/c2pie/compare/v0.1.0...0.2.0-alpha.1) (2026-08-07)
+
+### Features
+
+* [#100](https://github.com/TourmalineCore/c2pie/issues/100): fixing the manifest store error when a single file has multiple signatures ([#101](https://github.com/TourmalineCore/c2pie/issues/101)) ([fc16088](https://github.com/TourmalineCore/c2pie/commit/fc16088198b1a016d9d868d3eaa94abb1062b49e))
+* [#108](https://github.com/TourmalineCore/c2pie/issues/108): add a workflow to check for hard-coded secrets in repo using gitleaks and pre-commit hook ([#109](https://github.com/TourmalineCore/c2pie/issues/109)) ([1be2303](https://github.com/TourmalineCore/c2pie/commit/1be23035b6076fc00bd56d30774cf7853a319842))
+* [#60](https://github.com/TourmalineCore/c2pie/issues/60): update the library to C2PA 2.4 ([#61](https://github.com/TourmalineCore/c2pie/issues/61)) ([c8524ab](https://github.com/TourmalineCore/c2pie/commit/c8524ab154ee89c67bb83d5140c8e941cdd597a2))
+* [#69](https://github.com/TourmalineCore/c2pie/issues/69): removal of Python 3.9 from the library's supported versions ([#72](https://github.com/TourmalineCore/c2pie/issues/72)) ([853361f](https://github.com/TourmalineCore/c2pie/commit/853361f509b9f32e5351c2f3ebde569bac62de34))
+* [#79](https://github.com/TourmalineCore/c2pie/issues/79): add a thumbnail ingredient assertion ([#94](https://github.com/TourmalineCore/c2pie/issues/94)) ([8b016b5](https://github.com/TourmalineCore/c2pie/commit/8b016b5413290708f603cdaf3c02193a3eee5c74))
+* [#80](https://github.com/TourmalineCore/c2pie/issues/80): investigation and correction of hash mismatches during the signing process ([#86](https://github.com/TourmalineCore/c2pie/issues/86)) ([cdbf950](https://github.com/TourmalineCore/c2pie/commit/cdbf9502a39a32a0b28fd33292174316138ec41c))
+* [#84](https://github.com/TourmalineCore/c2pie/issues/84): add APP11 segment division logic in case of overflow ([#99](https://github.com/TourmalineCore/c2pie/issues/99)) ([ef7c5da](https://github.com/TourmalineCore/c2pie/commit/ef7c5dadfe844e24711957854db56a2f0bb4f747))
+* [#89](https://github.com/TourmalineCore/c2pie/issues/89): add dependency check workflow ([#90](https://github.com/TourmalineCore/c2pie/issues/90)) ([0572736](https://github.com/TourmalineCore/c2pie/commit/05727366b07a588e187060d7d1f71eb7663b4128))
+* [#95](https://github.com/TourmalineCore/c2pie/issues/95): add e2e tests to verify multiple signatures on single file and signing with timestamp ([#96](https://github.com/TourmalineCore/c2pie/issues/96)) ([019c863](https://github.com/TourmalineCore/c2pie/commit/019c8637539b5a33215627661f12efeb38a2cfed))
+* **actions-assertion:** [#55](https://github.com/TourmalineCore/c2pie/issues/55): add implementation of action assertion ([#57](https://github.com/TourmalineCore/c2pie/issues/57)) ([68ba654](https://github.com/TourmalineCore/c2pie/commit/68ba654378bfad2a584fbcf2d587829fa6adf76e))
+* **hash-uri-map:** [#56](https://github.com/TourmalineCore/c2pie/issues/56): add generate hash uri map function ([#58](https://github.com/TourmalineCore/c2pie/issues/58)) ([88f9abe](https://github.com/TourmalineCore/c2pie/commit/88f9abefc181a6a10be9f9c76065b2f13891ee31))
+* implement JPEG and PDF C2PA signing functionality ([42d1528](https://github.com/TourmalineCore/c2pie/commit/42d1528b8a8c0ce72ae93948055fc58e5845f4a7))
+* **ingredient-assertion:** [#47](https://github.com/TourmalineCore/c2pie/issues/47): adding implementation of ingredient assertion ([#48](https://github.com/TourmalineCore/c2pie/issues/48)) ([30f672e](https://github.com/TourmalineCore/c2pie/commit/30f672e7991cce78ceec5074d92fb863835cab8f))
+* **jumbf-parser:** [#46](https://github.com/TourmalineCore/c2pie/issues/46): add manifest parsing functionality ([#65](https://github.com/TourmalineCore/c2pie/issues/65)) ([ea80072](https://github.com/TourmalineCore/c2pie/commit/ea8007245a8ba2b1b9100d48a07498530f511480))
+* **main:** add version option to c2pie command ([8449489](https://github.com/TourmalineCore/c2pie/commit/8449489f50f123edb3987ba1ce17513fd1cf8f4b))
+* **time-stamps:** [#59](https://github.com/TourmalineCore/c2pie/issues/59): adding timestamp functionality ([#64](https://github.com/TourmalineCore/c2pie/issues/64)) ([688380d](https://github.com/TourmalineCore/c2pie/commit/688380dfced75f622826c4d2a6a2daaa87e28c22)), closes [#57](https://github.com/TourmalineCore/c2pie/issues/57)
+
+### Bug Fixes
+
+* [#62](https://github.com/TourmalineCore/c2pie/issues/62): fix for the library build auto update ([#63](https://github.com/TourmalineCore/c2pie/issues/63)) ([57430c5](https://github.com/TourmalineCore/c2pie/commit/57430c592c067bc0bdd4e96f834cddb9ef19b1f1))
+* **ci:** [#53](https://github.com/TourmalineCore/c2pie/issues/53): change poetry version into install poetry step so that fix the installation error in python 3.9 ([#54](https://github.com/TourmalineCore/c2pie/issues/54)) ([61b4b7b](https://github.com/TourmalineCore/c2pie/commit/61b4b7b282554ffacd756ca0257d6fb69aa26dca))
+* **gitattributes:** [#51](https://github.com/TourmalineCore/c2pie/issues/51): correcting end of lines, change target of .gitattributes ([#52](https://github.com/TourmalineCore/c2pie/issues/52)) ([b676c92](https://github.com/TourmalineCore/c2pie/commit/b676c92348939197d83689adb2cb94614551dbc6))
+* make signature schema configurable ([9c5666a](https://github.com/TourmalineCore/c2pie/commit/9c5666a0bc8267d526b785916f500c7389e2a492))
+
+### Documentation
+
+* [#103](https://github.com/TourmalineCore/c2pie/issues/103): update project readme after applying changes ([#104](https://github.com/TourmalineCore/c2pie/issues/104)) ([e1636d4](https://github.com/TourmalineCore/c2pie/commit/e1636d4f1d1aefb2454536162914ba403aab790c))
+* move contributing to its separate file ([cf468f3](https://github.com/TourmalineCore/c2pie/commit/cf468f38f8722d6d8ab48fdd5e7d721b3af0d72b))
+* **readme:** add empty line dividers ([b547982](https://github.com/TourmalineCore/c2pie/commit/b5479820c157b4076d5c40fb3a94097410d5b1e1))
+* **readme:** add instructions for switching between terminals ([b7a80ff](https://github.com/TourmalineCore/c2pie/commit/b7a80ffef144c5f60a1e69bc4f5cabe4f3b6d7e3))
+* **readme:** add note on customizing signature subject info ([1bab57b](https://github.com/TourmalineCore/c2pie/commit/1bab57bccdddf9b5a5178dcd6d5c7f3bf322b501))
+* **readme:** add notes on current package status ([13746d5](https://github.com/TourmalineCore/c2pie/commit/13746d5e9167341d8d4b883b87681b8b06a200d7))
+* **readme:** add signing and validating with Docker containers ([9ebfa3c](https://github.com/TourmalineCore/c2pie/commit/9ebfa3c2acd50150c9d7501965362014b97ca129))
+* **readme:** apply suggestions after readme-testing ([c7c8d73](https://github.com/TourmalineCore/c2pie/commit/c7c8d733e5b5ac7771fa825cdbb945b4ea974361))
+* **readme:** bring test coverage score up to date ([00fc78e](https://github.com/TourmalineCore/c2pie/commit/00fc78ecf5ace64d119b470568ed056037131a14))
+* **readme:** bring test coverage score up to date ([a4dbac5](https://github.com/TourmalineCore/c2pie/commit/a4dbac589c7c48044532a6700ffa9c2868b10247))
+* **readme:** bring test coverage score up to date ([ca25434](https://github.com/TourmalineCore/c2pie/commit/ca254343b110a5111b31539eea8a812dd45db5f8))
+* **readme:** change days amount in signing certificate command ([2782d1d](https://github.com/TourmalineCore/c2pie/commit/2782d1d95afaccfa905e7aa5e24aea448dac65eb))
+* **readme:** clarify file placement ([70633e5](https://github.com/TourmalineCore/c2pie/commit/70633e58d3f4a654570e6cb83f18fdf4d72c0148))
+* **readme:** fix env vars filepaths to correspond with the example ([7c4a230](https://github.com/TourmalineCore/c2pie/commit/7c4a230e5d7be13918f5b5f6c642c7f4eaea4e3f))
+* **readme:** fix links ([df5fac4](https://github.com/TourmalineCore/c2pie/commit/df5fac4b7998d621c6e9ab1893b18fb651b34c05))
+* **readme:** fix numbers in list ([4b49d54](https://github.com/TourmalineCore/c2pie/commit/4b49d540ccceeba6661a1b80a1137ece12e35237))
+* **readme:** swap sections' places ([2d74b9d](https://github.com/TourmalineCore/c2pie/commit/2d74b9ddde6b952c854e5fac40751ff141ab6ad8))
+* **readme:** update python version for test container image ([a896642](https://github.com/TourmalineCore/c2pie/commit/a896642edaabd947aa7152d182897ed69e212967))
+
+### Refactoring
+
+* **pyproject:** [#97](https://github.com/TourmalineCore/c2pie/issues/97): update pyproject.toml to get rid of outdated and unnecessary configurations ([#98](https://github.com/TourmalineCore/c2pie/issues/98)) ([81da995](https://github.com/TourmalineCore/c2pie/commit/81da995fac6a87ff7841fd324b5c3154ff0745be))
+
 # CHANGELOG
 
 <!-- version list -->
