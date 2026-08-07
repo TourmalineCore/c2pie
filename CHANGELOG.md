@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.0-alpha.2](https://github.com/TourmalineCore/c2pie/compare/1.0.0-alpha.1...1.0.0-alpha.2) (2026-08-07)
+
+### Bug Fixes
+
+* [#114](https://github.com/TourmalineCore/c2pie/issues/114): fix dependabot alerts; update dependency versions ([#115](https://github.com/TourmalineCore/c2pie/issues/115)) ([ff9294c](https://github.com/TourmalineCore/c2pie/commit/ff9294c9d18c031d08b07229e957353f2220f218))
+
 ## [1.0.0-alpha.1](https://github.com/TourmalineCore/c2pie/compare/0.2.0-alpha.1...1.0.0-alpha.1) (2026-08-07)
 
 ### ⚠ BREAKING CHANGES
