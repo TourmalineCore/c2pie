@@ -1,3 +1,17 @@
+# Changelog
+
+## [1.0.0-hotfix.1](https://github.com/TourmalineCore/c2pie/compare/v0.1.0...1.0.0-hotfix.1) (2026-08-07)
+
+### ⚠ BREAKING CHANGES
+
+* #67: remove redundant parameters and steps from semantic release workflow (#113)
+
+* [#67](https://github.com/TourmalineCore/c2pie/issues/67): remove redundant parameters and steps from semantic release workflow ([#113](https://github.com/TourmalineCore/c2pie/issues/113)) ([ed9517c](https://github.com/TourmalineCore/c2pie/commit/ed9517c73d96266ff51149f0201130a33418ae16))
+
+### Bug Fixes
+
+* [#114](https://github.com/TourmalineCore/c2pie/issues/114): fix dependabot alerts; update dependency versions ([946cbc8](https://github.com/TourmalineCore/c2pie/commit/946cbc81763e38139c3428528fe9c481d25ead6f))
+
 # CHANGELOG
 
 <!-- version list -->
