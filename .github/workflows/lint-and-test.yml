@@ -10,11 +10,15 @@ on:
       - 'docs/**'
     tags-ignore:
       - v**
+    branches:
+      - feature/*
+
   workflow_call:
 
 permissions:
   contents: read
   packages: read
+  checks: write
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
@@ -107,8 +111,22 @@ jobs:
           poetry run pytest \
             --cov=c2pie \
             -m "not e2e" \
-            --maxfail=1 \
+            --junit-xml=test-report-${{ matrix.os }}-${{ matrix.python-version }}.xml \
             -v
+
+      - name: Publish test report
+        uses: dorny/test-reporter@v1
+        if: always() 
+        with:
+          name: Unit Tests Report
+          path: test-report-${{ matrix.os }}-${{ matrix.python-version }}.xml
+          reporter: java-junit
+          # Not set action as failed if test report contains any failed test
+          fail-on-error: false 
+          # # Allows generate only summary without all tests list for more clear results
+          # only-summary: true
+          # list-suites: failed
+          list-tests: failed
 
       - name: Upload coverage artifact
         if: (matrix.python-version == '3.12') && (matrix.os == 'ubuntu-latest')
