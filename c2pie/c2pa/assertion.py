@@ -51,11 +51,11 @@ class Assertion(SuperBox):
         )
 
     def get_payload_from_schema(self) -> bytes:
-        ctype = get_assertion_content_type(self.type)
+        content_type = get_assertion_content_type(self.type)
 
-        if ctype == jumbf_content_types["json"]:
+        if content_type == jumbf_content_types["json"]:
             return json_to_bytes(self.schema)
-        elif ctype == jumbf_content_types["cbor"]:
+        elif content_type == jumbf_content_types["cbor"]:
             return cbor_to_bytes(self.schema)
 
         return b""
