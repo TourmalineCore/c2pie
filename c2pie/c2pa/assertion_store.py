@@ -1,4 +1,4 @@
-from c2pie.c2pa.assertion import Assertion
+from c2pie.c2pa.assertions.base_assertion import Assertion
 from c2pie.jumbf_boxes.super_box import SuperBox
 from c2pie.utils.assertion_schemas import C2PA_AssertionTypes
 from c2pie.utils.content_types import c2pa_content_types

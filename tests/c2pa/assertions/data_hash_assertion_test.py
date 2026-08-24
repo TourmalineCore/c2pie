@@ -1,6 +1,6 @@
 import pytest
 
-from c2pie.c2pa.assertion import HashDataAssertion
+from c2pie.c2pa.assertions.hash_data_assertion import HashDataAssertion
 from c2pie.utils.assertion_schemas import C2PA_AssertionTypes, cbor_to_bytes
 from c2pie.utils.content_types import jumbf_content_types
 

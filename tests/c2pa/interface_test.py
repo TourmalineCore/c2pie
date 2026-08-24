@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from c2pie.c2pa.assertion import IngredientThumbnailAssertion
+from c2pie.c2pa.assertions.ingredient_thumbnail_assertion import IngredientThumbnailAssertion
 from c2pie.c2pa.manifest_store import ManifestStore
 from c2pie.interface import (
     c2pie_EmplaceManifest,
@@ -43,7 +43,7 @@ def test_generate_assertion_has_correct_schema():
 
 
 def test_generate_hash_data_assertion_returns_hash_data_assertion_instance():
-    from c2pie.c2pa.assertion import HashDataAssertion
+    from c2pie.c2pa.assertions.hash_data_assertion import HashDataAssertion
 
     hash_data_assertion = c2pie_GenerateHashDataAssertion(
         hashed_data=b"\x00" * 32,
@@ -52,14 +52,14 @@ def test_generate_hash_data_assertion_returns_hash_data_assertion_instance():
 
 
 def test_generate_actions_assertion_returns_actions_assertion_instance():
-    from c2pie.c2pa.assertion import ActionsAssertion
+    from c2pie.c2pa.assertions.actions_assertion import ActionsAssertion
 
     actions_assertion = c2pie_GenerateActionsAssertion(action="c2pa.created")
     assert isinstance(actions_assertion, ActionsAssertion)
 
 
 def test_generate_thumbnail_assertion_returns_thumbnail_assertion_instance():
-    from c2pie.c2pa.assertion import ThumbnailAssertion
+    from c2pie.c2pa.assertions.thumbnail_assertion import ThumbnailAssertion
 
     thumbnail_assertion = c2pie_GenerateThumbnailAssertion(
         media_type=MEDIA_TYPE,

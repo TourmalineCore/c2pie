@@ -1,5 +1,5 @@
-from c2pie.c2pa.assertion import HashDataAssertion
 from c2pie.c2pa.assertion_store import AssertionStore
+from c2pie.c2pa.assertions.hash_data_assertion import HashDataAssertion
 from c2pie.c2pa.claim import Claim
 from c2pie.c2pa.claim_signature import ClaimSignature
 from c2pie.c2pa.manifest import Manifest

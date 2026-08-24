@@ -1,14 +1,12 @@
 import uuid
 
-from c2pie.c2pa.assertion import (
-    ActionsAssertion,
-    Assertion,
-    HashDataAssertion,
-    IngredientAssertion,
-    IngredientThumbnailAssertion,
-    ThumbnailAssertion,
-)
 from c2pie.c2pa.assertion_store import AssertionStore
+from c2pie.c2pa.assertions.actions_assertion import ActionsAssertion
+from c2pie.c2pa.assertions.base_assertion import Assertion
+from c2pie.c2pa.assertions.hash_data_assertion import HashDataAssertion
+from c2pie.c2pa.assertions.ingredient_assertion import IngredientAssertion
+from c2pie.c2pa.assertions.ingredient_thumbnail_assertion import IngredientThumbnailAssertion
+from c2pie.c2pa.assertions.thumbnail_assertion import ThumbnailAssertion
 from c2pie.c2pa.claim import Claim
 from c2pie.c2pa.claim_signature import ClaimSignature
 from c2pie.c2pa.manifest import Manifest
