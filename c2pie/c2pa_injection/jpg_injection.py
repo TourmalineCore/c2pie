@@ -140,9 +140,6 @@ def strip_c2pa_app11_segments(
     Return JPEG bytes with all C2PA APP11 segments removed.
     """
 
-    if not segment_ranges:
-        return jpeg_bytes
-
     result = bytearray()
     cursor = 0
 
