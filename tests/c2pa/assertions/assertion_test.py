@@ -1,3 +1,5 @@
+import pytest
+
 from c2pie.c2pa.assertions.base_assertion import Assertion
 from c2pie.utils.assertion_schemas import C2PA_AssertionTypes, cbor_to_bytes, json_to_bytes
 from c2pie.utils.content_types import jumbf_content_types
@@ -85,3 +87,11 @@ def test_assertion_content_boxes_not_empty():  # noqa: F811
 
     actions_assertion = Assertion(C2PA_AssertionTypes.actions, action_assertion_content_boxes)
     assert len(actions_assertion.content_boxes) != 0
+
+
+def test_serialize_schema_with_unsupportdet_content_box_type():
+
+    with pytest.raises(
+        ValueError, match=f"Content type of {C2PA_AssertionTypes.embedded_data.name!r} is not convertable from schema"
+    ):
+        Assertion.content_box_from_schema(C2PA_AssertionTypes.embedded_data, {})

@@ -41,7 +41,7 @@ class Assertion(SuperBox):
         elif content_type == jumbf_content_types["cbor"]:
             return cbor_to_bytes(schema)
 
-        return b""
+        raise ValueError(f"Content type of {assertion_type.name!r} is not convertable from schema")
 
     @staticmethod
     def content_box_from_schema(assertion_type: C2PA_AssertionTypes, schema: dict[str, Any]) -> list[ContentBox]:
