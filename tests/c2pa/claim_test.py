@@ -20,7 +20,7 @@ def test_create_claim_with_label():
 
 
 def test_create_claim_with_label_and_assertion_store():
-    actions_assertion = Assertion(assertion_type=C2PA_AssertionTypes.actions, schema={})
+    actions_assertion = Assertion(assertion_type=C2PA_AssertionTypes.actions, content_boxes=[])
     assertions = [actions_assertion, actions_assertion]
 
     assertion_store = AssertionStore(assertions=assertions)
@@ -35,7 +35,7 @@ def test_create_claim_with_label_and_assertion_store():
 
 
 def test_create_claim_with_jumbf_type():
-    actions_assertion = Assertion(assertion_type=C2PA_AssertionTypes.actions, schema={})
+    actions_assertion = Assertion(assertion_type=C2PA_AssertionTypes.actions, content_boxes=[])
     assertions = [actions_assertion, actions_assertion]
 
     assertion_store = AssertionStore(assertions=assertions)

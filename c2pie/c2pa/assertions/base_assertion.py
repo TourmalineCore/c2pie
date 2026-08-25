@@ -12,8 +12,6 @@ from c2pie.utils.assertion_schemas import (
 )
 from c2pie.utils.content_types import jumbf_content_types
 
-_ALLOWED_ACTIONS = ["c2pa.created", "c2pa.opened"]
-
 
 class Assertion(SuperBox):
     """Universal assertion superbox (one content box)."""
@@ -21,21 +19,9 @@ class Assertion(SuperBox):
     def __init__(
         self,
         assertion_type: C2PA_AssertionTypes,
-        schema: dict[str, Any],
-        content_boxes: list[ContentBox] | None = None,
+        content_boxes: list[ContentBox],
     ):
         self.type = assertion_type
-        self.schema = schema
-
-        if not content_boxes:
-            payload = self.get_payload_from_schema()
-            box_type_hex = get_assertion_content_box_type(self.type)
-            content_boxes = [
-                ContentBox(
-                    box_type=box_type_hex,
-                    payload=payload,
-                )
-            ]
 
         super().__init__(
             content_type=get_assertion_content_type(self.type),
@@ -43,15 +29,28 @@ class Assertion(SuperBox):
             content_boxes=content_boxes,
         )
 
-    def get_payload_from_schema(self) -> bytes:
-        content_type = get_assertion_content_type(self.type)
+    def get_data_for_signing(self) -> bytes:
+        return self.description_box.serialize() + self.serialize_content_boxes()
+
+    @staticmethod
+    def get_payload_from_schema(assertion_type: C2PA_AssertionTypes, schema: dict[str, Any]) -> bytes:
+        content_type = get_assertion_content_type(assertion_type)
 
         if content_type == jumbf_content_types["json"]:
-            return json_to_bytes(self.schema)
+            return json_to_bytes(schema)
         elif content_type == jumbf_content_types["cbor"]:
-            return cbor_to_bytes(self.schema)
+            return cbor_to_bytes(schema)
 
         return b""
 
-    def get_data_for_signing(self) -> bytes:
-        return self.description_box.serialize() + self.serialize_content_boxes()
+    @staticmethod
+    def content_box_from_schema(assertion_type: C2PA_AssertionTypes, schema: dict[str, Any]) -> list[ContentBox]:
+        payload = Assertion.get_payload_from_schema(assertion_type, schema)
+
+        box_type_hex = get_assertion_content_box_type(assertion_type)
+        return [
+            ContentBox(
+                box_type=box_type_hex,
+                payload=payload,
+            )
+        ]

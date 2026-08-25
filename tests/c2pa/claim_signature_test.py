@@ -40,7 +40,7 @@ def test_create_claim_signature_with_non_empty_claim():
     with open(cert_filepath, "rb") as f:
         certificate = f.read()
 
-    actions_assertion = Assertion(assertion_type=C2PA_AssertionTypes.actions, schema={})
+    actions_assertion = Assertion(assertion_type=C2PA_AssertionTypes.actions, content_boxes=[])
     assertions = [actions_assertion, actions_assertion]
     assertion_store = AssertionStore(assertions=assertions)
     claim = Claim(

@@ -22,7 +22,8 @@ from c2pie.utils.content_types import C2PA_ContentTypes
 
 
 def c2pie_GenerateAssertion(assertion_type: C2PA_AssertionTypes, assertion_schema: dict) -> Assertion:
-    return Assertion(assertion_type, assertion_schema)
+    assertion_content_box = Assertion.content_box_from_schema(assertion_type, assertion_schema)
+    return Assertion(assertion_type, assertion_content_box)
 
 
 def c2pie_GenerateHashDataAssertion(

@@ -21,6 +21,7 @@ class Manifest(SuperBox):
 
         super().__init__(
             content_type=c2pa_content_types["default_manifest"],
+            content_boxes=[],
             label=self.manifest_label,
         )
 

@@ -24,7 +24,7 @@ class IngredientAssertion(Assertion):
         active_manifest: Box | None,
         ingredient_thumbnail_assertion: IngredientThumbnailAssertion | None = None,
     ):
-        schema: dict[str, Any] = {
+        self.schema: dict[str, Any] = {
             "dc:title": title,
             "dc:format": dc_format,
             "relationship": "parentOf",
@@ -38,7 +38,7 @@ class IngredientAssertion(Assertion):
                 hash_value=ingredient_thumbnail_hash,
                 hash_algorithm="sha256",
             )
-            schema["thumbnail"] = ingredient_thumbnail
+            self.schema["thumbnail"] = ingredient_thumbnail
 
         if active_manifest_urn and active_manifest:
             validation_results = self.validate_ingredient(
@@ -48,9 +48,11 @@ class IngredientAssertion(Assertion):
 
             # We should not include information about the active manifest if validation was unsuccessful
             if not validation_results:
+                content_boxes = self.content_box_from_schema(C2PA_AssertionTypes.ingredient, self.schema)
+
                 super().__init__(
                     C2PA_AssertionTypes.ingredient,
-                    schema,
+                    content_boxes,
                 )
                 return
 
@@ -72,14 +74,13 @@ class IngredientAssertion(Assertion):
                 hash_algorithm="sha256",
             )
 
-            schema["activeManifest"] = active_manifest_map
-            schema["validationResults"] = validation_results
-            schema["claimSignature"] = claim_signature
+            self.schema["activeManifest"] = active_manifest_map
+            self.schema["validationResults"] = validation_results
+            self.schema["claimSignature"] = claim_signature
 
-        super().__init__(
-            C2PA_AssertionTypes.ingredient,
-            schema,
-        )
+        content_boxes = self.content_box_from_schema(C2PA_AssertionTypes.ingredient, self.schema)
+
+        super().__init__(C2PA_AssertionTypes.ingredient, content_boxes)
 
     def validate_ingredient(
         self,

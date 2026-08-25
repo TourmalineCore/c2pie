@@ -37,7 +37,6 @@ class EmbeddedDataAssertion(Assertion):
 
         super().__init__(
             assertion_type=assertion_type,
-            schema={},
             content_boxes=[
                 ContentBox(
                     box_type=b"bfdb".hex(),  # UUID Type of Embedded File Description Box

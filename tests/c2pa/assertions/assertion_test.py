@@ -39,9 +39,16 @@ def test_create_assertion_with_correct_schema():
         ],
     }
 
-    actions_assertion = Assertion(C2PA_AssertionTypes.actions, actions_assertion_schema)
+    action_assertion_content_boxes = Assertion.content_box_from_schema(
+        C2PA_AssertionTypes.actions, actions_assertion_schema
+    )
 
-    assert actions_assertion.schema == actions_assertion_schema
+    actions_assertion = Assertion(
+        C2PA_AssertionTypes.actions,
+        action_assertion_content_boxes,
+    )
+
+    assert actions_assertion.content_boxes == action_assertion_content_boxes
 
 
 def test_serialize_json_assertion():
@@ -74,5 +81,7 @@ def test_serialize_cbor_assertion():
 
 
 def test_assertion_content_boxes_not_empty():  # noqa: F811
-    actions_assertion = Assertion(C2PA_AssertionTypes.actions, {})
+    action_assertion_content_boxes = Assertion.content_box_from_schema(C2PA_AssertionTypes.actions, {})
+
+    actions_assertion = Assertion(C2PA_AssertionTypes.actions, action_assertion_content_boxes)
     assert len(actions_assertion.content_boxes) != 0

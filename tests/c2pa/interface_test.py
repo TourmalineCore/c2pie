@@ -3,6 +3,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from c2pie.c2pa.assertions.base_assertion import Assertion
 from c2pie.c2pa.assertions.ingredient_thumbnail_assertion import IngredientThumbnailAssertion
 from c2pie.c2pa.manifest_store import ManifestStore
 from c2pie.interface import (
@@ -38,8 +39,15 @@ def test_generate_assertion_has_correct_schema():
             },
         ],
     }
+
     assertion = c2pie_GenerateAssertion(C2PA_AssertionTypes.actions, expected_schema)
-    assert assertion.schema == expected_schema
+
+    expected_assertion_content_boxes = Assertion.content_box_from_schema(C2PA_AssertionTypes.actions, expected_schema)
+
+    assert len(assertion.content_boxes) == len(expected_assertion_content_boxes)
+    for actual, expected in zip(assertion.content_boxes, expected_assertion_content_boxes, strict=False):
+        assert actual.get_type() == expected.get_type()
+        assert actual.payload == expected.payload
 
 
 def test_generate_hash_data_assertion_returns_hash_data_assertion_instance():

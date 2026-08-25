@@ -14,7 +14,7 @@ class HashDataAssertion(Assertion):
     ):
         exclusions: list[dict[str, int]] = []
 
-        schema: dict[str, Any] = {
+        self.schema: dict[str, Any] = {
             "exclusions": exclusions,
             "alg": "sha256",
             "hash": hashed_data,
@@ -23,11 +23,9 @@ class HashDataAssertion(Assertion):
             # the CBOR header of the pad field would be reduced by 1 byte.
             "pad": b"\x00" * 64,
         }
+        content_boxes = self.content_box_from_schema(C2PA_AssertionTypes.data_hash, self.schema)
 
-        super().__init__(
-            C2PA_AssertionTypes.data_hash,
-            schema,
-        )
+        super().__init__(C2PA_AssertionTypes.data_hash, content_boxes)
 
     def add_full_c2pa_structure_exclusion(
         self,
@@ -67,7 +65,7 @@ class HashDataAssertion(Assertion):
 
         self.schema["pad"] = b"\x00" * updated_pad_length
 
-        payload = self.get_payload_from_schema()
+        payload = self.get_payload_from_schema(C2PA_AssertionTypes.data_hash, self.schema)
 
         self.content_boxes = [
             ContentBox(
