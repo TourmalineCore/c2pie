@@ -33,7 +33,7 @@ class HashDataAssertion(Assertion):
         length: int,
     ) -> None:
         exclusions = self.schema["exclusions"]
-        previous_exclusion_length = len(cbor_to_bytes(exclusions))
+        previous_exclusions_length = len(cbor_to_bytes(exclusions))
 
         self.schema["exclusions"].extend(
             [
@@ -47,12 +47,12 @@ class HashDataAssertion(Assertion):
         # NOTE: If the number of exclusions exceeds 23, an additional length byte
         # will be added to the CBOR header of serialized exclusions array. This byte
         # is included in the recalculation of the serialized exclusions.
-        current_exclusion_length = len(cbor_to_bytes(exclusions))
+        current_exclusions_length = len(cbor_to_bytes(exclusions))
 
-        difference = previous_exclusion_length - current_exclusion_length
+        difference = previous_exclusions_length - current_exclusions_length
 
         if -difference > len(self.schema["pad"]):
-            raise ValueError("Difference in length exceeds the predefined pad")
+            raise ValueError("Exclusion exceed the reserved pad in Hash Assertion.")
 
         # If the pad is less than 24 bytes the size of the cbor header
         # will change during conversion to cbor and will occupy less than 2 bytes.

@@ -74,7 +74,7 @@ def test_align_hash_data_with_large_difference_causes_error():
     data_hash_assertion = HashDataAssertion(hashed_data=HASHED_DATA)
     data_hash_assertion.schema["pad"] = b"\x00"
 
-    with pytest.raises(ValueError, match="Difference in length exceeds the predefined pad"):
+    with pytest.raises(ValueError, match="Exclusion exceed the reserved pad in Hash Assertion."):
         data_hash_assertion.add_full_c2pa_structure_exclusion(
             CAI_OFFSET,
             200,
