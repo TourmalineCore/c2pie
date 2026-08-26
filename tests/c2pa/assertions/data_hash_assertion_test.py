@@ -103,7 +103,10 @@ def test_exceed_cbor_23_bytes_limit_add_1_byte_to_length():
     )
 
     # Don`t forget about additional byte
-    assert len(data_hash_assertion.schema["pad"]) == 22
+    # Growth of exclusions (41 bytes) forces pad from 64 down to 23 bytes.
+    # Since 23 < 24, the pad's own CBOR header shrinks by 1 byte (2-byte -> 1-byte),
+    # so we add 1 byte back to compensate: 23 + 1 = 24.
+    assert len(data_hash_assertion.schema["pad"]) == 24
 
 
 def test_data_hash_assertion_exclusions_more_then_23():

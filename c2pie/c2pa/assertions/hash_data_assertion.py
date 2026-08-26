@@ -32,8 +32,8 @@ class HashDataAssertion(Assertion):
         offset: int,
         length: int,
     ) -> None:
-        exclusions = self.schema["exclusions"]
-        previous_exclusions_length = len(cbor_to_bytes(exclusions))
+        previous_exclusions = list(self.schema["exclusions"])
+        pad_length = len(self.schema["pad"])
 
         self.schema["exclusions"].extend(
             [
@@ -43,25 +43,13 @@ class HashDataAssertion(Assertion):
                 },
             ]
         )
-
-        # NOTE: If the number of exclusions exceeds 23, an additional length byte
-        # will be added to the CBOR header of serialized exclusions array. This byte
-        # is included in the recalculation of the serialized exclusions.
-        current_exclusions_length = len(cbor_to_bytes(exclusions))
-
-        pad_difference = current_exclusions_length - previous_exclusions_length
-
-        if pad_difference > len(self.schema["pad"]):
-            raise ValueError("Exclusion exceed the reserved pad in Hash Assertion.")
-
-        # If the pad is less than 24 bytes the size of the cbor header
-        # will change during conversion to cbor and will occupy less than 2 bytes.
-        updated_pad_length = len(self.schema["pad"]) - pad_difference
-
-        # If a CBOR overflow is not handled, the extra length byte that
-        # would be added in this case will not be taken into account.
-        if updated_pad_length < 24:
-            updated_pad_length -= 1
+        current_exclusions = self.schema["exclusions"]
+        
+        updated_pad_length = self._calculate_updated_pad_length(
+            previous_pad_length=pad_length,
+            previous_exclusions=previous_exclusions,
+            current_exclusions=current_exclusions,
+        )
 
         self.schema["pad"] = b"\x00" * updated_pad_length
 
@@ -75,3 +63,41 @@ class HashDataAssertion(Assertion):
         ]
 
         self.sync_payload()
+
+    def _calculate_updated_pad_length(
+        self,
+        previous_pad_length: int,
+        previous_exclusions: list[dict[str, int]],
+        current_exclusions: list[dict[str, int]],
+    ) -> int:
+        # NOTE: If the number of exclusions exceeds 24, an additional length byte
+        # will be added to the CBOR header of serialized exclusions array. This byte
+        # is included in the recalculation of the serialized exclusions.
+        previous_exclusions_length: int = len(cbor_to_bytes(previous_exclusions))
+        current_exclusions_length: int = len(cbor_to_bytes(current_exclusions))
+
+        pad_difference: int = current_exclusions_length - previous_exclusions_length
+
+        # If exclusions grew by more bytes than the pad has reserved, there is
+        # no way to compensate without changing the total assertion size, which
+        # would break the hard binding hash calculation.
+        if pad_difference > previous_pad_length:
+            raise ValueError("Exclusion exceed the reserved pad in Hash Assertion.")
+
+        updated_pad_length: int = previous_pad_length - pad_difference
+
+        # CBOR encodes a byte-string length header as 1 byte when the length is
+        # 0-23, and as 2+ bytes when the length is 24 or more. If the pad drops
+        # from >= 24 bytes to < 24 bytes, its own header shrinks by 1 byte.
+        # Add 1 byte back to the pad to compensate for that shrinkage and keep
+        # the total schema size unchanged.
+        if updated_pad_length < 24 <= previous_pad_length:
+            updated_pad_length += 1
+
+        # If the pad has been fully consumed and would go negative, there is
+        # no valid pad length left to represent — fail loudly instead of
+        # silently producing an empty/invalid pad (e.g. b"\x00" * -1 == b"").
+        if updated_pad_length < 0:
+            raise ValueError("Not enough reserved pad to accommodate exclusion; increase initial pad size.")
+
+        return updated_pad_length
