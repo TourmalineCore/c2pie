@@ -25,8 +25,21 @@ class IngredientAssertion(Assertion):
         ingredient_thumbnail_assertion: IngredientThumbnailAssertion | None = None,
     ):
         self.schema: dict[str, Any] = {
+            # Optional (per CDDL: "? dc:title"). Human-readable name of the
+            # ingredient, e.g. the original filename or asset title.
             "dc:title": title,
+            # Optional (per CDDL: "? dc:format"). Media Type (MIME type) of
+            # the ingredient, e.g. "image/jpeg" or "application/pdf".
             "dc:format": dc_format,
+            # Required. Describes the relationship of this ingredient to the
+            # asset it is an ingredient of. Per spec Table 10, valid values:
+            # "parentOf"    - the current asset is a derived/rendered version
+            #                 of this ingredient (at most one parent per manifest);
+            # "componentOf" - the current asset is composed of multiple parts,
+            #                 this ingredient being one of them;
+            # "inputTo"     - this ingredient was used as input to a
+            #                 computational process (e.g. AI/ML model) that
+            #                 led to the creation/modification of this asset.
             "relationship": "parentOf",
         }
 
