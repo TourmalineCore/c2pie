@@ -1,5 +1,6 @@
 import hashlib
 import uuid
+from importlib.metadata import version
 from typing import Any
 
 import cbor2
@@ -123,6 +124,7 @@ class Claim(SuperBox):
         claim: dict[str, Any] = {
             "claim_generator_info": {
                 "name": "c2pie",
+                "version": version("c2pie"),
                 "specVersion": "2.4.0",
             },
             "instanceID": self.instance_id,
