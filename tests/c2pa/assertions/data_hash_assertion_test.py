@@ -53,11 +53,14 @@ def test_hash_data_assertion_without_additional_exclusions_has_not_exclusions():
 
 def test_add_full_c2pa_structure_exclusion_updates_exclusion():
     data_hash_assertion = HashDataAssertion(hashed_data=HASHED_DATA)
+    assert len(data_hash_assertion.schema["exclusions"]) == 0
+
     data_hash_assertion.add_full_c2pa_structure_exclusion(
         CAI_OFFSET,
         200,
     )
     assert data_hash_assertion.schema["exclusions"][0]["length"] == 200
+    assert data_hash_assertion.schema["exclusions"][0]["start"] == CAI_OFFSET
 
 
 def test_add_full_c2pa_structure_exclusion_updates_content_box_payload():
@@ -84,28 +87,28 @@ def test_align_hash_data_with_large_difference_causes_error():
 def test_exceed_cbor_23_bytes_limit_add_1_byte_to_length():
     data_hash_assertion = HashDataAssertion(hashed_data=HASHED_DATA)
 
-    # Empty list (default value) of exclusions serialized
-    # in CBOR has 1 bytes in length.
-
-    # Following list of exclusions serialized in CBOR:
-    # [{ "start": 2, "length": "", }]
+    # Empty exclusions list serializes to 1 byte in CBOR
     #
-    # has 17 bytes in length
-
-    # We need to set the exclusion size so that the difference
-    # is greater than 41 bytes (64 - 23 = 41).
-
-    fake_payload = b"\x00" * 24  # 41 - 17 = 24
+    # Adding one exclusion entry {"start": 2, "length": <0 bytes>} grows
+    # the exclusions array to 17 bytes total
+    #
+    # We want the total growth to cross the 24-byte pad boundary, i.e.
+    # other data in assertion must exceed 41 bytes (64 - 23),
+    # so the pad drops from 64 to 23 bytes and triggers
+    # the CBOR header-size compensation (+1 byte)
+    #
+    # Extra growth needed beyond the 17-byte structural growth: 41 - 17 = 24.
+    fake_payload = b"\x00" * 24
 
     data_hash_assertion.add_full_c2pa_structure_exclusion(
         CAI_OFFSET,
         fake_payload,
     )
 
-    # Don`t forget about additional byte
-    # Growth of exclusions (41 bytes) forces pad from 64 down to 23 bytes.
-    # Since 23 < 24, the pad's own CBOR header shrinks by 1 byte (2-byte -> 1-byte),
-    # so we add 1 byte back to compensate: 23 + 1 = 24.
+    # Total exclusions growth = 41 bytes -> pad drops from 64 to 23.
+    # Since 23 < 24, the pad's own CBOR header shrinks from 2 bytes to
+    # 1 byte, so we add 1 byte back to keep the total schema size
+    # unchanged: 23 + 1 = 24
     assert len(data_hash_assertion.schema["pad"]) == 24
 
 
@@ -130,3 +133,15 @@ def test_calculation_of_pad_inside_data_hash_assertion_was_performed_correctly()
     )
 
     assert len(data_hash_assertion.schema["pad"]) == 48
+
+
+def test_add_multiple_time_exclusions_update_pad_correctly():
+    data_hash_assertion = HashDataAssertion(hashed_data=HASHED_DATA)
+
+    data_hash_assertion.add_full_c2pa_structure_exclusion(0, 10)  # Add 16 bytes in exclusions
+    assert len(data_hash_assertion.schema["pad"]) == 48
+
+    data_hash_assertion.add_full_c2pa_structure_exclusion(100, 20)  # Add 17 bytes in exclusions
+    assert len(data_hash_assertion.schema["pad"]) == 31
+
+    assert len(data_hash_assertion.schema["exclusions"]) == 2
