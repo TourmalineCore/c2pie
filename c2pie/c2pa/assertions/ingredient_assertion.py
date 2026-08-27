@@ -101,10 +101,15 @@ class IngredientAssertion(Assertion):
         mime_type: str,
     ) -> dict | None:
         stream = io.BytesIO(ingredient_bytes)
-        reader = c2pa.Reader.try_create(mime_type, stream)
+        # Reader.try_create is a factory method that attempts to create a Reader
+        # for the given stream/mime type. Returns a Reader instance if a C2PA
+        # manifest (JUMBF data) is found in the asset, or None if no manifest
+        # is present (instead of raising ManifestNotFound).
+        # Raises an exception for any other error unrelated to a missing manifest.
+        c2pa_instance = c2pa.Reader.try_create(mime_type, stream)
 
-        if not reader:
+        if not c2pa_instance:
             return None
 
-        with reader:
-            return reader.get_validation_results()
+        with c2pa_instance:
+            return c2pa_instance.get_validation_results()
