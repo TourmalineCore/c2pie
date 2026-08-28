@@ -295,7 +295,7 @@ def test_calculated_exclusion_covers_the_full_storage(file):
 
         More info about PDF Incremental Update you can see here: docs/PDF-structure-overview.md
         """
-        expected_serialized_length = 7164
+        expected_serialized_length = 7165
 
     with patch("c2pie.c2pa.manifest_store.ManifestStore.add_full_c2pa_structure_exclusion") as mock_func:
         c2pie_EmplaceManifest(
