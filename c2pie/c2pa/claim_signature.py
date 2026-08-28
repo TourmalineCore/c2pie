@@ -131,9 +131,10 @@ class ClaimSignature(SuperBox):
                         },
                     ],
                 },
-                # The specification recommends setting the pad to at least 16 bytes. We use 64 bytes
-                # to allow for some extra space before the 23-byte limit is exceeded, since otherwise
-                # the CBOR header of the pad field would be reduced by 1 byte.
+                # According to the specification, the padding size must be at least 16 bytes. 
+                # However, the TSA token has a very predictable size. 
+                # Therefore, the pad size has been reduced to the minimum necessary 
+                # to align any possibly truncated microseconds.
                 "pad": b"\x00" * 8,
             }
 
