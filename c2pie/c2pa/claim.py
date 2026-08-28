@@ -26,7 +26,7 @@ class Claim(SuperBox):
         self.assertion_store = assertion_store
         self.dc_title = dc_title
 
-        self.claim_signature_label = f"self#jumbf=c2pa/{self.manifest_label}/c2pa.signature"
+        self.claim_signature_label = f"self#jumbf=/c2pa/{self.manifest_label}/c2pa.signature"
         self.instance_id = f"xmp:iid:{uuid.uuid4()}"
 
         cbor_payload = self._build_cbor_payload()
