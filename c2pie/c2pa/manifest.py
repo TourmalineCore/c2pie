@@ -43,7 +43,7 @@ class Manifest(SuperBox):
     def get_assertions(self):
         if self.assertion_store:
             return self.assertion_store.get_assertions()
-        return
+        return []
 
     def add_full_c2pa_structure_exclusion(
         self,
