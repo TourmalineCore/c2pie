@@ -30,6 +30,11 @@ class ManifestStore(SuperBox):
         offset: int,
         length: int,
     ) -> None:
+        if not self.manifests:
+            raise ValueError(
+                "ManifestStore has no manifests: cannot add exclusion before creating at least one Manifest."
+            )
+
         self.manifests[-1].add_full_c2pa_structure_exclusion(
             offset,
             length,
