@@ -16,7 +16,7 @@ def test_create_claim_with_label():
 
     assert claim is not None
     assert claim.manifest_label == "urn:c2pa:test-uuid"
-    assert claim.claim_signature_label == "self#jumbf=c2pa/urn:c2pa:test-uuid/c2pa.signature"
+    assert claim.claim_signature_label == "self#jumbf=/c2pa/urn:c2pa:test-uuid/c2pa.signature"
 
 
 def test_create_claim_with_label_and_assertion_store():
