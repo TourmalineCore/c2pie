@@ -291,7 +291,7 @@ def test_calculated_exclusion_covers_the_full_storage(file):
     elif file_extension == C2PA_ContentTypes.pdf:
         """
         Expected length of serialized data in PDF format consists 
-        of boby (serialized ManifestStore) + updated cross-ref table and trailer.
+        of body (serialized ManifestStore) + updated cross-ref table and trailer.
 
         More info about PDF Incremental Update you can see here: docs/PDF-structure-overview.md
         """

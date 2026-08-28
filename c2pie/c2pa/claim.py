@@ -13,10 +13,6 @@ from c2pie.utils.content_types import c2pa_content_types
 _GATHERED_ASSERTIONS = {"c2pa.ingredient.v3", "c2pa.actions.v2"}
 
 
-def _sha256(b: bytes) -> bytes:
-    return hashlib.sha256(b).digest()
-
-
 class Claim(SuperBox):
     """Claim (c2pa.claim.v2) as a JUMBF superbox with one CBOR content box."""
 
@@ -96,7 +92,7 @@ class Claim(SuperBox):
                     {
                         "url": f"self#jumbf=/c2pa/{self.manifest_label}/c2pa.assertions/{label}",
                         "alg": "sha256",
-                        "hash": _sha256(data),
+                        "hash": hashlib.sha256(data).digest(),
                     }
                 )
             else:
@@ -104,7 +100,7 @@ class Claim(SuperBox):
                     {
                         "url": f"self#jumbf=/c2pa/{self.manifest_label}/c2pa.assertions/{label}",
                         "alg": "sha256",
-                        "hash": _sha256(data),
+                        "hash": hashlib.sha256(data).digest(),
                     }
                 )
 
@@ -124,7 +120,7 @@ class Claim(SuperBox):
         claim: dict[str, Any] = {
             "claim_generator_info": {
                 "name": "c2pie",
-                "version": version("c2pie"),
+                "version": f"{version('c2pie')}",
                 "specVersion": "2.4.0",
             },
             "instanceID": self.instance_id,
