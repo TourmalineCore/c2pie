@@ -12,9 +12,9 @@ class Manifest(SuperBox):
 
     def __init__(
         self,
-        manifest_label: str | None = f"urn:c2pa:{uuid.uuid4().hex}",
+        manifest_label: str | None = None,
     ):
-        self.manifest_label = manifest_label
+        self.manifest_label = manifest_label or f"urn:c2pa:{uuid.uuid4().hex}"
         self.claim = None
         self.claim_signature = None
         self.assertion_store = None
