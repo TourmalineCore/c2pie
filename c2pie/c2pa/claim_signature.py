@@ -95,8 +95,8 @@ class ClaimSignature(SuperBox):
         """
         protected_header ; bstr
 
-        Signing algorithms
-        -7 - ES256 (ECDSA with SHA-256)
+        Signing algorithms \n
+        [NOT IMPLEMENTED YET] -7 - ES256 (ECDSA with SHA-256) \n
         -37 - PS256 (RSASSA-PSS с SHA-256)
         """
         protected_header: dict[int, Any] = {1: -37}  # "alg": "PS256"
@@ -131,9 +131,9 @@ class ClaimSignature(SuperBox):
                         },
                     ],
                 },
-                # According to the specification, the padding size must be at least 16 bytes. 
-                # However, the TSA token has a very predictable size. 
-                # Therefore, the pad size has been reduced to the minimum necessary 
+                # According to the specification, the padding size must be at least 16 bytes.
+                # However, the TSA token has a very predictable size.
+                # Therefore, the pad size has been reduced to the minimum necessary
                 # to align any possibly truncated microseconds.
                 "pad": b"\x00" * 8,
             }
