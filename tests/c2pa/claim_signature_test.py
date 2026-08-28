@@ -176,9 +176,11 @@ def test_exceed_cbor_limit_add_1_bytes_to_length():
     claim_signature = ClaimSignature.__new__(ClaimSignature)
 
     # We must ensure that the difference is such
-    # that the pad size is greater than 23 bytes.
+    # that the pad size reaches exactly the CBOR header boundary (24 bytes),
+    # without triggering the +1 compensation byte, since previous_pad_length (8)
+    # never crossed the >=24 threshold before the update.
 
-    # Current length of cose_sign1 serialized in CBOR is 50 bytes.
+    # Current length of cose_sign1 serialized in CBOR with pad=8 is 51 bytes.
     cose_sign1 = [
         "protected_header",
         {
@@ -188,10 +190,49 @@ def test_exceed_cbor_limit_add_1_bytes_to_length():
         "signature",
     ]
 
-    # cose_sign1 CBOR encoded + CBOR limit - current pad + 1 (COSE tag)
-    # ~ 50 + 24 - 8 + 1
+    # previous_serialized_length is set higher than current serialized length
+    # by exactly the amount pad should grow to compensate (67 - 51 = 16 -> pad 8+16=24).
     claim_signature.serialized_cose_sign1_length = 67
 
     serialized_cose_sign1_cbor = claim_signature.serialize_cose_sign1_tagged_with_alignment(cose_sign1)
 
-    assert len(cbor2.loads(serialized_cose_sign1_cbor).value[1]["pad"]) == 25
+    assert len(cbor2.loads(serialized_cose_sign1_cbor).value[1]["pad"]) == 24
+
+
+def test_cose_sign1_pad_exact_exhaustion_to_zero_is_valid():
+    claim_signature = ClaimSignature.__new__(ClaimSignature)
+    claim_signature.serialized_cose_sign1_length = 0
+
+    cose_sign1 = [
+        "protected_header",
+        {"pad": b"\x00" * 8},
+        "payload",
+        "signature",
+    ]
+    claim_signature.serialize_cose_sign1_tagged_with_alignment(cose_sign1)
+
+    # Grow payload by exactly 8 bytes (equal to reserved pad)
+    cose_sign1[2] = "payload" + "0" * 8
+    serialized = claim_signature.serialize_cose_sign1_tagged_with_alignment(cose_sign1)
+
+    assert len(cbor2.loads(serialized).value[1]["pad"]) == 0
+
+
+def test_cose_sign1_pad_boundary_crossing_from_24_triggers_compensation_byte():
+    claim_signature = ClaimSignature.__new__(ClaimSignature)
+    claim_signature.serialized_cose_sign1_length = 0
+
+    cose_sign1 = [
+        "protected_header",
+        {"pad": b"\x00" * 24},
+        "payload",
+        "signature",
+    ]
+    claim_signature.serialize_cose_sign1_tagged_with_alignment(cose_sign1)
+
+    cose_sign1[0] = "p"
+    cose_sign1[2] = "pl"
+    cose_sign1[3] = "sig"
+    serialized = claim_signature.serialize_cose_sign1_tagged_with_alignment(cose_sign1)
+
+    assert len(cbor2.loads(serialized).value[1]["pad"]) == 50
