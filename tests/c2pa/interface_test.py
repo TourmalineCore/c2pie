@@ -1,3 +1,4 @@
+from importlib.metadata import version
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -278,6 +279,7 @@ def test_calculated_exclusion_covers_the_full_storage(file):
         tsa_log_dir=None,
     )
 
+    manifest_store.manifests[0].claim
     file_extension = C2PA_ContentTypes(file.suffix)
 
     if file_extension == C2PA_ContentTypes.jpeg or file_extension == C2PA_ContentTypes.jpg:
@@ -295,7 +297,7 @@ def test_calculated_exclusion_covers_the_full_storage(file):
 
         More info about PDF Incremental Update you can see here: docs/PDF-structure-overview.md
         """
-        expected_serialized_length = 7165
+        expected_serialized_length = 7149 + len(b"version: ") + len(version("c2pie").encode())
 
     with patch("c2pie.c2pa.manifest_store.ManifestStore.add_full_c2pa_structure_exclusion") as mock_func:
         c2pie_EmplaceManifest(
