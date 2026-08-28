@@ -10,8 +10,6 @@ from c2pie.jumbf_boxes.content_box import ContentBox
 from c2pie.jumbf_boxes.super_box import SuperBox
 from c2pie.utils.content_types import c2pa_content_types
 
-_GATHERED_ASSERTIONS = {"c2pa.ingredient.v3", "c2pa.actions.v2"}
-
 
 class Claim(SuperBox):
     """Claim (c2pa.claim.v2) as a JUMBF superbox with one CBOR content box."""
@@ -59,23 +57,22 @@ class Claim(SuperBox):
 
     def _build_assertions_array(self) -> list[dict[str, Any]]:
         """
-        Build the claim["created_assertions"] and claim["gathered_assertions"] arrays from the current AssertionStore:
+        Build the claim["created_assertions"] arrays from the current AssertionStore:
           - url:  self#jumbf=/c2pa/<manifest_label>/c2pa.assertions/<label>
           - alg:  sha256
           - hash: sha256( JUMBF-superbox-content = description + content_boxes ) for this assertion
         """
         created_assertions: list[dict[str, Any]] = []
-        gathered_assertions: list[dict[str, Any]] = []
 
         if not self.assertion_store:
-            return created_assertions, gathered_assertions
+            return created_assertions
 
         assertions = getattr(self.assertion_store, "assertions", None)
         if assertions is None and hasattr(self.assertion_store, "get_assertions"):
             assertions = self.assertion_store.get_assertions()
 
         if not assertions:
-            return created_assertions, gathered_assertions
+            return created_assertions
 
         for assertion in assertions:
             label = getattr(assertion, "label", None)
@@ -87,24 +84,15 @@ class Claim(SuperBox):
             else:
                 data = assertion.description_box.serialize() + assertion.serialize_content_boxes()
 
-            if label in _GATHERED_ASSERTIONS:
-                gathered_assertions.append(
-                    {
-                        "url": f"self#jumbf=/c2pa/{self.manifest_label}/c2pa.assertions/{label}",
-                        "alg": "sha256",
-                        "hash": hashlib.sha256(data).digest(),
-                    }
-                )
-            else:
-                created_assertions.append(
-                    {
-                        "url": f"self#jumbf=/c2pa/{self.manifest_label}/c2pa.assertions/{label}",
-                        "alg": "sha256",
-                        "hash": hashlib.sha256(data).digest(),
-                    }
-                )
+            created_assertions.append(
+                {
+                    "url": f"self#jumbf=/c2pa/{self.manifest_label}/c2pa.assertions/{label}",
+                    "alg": "sha256",
+                    "hash": hashlib.sha256(data).digest(),
+                }
+            )
 
-        return created_assertions, gathered_assertions
+        return created_assertions
 
     def _build_cbor_payload(self) -> bytes:
         """
@@ -114,7 +102,6 @@ class Claim(SuperBox):
           - instanceID (stable for the object)
           - signature (reference to c2pa.signature)
           - optional created_assertions (if there is an assertion_store)
-          - optional gathered_assertions (if there is an assertion_store)
           - optional dc:title
         """
         claim: dict[str, Any] = {
@@ -129,13 +116,9 @@ class Claim(SuperBox):
             "alg": "sha256",
         }
 
-        created_assertions, gathered_assertions = self._build_assertions_array()
+        created_assertions = self._build_assertions_array()
 
-        if created_assertions:
-            claim["created_assertions"] = created_assertions
-
-        if gathered_assertions:
-            claim["gathered_assertions"] = gathered_assertions
+        claim["created_assertions"] = created_assertions
 
         return cbor2.dumps(claim, canonical=True)
 
