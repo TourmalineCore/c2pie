@@ -1,3 +1,5 @@
+import pytest
+
 from c2pie.c2pa.assertion_store import AssertionStore
 from c2pie.c2pa.assertions.hash_data_assertion import HashDataAssertion
 from c2pie.c2pa.claim import Claim
@@ -118,6 +120,23 @@ def test_manifest_store_set_hash_data_length_only_affects_new_manifests():
 
     previous_box = manifest_store.content_boxes[0]
     assert previous_box == previous_manifest
+
+
+def test_manifest_store_set_exclusion_with_not_fullfilled_manifest_raises_error():
+    manifest = Manifest(manifest_label="urn:c2pa:new-manifest")
+
+    manifest_store = ManifestStore(
+        [
+            manifest,
+        ]
+    )
+
+    with pytest.raises(
+        ValueError,
+        match="Manifest is not fully initialized: assertion_store/claim/claim_signature "
+        "required before adding exclusions.",
+    ):
+        manifest_store.add_full_c2pa_structure_exclusion(2, 1024)
 
 
 def test_manifest_store_empty_list_equivalent_to_no_args():

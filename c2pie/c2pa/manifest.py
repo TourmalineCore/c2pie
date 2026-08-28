@@ -54,12 +54,17 @@ class Manifest(SuperBox):
         Updates the length of exceptions in HashData, reassembles Claim (assertion hashes)
         and ClaimSignature (COSE Sign1 detached over Claim CBOR).
         """
-        if self.assertion_store and self.claim and self.claim_signature:
-            self.assertion_store.add_full_c2pa_structure_exclusion(
-                offset,
-                length,
+        if not (self.assertion_store and self.claim and self.claim_signature):
+            raise ValueError(
+                "Manifest is not fully initialized: assertion_store/claim/claim_signature "
+                "required before adding exclusions."
             )
-            self.claim.set_assertion_store(self.assertion_store)
-            self.claim_signature.set_claim(self.claim)
+
+        self.assertion_store.add_full_c2pa_structure_exclusion(
+            offset,
+            length,
+        )
+        self.claim.set_assertion_store(self.assertion_store)
+        self.claim_signature.set_claim(self.claim)
 
         self.sync_payload()
