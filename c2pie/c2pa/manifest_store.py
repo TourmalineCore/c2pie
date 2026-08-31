@@ -22,9 +22,6 @@ class ManifestStore(SuperBox):
             content_boxes=self.manifests,
         )
 
-    def sync_payload(self):
-        super().sync_payload()
-
     def add_full_c2pa_structure_exclusion(
         self,
         offset: int,
@@ -40,7 +37,7 @@ class ManifestStore(SuperBox):
             length,
         )
 
-        super().sync_payload()
+        self.sync_payload()
 
     def serialize(self) -> bytes:
         if self.l_box > 0xFFFFFFFF:
