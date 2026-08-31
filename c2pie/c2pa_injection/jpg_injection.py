@@ -180,4 +180,7 @@ def emplace_manifest_into_jpeg(
 
     tail = create_and_serialize_app11_storage(manifest_store)
 
+    if len(tail) != serialized_app11_storage_length:
+        raise ValueError("Manifest Store serialized with wrong lenght")
+
     return content_bytes[:c2pa_offset] + tail + content_bytes[c2pa_offset:]
