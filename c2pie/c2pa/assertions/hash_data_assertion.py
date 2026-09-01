@@ -44,7 +44,7 @@ class HashDataAssertion(Assertion):
             ]
         )
         current_exclusions = self.schema["exclusions"]
-        
+
         updated_pad_length = self._calculate_updated_pad_length(
             previous_pad_length=pad_length,
             previous_exclusions=previous_exclusions,

@@ -18,7 +18,7 @@ class SuperBox(Box):
 
         if content_boxes is None:
             content_boxes = []
-            
+
         self.content_boxes = content_boxes
 
         self.description_box = DescriptionBox(

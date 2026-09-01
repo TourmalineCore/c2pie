@@ -7,7 +7,7 @@ from pypdf import PdfWriter
 from c2pie.c2pa.manifest_store import ManifestStore
 
 
-# More about incremental updates PDF and embedding C2PA Manifest on it, 
+# More about incremental updates PDF and embedding C2PA Manifest on it,
 # described in docs/PDF-structure-overview.md
 class PdfInfo(NamedTuple):
     """Structural metadata extracted from an existing PDF, needed to append

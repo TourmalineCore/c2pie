@@ -279,7 +279,6 @@ def test_calculated_exclusion_covers_the_full_storage(file):
         tsa_log_dir=None,
     )
 
-    manifest_store.manifests[0].claim
     file_extension = C2PA_ContentTypes(file.suffix)
 
     if file_extension == C2PA_ContentTypes.jpeg or file_extension == C2PA_ContentTypes.jpg:
