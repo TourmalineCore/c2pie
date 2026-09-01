@@ -95,8 +95,8 @@ class ClaimSignature(SuperBox):
         """
         protected_header ; bstr
 
-        Signing algorithms
-        -7 - ES256 (ECDSA with SHA-256)
+        Signing algorithms \n
+        [NOT IMPLEMENTED YET] -7 - ES256 (ECDSA with SHA-256) \n
         -37 - PS256 (RSASSA-PSS с SHA-256)
         """
         protected_header: dict[int, Any] = {1: -37}  # "alg": "PS256"
@@ -131,9 +131,10 @@ class ClaimSignature(SuperBox):
                         },
                     ],
                 },
-                # The specification recommends setting the pad to at least 16 bytes. We use 64 bytes
-                # to allow for some extra space before the 23-byte limit is exceeded, since otherwise
-                # the CBOR header of the pad field would be reduced by 1 byte.
+                # According to the specification, the padding size must be at least 16 bytes.
+                # However, the TSA token has a very predictable size.
+                # Therefore, the pad size has been reduced to the minimum necessary
+                # to align any possibly truncated microseconds.
                 "pad": b"\x00" * 8,
             }
 
@@ -154,17 +155,11 @@ class ClaimSignature(SuperBox):
         if self.serialized_cose_sign1_length == 0:
             self.serialized_cose_sign1_length = len(cose_sign1_tagged_cbor)
         elif self.serialized_cose_sign1_length != len(cose_sign1_tagged_cbor):
-            difference = self.serialized_cose_sign1_length - len(cose_sign1_tagged_cbor)
-
-            if -difference > len(cose_sign1[1]["pad"]):
-                raise ValueError("Difference in length exceeds the predefined pad")
-
-            updated_pad_length = len(cose_sign1[1]["pad"]) + difference
-
-            # If a CBOR overflow is not handled, the extra length byte that
-            # would be added in this case will not be taken into account.
-            if updated_pad_length > 23:
-                updated_pad_length += 1
+            updated_pad_length = self._calculate_updated_cose_sign1_pad_length(
+                previous_pad_length=len(cose_sign1[1]["pad"]),
+                previous_serialized_length=self.serialized_cose_sign1_length,
+                current_serialized_length=len(cose_sign1_tagged_cbor),
+            )
 
             cose_sign1[1]["pad"] = b"\x00" * updated_pad_length
             cose_sign1_tagged_cbor = cbor2.dumps(
@@ -173,6 +168,43 @@ class ClaimSignature(SuperBox):
             )
 
         return cose_sign1_tagged_cbor
+
+    def _calculate_updated_cose_sign1_pad_length(
+        self,
+        previous_pad_length: int,
+        previous_serialized_length: int,
+        current_serialized_length: int,
+    ) -> int:
+        """
+        Recalculates the pad length for a COSE_Sign1 (Claim Signature) structure
+        so that the total serialized length stays constant despite a variable-length
+        TSA token, similar to pad recalculation in the Data Hash Assertion.
+        """
+        length_difference: int = current_serialized_length - previous_serialized_length
+
+        # If the new token grew by more bytes than the pad has reserved, there is
+        # no way to compensate without changing the total signature size, which
+        # would break the exclusion boundary for the C2PA structure.
+        if length_difference > previous_pad_length:
+            raise ValueError("Difference in length exceeds the predefined pad")
+
+        updated_pad_length: int = previous_pad_length - length_difference
+
+        # CBOR encodes a byte-string length header as 1 byte when the length is
+        # 0-23, and as 2+ bytes when the length is 24 or more. If the pad drops
+        # from >= 24 bytes to < 24 bytes, its own header shrinks by 1 byte.
+        # Add 1 byte back to the pad to compensate for that shrinkage and keep
+        # the total schema size unchanged.
+        if updated_pad_length < 24 <= previous_pad_length:
+            updated_pad_length += 1
+
+        # If the pad has been fully consumed and would go negative, there is
+        # no valid pad length left to represent — fail loudly instead of
+        # silently producing an empty/invalid pad (e.g. b"\x00" * -1 == b"").
+        if updated_pad_length < 0:
+            raise ValueError("Not enough reserved pad to accommodate the TSA token; increase initial pad size.")
+
+        return updated_pad_length
 
     def _create_cose_sign1_tagged(self) -> bytes:
         """

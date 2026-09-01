@@ -248,10 +248,11 @@ def sign_file(
 
     # Remove old C2PA APP11 segments so the resulting
     # file contains exactly one Manifest Store.
-    raw_bytes = strip_c2pa_app11_segments(
-        raw_bytes,
-        segment_ranges,
-    )
+    if segment_ranges:
+        raw_bytes = strip_c2pa_app11_segments(
+            raw_bytes,
+            segment_ranges,
+        )
 
     hash_data_assertion = c2pie_GenerateHashDataAssertion(
         hashed_data=hashlib.sha256(raw_bytes).digest(),

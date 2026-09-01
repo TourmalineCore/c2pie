@@ -1,4 +1,4 @@
-from c2pie.c2pa.assertion import EmbeddedDataAssertion
+from c2pie.c2pa.assertions.embedded_data_assertion import EmbeddedDataAssertion
 from c2pie.utils.content_types import jumbf_content_types
 
 JPEG_HEADER = b"\xff\xd8\xff"

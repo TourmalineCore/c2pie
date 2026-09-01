@@ -11,16 +11,20 @@ from c2pie.utils.content_types import jumbf_content_types
 class SuperBox(Box):
     def __init__(
         self,
+        content_boxes: list[ContentBox] = None,
         content_type: bytes = jumbf_content_types["json"],
         label: str = "",
-        content_boxes: list | None = None,
     ):
+
+        if content_boxes is None:
+            content_boxes = []
+
+        self.content_boxes = content_boxes
+
         self.description_box = DescriptionBox(
             content_type=content_type,
             label=label,
         )
-
-        self.content_boxes = [] if content_boxes is None else content_boxes
 
         payload = self.description_box.serialize() + self.serialize_content_boxes()
 

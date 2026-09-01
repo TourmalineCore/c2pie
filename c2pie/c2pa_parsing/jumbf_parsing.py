@@ -127,7 +127,7 @@ def get_active_manifest_uuid(manifest_store_bytes: bytes) -> str | None:
             continue
 
         label = jumd_label(manifest[0].get_payload())
-        if label:
+        if label and label.startswith("urn:c2pa:"):
             active_manifest_urn = label
 
     return active_manifest_urn

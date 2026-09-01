@@ -48,6 +48,7 @@ pytest-cov = "^7.1.0"
 ruff = "^0.16.1"
 deptry = "^0.25.1"
 pre-commit = "^4.6.1"
+pytest-xdist = "^3.8.0"
 
 [build-system]
 requires = ["poetry-core>=2.0.0"]
@@ -57,6 +58,7 @@ build-backend = "poetry.core.masonry.api"
 markers = [
     "e2e: marks tests as e2e",
 ]
+addopts = "-n auto"
 
 [tool.coverage.run]
 omit = [

@@ -1,7 +1,7 @@
 import hashlib
 from unittest.mock import MagicMock, patch
 
-from c2pie.c2pa.assertion import IngredientAssertion
+from c2pie.c2pa.assertions.ingredient_assertion import IngredientAssertion
 from c2pie.c2pa.claim_signature import ClaimSignature
 from c2pie.c2pa.manifest import Manifest
 from c2pie.c2pa_parsing.jumbf_parsing import find_in_box
@@ -46,7 +46,7 @@ def test_no_active_manifest_when_active_manifest_is_none():
 
 def test_no_active_manifest_when_validation_fails():
     with patch(
-        "c2pie.c2pa.assertion.IngredientAssertion.validate_ingredient",
+        "c2pie.c2pa.assertions.ingredient_assertion.IngredientAssertion.validate_ingredient",
         return_value=None,
     ):
         manifest_box, _ = Box.parse_from_bytes(
@@ -78,7 +78,7 @@ def test_no_active_manifest_when_urn_and_manifest_are_none():
 
 def test_ingredient_assertion_schema_with_active_manifest_is_correct():
     with patch(
-        "c2pie.c2pa.assertion.IngredientAssertion.validate_ingredient",
+        "c2pie.c2pa.assertions.ingredient_assertion.IngredientAssertion.validate_ingredient",
         return_value=VALIDATION_RESULTS,
     ):
         manifest = Manifest(manifest_label="urn:c2pa:test-manifest")
