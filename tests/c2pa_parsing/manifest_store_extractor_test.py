@@ -24,7 +24,7 @@ C2PA_MARK = b"urn:c2pa:"
 JUMBF = b"jumbf_box_data"
 STORE = C2PA_MARK + JUMBF
 
-EXPECTED_ACTIVE_UUID = "urn:uuid:712065da7bda430f8e425d2772b0a0b7"
+EXPECTED_ACTIVE_UUID = "urn:c2pa:4773e5775a844cf0bc5decfe9ef0e45e"
 
 
 @pytest.fixture
