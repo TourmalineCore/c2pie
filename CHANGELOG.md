@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.0.0-alpha.3](https://github.com/TourmalineCore/c2pie/compare/1.0.0-alpha.2...1.0.0-alpha.3) (2026-10-14)
+
+### Features
+
+* [#111](https://github.com/TourmalineCore/c2pie/issues/111): provide lib version to claim generator info ([78ba294](https://github.com/TourmalineCore/c2pie/commit/78ba294f7d5af9ed4602663fddb0c89d2da156bb))
+
+### Bug Fixes
+
+* [#111](https://github.com/TourmalineCore/c2pie/issues/111): add checking for manifest uuid ([67c20a7](https://github.com/TourmalineCore/c2pie/commit/67c20a7c50400dcf98c10784d7747df3e8b12cd2))
+* [#111](https://github.com/TourmalineCore/c2pie/issues/111): add condition for checking existing manifests ([ac05d67](https://github.com/TourmalineCore/c2pie/commit/ac05d67994dbc39c0a990038fe7b447043cca78b))
+* [#111](https://github.com/TourmalineCore/c2pie/issues/111): add slash into claim label due specification ([26cf26d](https://github.com/TourmalineCore/c2pie/commit/26cf26d1aa21e9e2268da0d1481563592a4b38ad))
+* [#111](https://github.com/TourmalineCore/c2pie/issues/111): delete gathered assertion list in claim and move assertinos in created list ([9deb156](https://github.com/TourmalineCore/c2pie/commit/9deb15634b5731e78f0692a95c3d08e5303a2b10))
+* [#111](https://github.com/TourmalineCore/c2pie/issues/111): fix calculation for padding ([7c3d77b](https://github.com/TourmalineCore/c2pie/commit/7c3d77b124b506389c56656497ce80a319e6809a))
+* [#111](https://github.com/TourmalineCore/c2pie/issues/111): move defining manifest lableinside constructor ([a0995d6](https://github.com/TourmalineCore/c2pie/commit/a0995d6cac888923b4f343835cab49d0f077a56c))
+
+### Documentation
+
+* [#111](https://github.com/TourmalineCore/c2pie/issues/111): update c2pa version on badge ([c3cdd2e](https://github.com/TourmalineCore/c2pie/commit/c3cdd2e5631a40930938511f3ffa726df7ed841e))
+* **readme:** bring test coverage score up to date ([14b4c7e](https://github.com/TourmalineCore/c2pie/commit/14b4c7ef6d2a8c75d3137d71a6276da8bb4750fc))
+
 ## [1.0.0-alpha.2](https://github.com/TourmalineCore/c2pie/compare/1.0.0-alpha.1...1.0.0-alpha.2) (2026-08-07)
 
 ### Bug Fixes
