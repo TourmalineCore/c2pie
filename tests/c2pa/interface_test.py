@@ -1,9 +1,11 @@
+from importlib.metadata import version
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
 
-from c2pie.c2pa.assertion import IngredientThumbnailAssertion
+from c2pie.c2pa.assertions.base_assertion import Assertion
+from c2pie.c2pa.assertions.ingredient_thumbnail_assertion import IngredientThumbnailAssertion
 from c2pie.c2pa.manifest_store import ManifestStore
 from c2pie.interface import (
     c2pie_EmplaceManifest,
@@ -38,12 +40,19 @@ def test_generate_assertion_has_correct_schema():
             },
         ],
     }
+
     assertion = c2pie_GenerateAssertion(C2PA_AssertionTypes.actions, expected_schema)
-    assert assertion.schema == expected_schema
+
+    expected_assertion_content_boxes = Assertion.content_box_from_schema(C2PA_AssertionTypes.actions, expected_schema)
+
+    assert len(assertion.content_boxes) == len(expected_assertion_content_boxes)
+    for actual, expected in zip(assertion.content_boxes, expected_assertion_content_boxes, strict=False):
+        assert actual.get_type() == expected.get_type()
+        assert actual.payload == expected.payload
 
 
 def test_generate_hash_data_assertion_returns_hash_data_assertion_instance():
-    from c2pie.c2pa.assertion import HashDataAssertion
+    from c2pie.c2pa.assertions.hash_data_assertion import HashDataAssertion
 
     hash_data_assertion = c2pie_GenerateHashDataAssertion(
         hashed_data=b"\x00" * 32,
@@ -52,14 +61,14 @@ def test_generate_hash_data_assertion_returns_hash_data_assertion_instance():
 
 
 def test_generate_actions_assertion_returns_actions_assertion_instance():
-    from c2pie.c2pa.assertion import ActionsAssertion
+    from c2pie.c2pa.assertions.actions_assertion import ActionsAssertion
 
     actions_assertion = c2pie_GenerateActionsAssertion(action="c2pa.created")
     assert isinstance(actions_assertion, ActionsAssertion)
 
 
 def test_generate_thumbnail_assertion_returns_thumbnail_assertion_instance():
-    from c2pie.c2pa.assertion import ThumbnailAssertion
+    from c2pie.c2pa.assertions.thumbnail_assertion import ThumbnailAssertion
 
     thumbnail_assertion = c2pie_GenerateThumbnailAssertion(
         media_type=MEDIA_TYPE,
@@ -283,11 +292,11 @@ def test_calculated_exclusion_covers_the_full_storage(file):
     elif file_extension == C2PA_ContentTypes.pdf:
         """
         Expected length of serialized data in PDF format consists 
-        of boby (serialized ManifestStore) + updated cross-ref table and trailer.
+        of body (serialized ManifestStore) + updated cross-ref table and trailer.
 
         More info about PDF Incremental Update you can see here: docs/PDF-structure-overview.md
         """
-        expected_serialized_length = 7148
+        expected_serialized_length = 7149 + len(b"version: ") + len(version("c2pie").encode())
 
     with patch("c2pie.c2pa.manifest_store.ManifestStore.add_full_c2pa_structure_exclusion") as mock_func:
         c2pie_EmplaceManifest(

@@ -1,4 +1,4 @@
-from c2pie.c2pa.assertion import ThumbnailAssertion
+from c2pie.c2pa.assertions.thumbnail_assertion import ThumbnailAssertion
 from c2pie.utils.assertion_schemas import C2PA_AssertionTypes
 from c2pie.utils.content_types import jumbf_content_types
 

@@ -29,7 +29,7 @@ jobs:
       IS_DEV_VERSION: >-
         ${{ github.event_name == 'push' ||
             startsWith(github.event.release.target_commitish, 'release/') ||
-            contains(github.event.release.target_commitish, '/release/') }} ||
+            contains(github.event.release.target_commitish, '/release/') ||
             startsWith(github.event.release.target_commitish, 'hotfix/') ||
             contains(github.event.release.target_commitish, '/hotfix/') }}
 

@@ -1,5 +1,9 @@
-from c2pie.c2pa.assertion import HashDataAssertion
+import copy
+
+import pytest
+
 from c2pie.c2pa.assertion_store import AssertionStore
+from c2pie.c2pa.assertions.hash_data_assertion import HashDataAssertion
 from c2pie.c2pa.claim import Claim
 from c2pie.c2pa.claim_signature import ClaimSignature
 from c2pie.c2pa.manifest import Manifest
@@ -105,19 +109,63 @@ def test_manifest_store_set_hash_data_length_only_affects_new_manifests():
     previous_manifest.set_claim(claim)
     previous_manifest.set_claim_signature(claim_signature)
 
+    new_assertion_store = AssertionStore(
+        [
+            HashDataAssertion(
+                b"\x00\x00\x00",
+            ),
+        ]
+    )
+
+    new_claim = Claim(
+        new_assertion_store,
+        "urn:c2pa:new-manifest",
+        "test_file.pdf",
+    )
+
+    new_claim_signature = ClaimSignature(
+        claim=new_claim,
+        private_key=b"\x00\x00\x00",
+        tsa_url=None,
+        require_tsa=False,
+        tsa_log_dir=None,
+    )
+
     manifest = Manifest(manifest_label="urn:c2pa:new-manifest")
+    manifest.set_assertion_store(new_assertion_store)
+    manifest.set_claim(new_claim)
+    manifest.set_claim_signature(new_claim_signature)
 
     manifest_store = ManifestStore(
         [
-            previous_manifest,
-            manifest,
+            copy.deepcopy(previous_manifest),
+            copy.deepcopy(manifest),
         ]
     )
 
     manifest_store.add_full_c2pa_structure_exclusion(2, 1024)
 
     previous_box = manifest_store.content_boxes[0]
-    assert previous_box == previous_manifest
+    new_box = manifest_store.content_boxes[1]
+    assert previous_box.payload == previous_manifest.payload
+    assert new_box.payload != manifest.payload
+
+
+def test_manifest_store_set_exclusion_with_not_fullfilled_manifest_raises_error():
+    manifest = Manifest(manifest_label="urn:c2pa:new-manifest")
+
+    manifest_store = ManifestStore(
+        [
+            manifest,
+        ]
+    )
+
+    with pytest.raises(
+        ValueError,
+        match="Manifest is not fully initialized: assertion_store/claim/claim_signature "
+        "required before adding exclusions.",
+    ):
+        manifest_store.add_full_c2pa_structure_exclusion(2, 1024)
 
 
 def test_manifest_store_empty_list_equivalent_to_no_args():

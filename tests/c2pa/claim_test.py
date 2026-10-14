@@ -1,7 +1,7 @@
 import cbor2
 
-from c2pie.c2pa.assertion import Assertion
 from c2pie.c2pa.assertion_store import AssertionStore
+from c2pie.c2pa.assertions.base_assertion import Assertion
 from c2pie.c2pa.claim import Claim
 from c2pie.utils.assertion_schemas import C2PA_AssertionTypes
 from c2pie.utils.content_types import c2pa_content_types
@@ -16,11 +16,11 @@ def test_create_claim_with_label():
 
     assert claim is not None
     assert claim.manifest_label == "urn:c2pa:test-uuid"
-    assert claim.claim_signature_label == "self#jumbf=c2pa/urn:c2pa:test-uuid/c2pa.signature"
+    assert claim.claim_signature_label == "self#jumbf=/c2pa/urn:c2pa:test-uuid/c2pa.signature"
 
 
 def test_create_claim_with_label_and_assertion_store():
-    actions_assertion = Assertion(assertion_type=C2PA_AssertionTypes.actions, schema={})
+    actions_assertion = Assertion(assertion_type=C2PA_AssertionTypes.actions, content_boxes=[])
     assertions = [actions_assertion, actions_assertion]
 
     assertion_store = AssertionStore(assertions=assertions)
@@ -35,7 +35,7 @@ def test_create_claim_with_label_and_assertion_store():
 
 
 def test_create_claim_with_jumbf_type():
-    actions_assertion = Assertion(assertion_type=C2PA_AssertionTypes.actions, schema={})
+    actions_assertion = Assertion(assertion_type=C2PA_AssertionTypes.actions, content_boxes=[])
     assertions = [actions_assertion, actions_assertion]
 
     assertion_store = AssertionStore(assertions=assertions)

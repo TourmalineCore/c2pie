@@ -140,9 +140,6 @@ def strip_c2pa_app11_segments(
     Return JPEG bytes with all C2PA APP11 segments removed.
     """
 
-    if not segment_ranges:
-        return jpeg_bytes
-
     result = bytearray()
     cursor = 0
 
@@ -182,5 +179,8 @@ def emplace_manifest_into_jpeg(
     )
 
     tail = create_and_serialize_app11_storage(manifest_store)
+
+    if len(tail) != serialized_app11_storage_length:
+        raise ValueError("Manifest Store serialized with wrong lenght")
 
     return content_bytes[:c2pa_offset] + tail + content_bytes[c2pa_offset:]

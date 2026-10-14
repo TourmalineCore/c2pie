@@ -3,8 +3,8 @@ from unittest.mock import patch
 import cbor2
 import pytest
 
-from c2pie.c2pa.assertion import Assertion
 from c2pie.c2pa.assertion_store import AssertionStore
+from c2pie.c2pa.assertions.base_assertion import Assertion
 from c2pie.c2pa.claim import Claim
 from c2pie.c2pa.claim_signature import ClaimSignature
 from c2pie.tsa.exceptions import TSARequiredError
