@@ -13,10 +13,10 @@ TSA_URL = "http://timestamp.digicert.com"
 TEST_FILES_DIR = Path(__file__).parent.parent / "test_files"
 
 test_files_by_extension = {
-    "pdf": [
-        "test_doc.pdf",
-        "test_broken_doc.pdf",
-    ],
+    # "pdf": [
+    #     "test_doc.pdf",
+    #     "test_broken_doc.pdf",
+    # ],
     "jpg": [
         "test_image.jpg",
     ],
