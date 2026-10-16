@@ -1,3 +1,4 @@
+from c2pie.jumbf_boxes.box import Box
 from c2pie.jumbf_boxes.content_box import ContentBox
 from c2pie.jumbf_boxes.super_box import SuperBox
 from c2pie.utils.content_types import jumbf_content_types
@@ -74,3 +75,78 @@ def test_serialize_super_box_with_content_box():
     )
 
     assert test_super_box.serialize() == test_serialized_data
+
+
+def test_super_box_from_box():
+    original = SuperBox(
+        content_type=jumbf_content_types["json"],
+        label="roundtrip",
+    )
+    raw = original.serialize()
+
+    parsed_box, _ = Box.parse_from_bytes(raw)
+    restored = SuperBox.from_box(parsed_box)
+
+    assert restored.get_label() == "roundtrip"
+    assert restored.get_content_type() == jumbf_content_types["json"]
+    assert restored.get_type() == b"jumb".hex()
+
+
+def test_super_box_from_box_with_content_boxes():
+    inner = ContentBox(payload=b"\x01\x02\x03")
+    original = SuperBox(
+        content_type=jumbf_content_types["json"],
+        label="parent",
+        content_boxes=[inner],
+    )
+    raw = original.serialize()
+
+    parsed_box, _ = Box.parse_from_bytes(raw)
+    restored = SuperBox.from_box(parsed_box)
+
+    assert restored.get_label() == "parent"
+    assert len(restored.content_boxes) == 1
+    assert restored.content_boxes[0].get_type() == b"json".hex()
+    assert restored.content_boxes[0].get_payload() == b"\x01\x02\x03"
+
+
+def test_super_box_from_box_nested():
+    inner = SuperBox(
+        content_type=jumbf_content_types["json"],
+        label="inner",
+    )
+    outer = SuperBox(
+        content_type=jumbf_content_types["json"],
+        label="outer",
+        content_boxes=[inner],
+    )
+    raw = outer.serialize()
+
+    parsed_box, _ = Box.parse_from_bytes(raw)
+    restored_outer = SuperBox.from_box(parsed_box)
+
+    assert restored_outer.get_label() == "outer"
+    assert len(restored_outer.content_boxes) == 1
+
+    nested = SuperBox.from_box(restored_outer.content_boxes[0])
+    assert nested.get_label() == "inner"
+
+
+def test_super_box_from_box_not_jumb():
+    wrong = Box(b"jumd".hex(), payload=b"test")
+
+    try:
+        SuperBox.from_box(wrong)
+        raise AssertionError("Should have raised")
+    except ValueError as e:
+        assert "not a JUMBF superbox" in str(e)
+
+
+def test_super_box_from_box_empty_payload():
+    empty = Box(b"jumb".hex(), payload=b"")
+
+    try:
+        SuperBox.from_box(empty)
+        raise AssertionError("Should have raised")
+    except ValueError as e:
+        assert "Empty" in str(e)
