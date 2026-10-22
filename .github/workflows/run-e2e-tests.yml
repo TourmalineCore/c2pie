@@ -3,6 +3,9 @@ name: E2E Testing on PR
 on:
   pull_request:
     types: [opened, synchronize, reopened]
+  push:
+    branches:
+      - release/*
   workflow_dispatch:
 
 concurrency:
