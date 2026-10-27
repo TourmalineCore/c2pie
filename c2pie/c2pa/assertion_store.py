@@ -24,12 +24,14 @@ class AssertionStore(SuperBox):
         self,
         offset: int,
         length: int,
+        asset_bytes: bytes | None = None,
     ) -> None:
         for assertion in self.assertions:
             if assertion.type == C2PA_AssertionTypes.data_hash:
                 assertion.add_full_c2pa_structure_exclusion(
                     offset,
                     length,
+                    asset_bytes,
                 )
 
         self.sync_payload()

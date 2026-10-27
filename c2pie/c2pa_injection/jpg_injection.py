@@ -176,6 +176,7 @@ def emplace_manifest_into_jpeg(
     manifest_store.add_full_c2pa_structure_exclusion(
         c2pa_offset,
         serialized_app11_storage_length,
+        asset_bytes=content_bytes[:c2pa_offset] + serialized_app11_storage + content_bytes[c2pa_offset:],
     )
 
     tail = create_and_serialize_app11_storage(manifest_store)

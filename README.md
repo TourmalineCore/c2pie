@@ -463,11 +463,11 @@ For detailed information on signing and certificates please explore the [corresp
 
 ## Notes for PDF vs JPG/JPEG
 
-🔸 **PDF**: we append an incremental update. The `c2pa.hash.data` exclusion starts at `len(original_pdf)` and its length equals the final tail size (computed iteratively).  
+🔸 **PDF**: we append an incremental update. The `c2pa.hash.data` exclusion covers exactly the Manifest Store bytes inside the embedded file stream; the new PDF objects, xref and trailer are hashed together with the original file.  
 
 🔸 **JPG/JPEG**: we insert APP11 segments. The exclusion start is the APP11 insertion offset; the length is the final APP11 payload length (also computed iteratively).
 
-The library takes care of iterative sizing, so the `c2pa.hash.data` matches exactly, otherwise validators return `assertion.dataHash.mismatch`.
+The library takes care of iterative sizing and computes the `c2pa.hash.data` hash over the final file (minus exclusions) when the manifest is placed, so it matches exactly, otherwise validators return `assertion.dataHash.mismatch`.
 
 <br>
 
