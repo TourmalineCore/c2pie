@@ -291,12 +291,13 @@ def test_calculated_exclusion_covers_the_full_storage(file):
         expected_serialized_length = 2 + 2 + 2 + 2 + 4 + len(manifest_store.serialize())
     elif file_extension == C2PA_ContentTypes.pdf:
         """
-        Expected length of serialized data in PDF format consists 
-        of body (serialized ManifestStore) + updated cross-ref table and trailer.
+        In PDF the exclusion covers only the serialized ManifestStore inside the embedded
+        file stream, the rest of the incremental update (objects, xref, trailer) is hashed.
+        The c2pie version is part of the ManifestStore, so its length is added separately.
 
         More info about PDF Incremental Update you can see here: docs/PDF-structure-overview.md
         """
-        expected_serialized_length = 7149 + len(b"version: ") + len(version("c2pie").encode())
+        expected_serialized_length = len(manifest_store.serialize())
 
     with patch("c2pie.c2pa.manifest_store.ManifestStore.add_full_c2pa_structure_exclusion") as mock_func:
         c2pie_EmplaceManifest(
