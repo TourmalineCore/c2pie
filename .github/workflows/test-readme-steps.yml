@@ -1,18 +1,22 @@
 name: Execute Readme Steps
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened]
-  push:
-    branches:
-      - master
+  workflow_run:
+    workflows: [Package Publishing]
+    types: [completed]
 
 jobs:
   sign-steps:
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push'
     runs-on: ubuntu-24.04
     container: python:3.10-bookworm
     steps:
+    - uses: actions/checkout@v5
+      with:
+        ref: ${{ github.event.workflow_run.head_sha }}
+
     - name: Generate Certificates, Install c2pie, and Sign Image and PDF
+      shell: bash
       run: |
         # Generate private key and certificate chain:
         openssl genpkey \
@@ -36,8 +40,11 @@ jobs:
         export C2PIE_PRIVATE_KEY_FILE=./private_key.key
         export C2PIE_CERTIFICATE_CHAIN_FILE=./certificate_chain.pem
 
-        # Install package
-        pip install c2pie 
+        # Install the dev build published to PyPI for this commit (same version as in publish-package.yml)
+        CURRENT_VERSION=$(grep -m1 '^version' pyproject.toml | cut -d'"' -f2)
+        SHORT_SHA=$(git rev-parse --short=8 HEAD)
+        DEV_NUM=$((16#$SHORT_SHA))
+        pip install "c2pie==${CURRENT_VERSION}.dev${DEV_NUM}"
 
         # Download test image and PDF from this repo
         wget https://raw.githubusercontent.com/TourmalineCore/c2pie/refs/heads/master/example_app/test_files/test_image.jpg
