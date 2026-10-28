@@ -3,6 +3,9 @@ name: Execute Readme Steps
 on:
   pull_request:
     types: [opened, synchronize, reopened]
+  push:
+    branches:
+      - master
 
 jobs:
   sign-steps:
@@ -41,12 +44,17 @@ jobs:
         export C2PIE_PRIVATE_KEY_FILE=./private_key.key
         export C2PIE_CERTIFICATE_CHAIN_FILE=./certificate_chain.pem
 
-        # Install the dev build published to PyPI for this commit (same version as in publish-package.yml)
-        CURRENT_VERSION=$(grep -m1 '^version' pyproject.toml | cut -d'"' -f2)
-        SHORT_SHA=${HEAD_SHA:0:8}
-        DEV_NUM=$((16#$SHORT_SHA))
-        # The build is published in parallel with this workflow, so wait until it appears on PyPI
-        until pip install "c2pie==${CURRENT_VERSION}.dev${DEV_NUM}"; do sleep 30; done
+        if [ "${{ github.event_name }}" = "pull_request" ]; then
+          # Install the dev build published to PyPI for this commit (same version as in publish-package.yml)
+          CURRENT_VERSION=$(grep -m1 '^version' pyproject.toml | cut -d'"' -f2)
+          SHORT_SHA=${HEAD_SHA:0:8}
+          DEV_NUM=$((16#$SHORT_SHA))
+          # The build is published in parallel with this workflow, so wait until it appears on PyPI
+          until pip install "c2pie==${CURRENT_VERSION}.dev${DEV_NUM}"; do sleep 30; done
+        else
+          # Install package as in README
+          pip install c2pie
+        fi
 
         # Download test image and PDF from this repo
         wget https://raw.githubusercontent.com/TourmalineCore/c2pie/refs/heads/master/example_app/test_files/test_image.jpg
