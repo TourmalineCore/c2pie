@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.0-alpha.4](https://github.com/TourmalineCore/c2pie/compare/1.0.0-alpha.3...1.0.0-alpha.4) (2026-10-30)
+
+### Bug Fixes
+
+* exclude only the manifest store from PDF data hash to pass new c2patool validation ([#123](https://github.com/TourmalineCore/c2pie/issues/123)) ([634add3](https://github.com/TourmalineCore/c2pie/commit/634add355fc8cfb9afe0881217d423d7a73905f1))
+
 ## [1.0.0-alpha.3](https://github.com/TourmalineCore/c2pie/compare/1.0.0-alpha.2...1.0.0-alpha.3) (2026-10-14)
 
 ### Features
