@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.0.0-rc.2](https://github.com/TourmalineCore/c2pie/compare/1.0.0-rc.1...1.0.0-rc.2) (2026-10-30)
+
+### Bug Fixes
+
+* [#114](https://github.com/TourmalineCore/c2pie/issues/114): fix dependabot alerts; update dependency versions ([f50c71e](https://github.com/TourmalineCore/c2pie/commit/f50c71e9110f4f75691b6788e453c6b143a1043f))
+* exclude only the manifest store from PDF data hash to pass new c2patool validation ([#123](https://github.com/TourmalineCore/c2pie/issues/123)) ([634add3](https://github.com/TourmalineCore/c2pie/commit/634add355fc8cfb9afe0881217d423d7a73905f1))
+
+### Documentation
+
+* update changelog after updating semantic-release ([416704b](https://github.com/TourmalineCore/c2pie/commit/416704bdaa663fecc84f4d9a9c0e3db24e1845e4))
+
 ## [1.0.0-alpha.4](https://github.com/TourmalineCore/c2pie/compare/1.0.0-alpha.3...1.0.0-alpha.4) (2026-10-30)
 
 ### Bug Fixes
