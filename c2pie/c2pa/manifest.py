@@ -49,6 +49,7 @@ class Manifest(SuperBox):
         self,
         offset: int,
         length: int,
+        asset_bytes: bytes | None = None,
     ):
         """
         Updates the length of exceptions in HashData, reassembles Claim (assertion hashes)
@@ -63,6 +64,7 @@ class Manifest(SuperBox):
         self.assertion_store.add_full_c2pa_structure_exclusion(
             offset,
             length,
+            asset_bytes,
         )
         self.claim.set_assertion_store(self.assertion_store)
         self.claim_signature.set_claim(self.claim)

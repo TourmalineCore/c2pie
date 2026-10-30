@@ -27,8 +27,10 @@ def c2pie_GenerateAssertion(assertion_type: C2PA_AssertionTypes, assertion_schem
 
 
 def c2pie_GenerateHashDataAssertion(
-    hashed_data: bytes,
+    hashed_data: bytes = b"\x00" * 32,
 ) -> HashDataAssertion:
+    # The hash is recomputed by c2pie_EmplaceManifest over the final asset,
+    # so hashed_data can be left as a placeholder.
     return HashDataAssertion(hashed_data)
 
 

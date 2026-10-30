@@ -57,6 +57,8 @@ build-backend = "poetry.core.masonry.api"
 [tool.pytest.ini_options]
 markers = [
     "e2e: marks tests as e2e",
+    "e2e_sign: e2e stage that signs test files (no c2patool needed)",
+    "e2e_validate: e2e stage that validates signed files with c2patool",
 ]
 addopts = "-n auto"
 
