@@ -2,14 +2,20 @@
 
 [[package]]
 name = "c2pa-python"
-version = "0.38.2"
+version = "0.38.0"
 description = "Python bindings for the C2PA Content Authenticity Initiative (CAI) library"
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "c2pa_python-0.38.2-py3-none-macosx_10_9_universal2.whl", hash = "sha256:8141c70b5fe2dbc2ad03afc4d8c2cf4fa116be7312dff2b0c31589b4906847fc"},
-    {file = "c2pa_python-0.38.2-py3-none-macosx_10_9_x86_64.whl", hash = "sha256:b96bbdeeb88e544b7b3b5d1d041ce536084c004553a1a54f509a9353442a3763"},
+    {file = "c2pa_python-0.38.0-py3-none-macosx_10_9_universal2.whl", hash = "sha256:334ffbff033423c910f1e635447cd775c1d66874e02b6db55d6f62d7a5a856fc"},
+    {file = "c2pa_python-0.38.0-py3-none-macosx_10_9_x86_64.whl", hash = "sha256:d1b5522673c0df8b64f85fc9f55bab5f211920fb571669bd8461a8ffe7e3a287"},
+    {file = "c2pa_python-0.38.0-py3-none-macosx_11_0_arm64.whl", hash = "sha256:53364e6b02b2c26863419f444bb6390e8c4c4095eb0e3c3373c7144e7a7ff363"},
+    {file = "c2pa_python-0.38.0-py3-none-manylinux_2_28_aarch64.whl", hash = "sha256:dcdc16c23178cb580c1017dca88ca2f6f516b3748ecf4c69acfff78ea385feb8"},
+    {file = "c2pa_python-0.38.0-py3-none-manylinux_2_28_x86_64.whl", hash = "sha256:9739589e69e5891da80d9b2cc2549c8a9b224d9131cafed4582d5746a155fd2d"},
+    {file = "c2pa_python-0.38.0-py3-none-win_amd64.whl", hash = "sha256:5db598a420242229a802c07e84890adb5162aac79afb110e4563c56f33e35256"},
+    {file = "c2pa_python-0.38.0-py3-none-win_arm64.whl", hash = "sha256:abac93851169c016aadb7251177656c3919af5ce469c011ff4ea014bd02501b4"},
+    {file = "c2pa_python-0.38.0.tar.gz", hash = "sha256:3a40dab7424e03b397f5c4c81298d7f534a28e7d75a17d5d39fdc35c5dfe5963"},
 ]
 
 [package.dependencies]
