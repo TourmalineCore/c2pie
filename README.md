@@ -8,9 +8,9 @@
 
 [![Linting](https://github.com/TourmalineCore/c2pie/actions/workflows/lint-on-pull-request.yml/badge.svg?branch=develop)](https://github.com/TourmalineCore/c2pie/actions/workflows/lint-on-pull-request.yml)
 [![c2pa](https://img.shields.io/badge/c2pa-v2.4-seagreen.svg)](https://c2pa.org/)
-[![coverage](https://img.shields.io/badge/e2e_coverage-82.29%25-olivedrab)](https://github.com/TourmalineCore/c2pie/actions/workflows/calculate-tests-coverage-on-pull-request.yml)
-[![coverage](https://img.shields.io/badge/units_coverage-86.44%25-olivedrab)](https://github.com/TourmalineCore/c2pie/actions/workflows/calculate-tests-coverage-on-pull-request.yml)
-[![coverage](https://img.shields.io/badge/full_coverage-91.97%25-forestgreen)](https://github.com/TourmalineCore/c2pie/actions/workflows/calculate-tests-coverage-on-pull-request.yml)
+[![coverage](https://img.shields.io/badge/e2e_coverage-82.36%25-olivedrab)](https://github.com/TourmalineCore/c2pie/actions/workflows/calculate-tests-coverage-on-pull-request.yml)
+[![coverage](https://img.shields.io/badge/units_coverage-86.47%25-olivedrab)](https://github.com/TourmalineCore/c2pie/actions/workflows/calculate-tests-coverage-on-pull-request.yml)
+[![coverage](https://img.shields.io/badge/full_coverage-91.96%25-forestgreen)](https://github.com/TourmalineCore/c2pie/actions/workflows/calculate-tests-coverage-on-pull-request.yml)
 [![latest](https://img.shields.io/pypi/v/c2pie?label=latest&colorB=fc8021)](https://pypi.org/project/c2pie/)
 
 <br>
@@ -463,11 +463,11 @@ For detailed information on signing and certificates please explore the [corresp
 
 ## Notes for PDF vs JPG/JPEG
 
-🔸 **PDF**: we append an incremental update. The `c2pa.hash.data` exclusion starts at `len(original_pdf)` and its length equals the final tail size (computed iteratively).  
+🔸 **PDF**: we append an incremental update. The `c2pa.hash.data` exclusion covers exactly the Manifest Store bytes inside the embedded file stream; the new PDF objects, xref and trailer are hashed together with the original file.  
 
 🔸 **JPG/JPEG**: we insert APP11 segments. The exclusion start is the APP11 insertion offset; the length is the final APP11 payload length (also computed iteratively).
 
-The library takes care of iterative sizing, so the `c2pa.hash.data` matches exactly, otherwise validators return `assertion.dataHash.mismatch`.
+The library takes care of iterative sizing and computes the `c2pa.hash.data` hash over the final file (minus exclusions) when the manifest is placed, so it matches exactly, otherwise validators return `assertion.dataHash.mismatch`.
 
 <br>
 

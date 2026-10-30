@@ -119,7 +119,7 @@ def emplace_manifest_into_pdf(
 ) -> bytes:
     """
     Incrementally adds C2PA Manifest Store to PDF.
-    - Exception c2pa.hash.data: start == len(initial_content), length == length of the entire tail (see C2PA 2.2).
+    - Exclusion of c2pa.hash.data covers exactly the Manifest Store bytes, the rest of the file is hashed.
     - Sign the claim, build the jumbf store, place it as EmbeddedFile, write xref/trailer correctly.
     """
     info = _scan_pdf_to_get_its_data(initial_content)
@@ -140,13 +140,13 @@ def emplace_manifest_into_pdf(
     # Creating Body
     # Object 1: the actual C2PA Manifest Store, embedded as a PDF stream
     # (EmbeddedFile), so the JUMBF bytes travel unmodified inside the PDF.
-    object_1 = (
+    object_1_header = (
         f"{starting_value} 0 obj\n".encode("ascii")
         + f"<< /Type /EmbeddedFile /Subtype {subtype} /Length {serialized_manifest_store_length} >>\n".encode("ascii")
         + b"stream\n"
-        + serialized_manifest_store
-        + b"\nendstream\nendobj\n"
     )
+    object_1 = object_1_header + serialized_manifest_store + b"\nendstream\nendobj\n"
+
     # Object 2: Filespec describing the embedded file, tagged with
     # /AFRelationship /C2PA_Manifest so C2PA-aware readers can find it.
     object_2 = (
@@ -238,11 +238,6 @@ def emplace_manifest_into_pdf(
 
     trailer += b">>\n"
 
-    # Assemble the full incremental update tail (first pass)
-    # This first tail is only used to measure its exact byte length, so we
-    # can tell the hard-binding hash assertion exactly how many trailing
-    # bytes to exclude from the file hash (they contain the manifest itself
-    # and therefore cannot be part of what the manifest hashes).
     tail = (
         sep
         + object_1
@@ -257,43 +252,21 @@ def emplace_manifest_into_pdf(
         + str(xref_pos).encode("ascii")
         + b"\n%%EOF\n"
     )
+
+    # The exclusion must cover exactly the stream content of object 1 (C2PA 15.12):
+    # the new PDF objects, xref and trailer around it are part of the hashed data.
+    manifest_start = len(sep) + len(object_1_header)
+    manifest_end = manifest_start + serialized_manifest_store_length
 
     manifest_store.add_full_c2pa_structure_exclusion(
-        c2pa_offset,
-        len(tail),
+        c2pa_offset + manifest_start,
+        serialized_manifest_store_length,
+        asset_bytes=initial_content + tail,
     )
 
-    # Reserialize manifest_store now that its internal pad
-    # has been adjusted, and rebuild object_1 (and thus the whole tail) with
-    # the final, correct bytes. All offsets/xref/trailer above are reused
-    # as-is, since exclusion pad adjustments are designed to keep the total
-    # serialized length of the manifest constant so object_1's length
-    # (and every offset that depends on it) does not change.
-
+    # Pads keep the manifest length unchanged, so the offsets in the tail stay valid.
     serialized_manifest_store = manifest_store.serialize()
-    serialized_manifest_store_length = len(serialized_manifest_store)
+    if len(serialized_manifest_store) != serialized_manifest_store_length:
+        raise ValueError("Manifest Store serialized with wrong length")
 
-    object_1 = (
-        f"{starting_value} 0 obj\n".encode("ascii")
-        + f"<< /Type /EmbeddedFile /Subtype {subtype} /Length {serialized_manifest_store_length} >>\n".encode("ascii")
-        + b"stream\n"
-        + serialized_manifest_store
-        + b"\nendstream\nendobj\n"
-    )
-
-    tail = (
-        sep
-        + object_1
-        + object_2
-        + object_3
-        + object_4
-        + object_5
-        + object_6
-        + xref
-        + trailer
-        + b"startxref\n"
-        + str(xref_pos).encode("ascii")
-        + b"\n%%EOF\n"
-    )
-
-    return initial_content + tail
+    return initial_content + tail[:manifest_start] + serialized_manifest_store + tail[manifest_end:]

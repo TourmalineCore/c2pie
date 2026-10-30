@@ -1,3 +1,4 @@
+import hashlib
 from typing import Any
 
 from c2pie.c2pa.assertions.base_assertion import Assertion
@@ -10,8 +11,11 @@ class HashDataAssertion(Assertion):
 
     def __init__(
         self,
-        hashed_data: bytes,
+        hashed_data: bytes = b"\x00" * 32,
     ):
+        # hashed_data may be a placeholder: the real hash is computed when the
+        # manifest is placed into the asset (see add_full_c2pa_structure_exclusion).
+        # It must keep the digest length so the manifest size does not change.
         exclusions: list[dict[str, int]] = []
 
         self.schema: dict[str, Any] = {
@@ -31,7 +35,13 @@ class HashDataAssertion(Assertion):
         self,
         offset: int,
         length: int,
+        asset_bytes: bytes | None = None,
     ) -> None:
+        """
+        Adds an exclusion for the C2PA structure. If asset_bytes (the final asset with
+        the manifest already in place) is given, the hash is recomputed over everything
+        except the exclusions, the same way validators do.
+        """
         previous_exclusions = list(self.schema["exclusions"])
         pad_length = len(self.schema["pad"])
 
@@ -53,6 +63,9 @@ class HashDataAssertion(Assertion):
 
         self.schema["pad"] = b"\x00" * updated_pad_length
 
+        if asset_bytes is not None:
+            self.schema["hash"] = self._hash_asset(asset_bytes)
+
         payload = self.get_payload_from_schema(C2PA_AssertionTypes.data_hash, self.schema)
 
         self.content_boxes = [
@@ -63,6 +76,13 @@ class HashDataAssertion(Assertion):
         ]
 
         self.sync_payload()
+
+    def _hash_asset(self, asset_bytes: bytes) -> bytes:
+        # Cut exclusions from the end, so the offsets of the remaining ones stay valid.
+        for exclusion in sorted(self.schema["exclusions"], key=lambda e: e["start"], reverse=True):
+            start = exclusion["start"]
+            asset_bytes = asset_bytes[:start] + asset_bytes[start + exclusion["length"] :]
+        return hashlib.sha256(asset_bytes).digest()
 
     def _calculate_updated_pad_length(
         self,

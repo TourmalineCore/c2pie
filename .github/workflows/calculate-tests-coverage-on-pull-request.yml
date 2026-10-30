@@ -55,7 +55,8 @@ jobs:
           cacheFrom: ghcr.io/${{ env.DEV_CONTAINER_IMAGE }}
           runCmd: |
             # For detailed explanation refer to previous step
-            COVERAGE_FILE=.coverage.e2e pytest tests/c2pa/e2e_test.py --cov=c2pie -v --cov-report xml:e2e-coverage.xml
+            # Only the signing stage runs c2pie code, validation with c2patool is done in run-e2e-tests.yml
+            COVERAGE_FILE=.coverage.e2e pytest tests/c2pa/e2e_test.py -m e2e_sign --cov=c2pie -v --cov-report xml:e2e-coverage.xml
           push: never
 
       - name: Merge Units And E2E Into Full Coverage

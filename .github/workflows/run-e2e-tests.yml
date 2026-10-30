@@ -8,60 +8,135 @@ concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  # Signed files are validated with two c2patool versions: a pinned old one and the latest one.
+  # This checks that c2pie output stays compatible with both, because new c2patool releases
+  # can add stricter checks. Example: c2patool 0.28 started requiring the c2pa.hash.data
+  # exclusion to cover exactly the manifest bytes, and PDFs that were valid in 0.27.22 became invalid.
+  C2PATOOL_OLD_VERSION: "0.27.22"
+
 jobs:
-  run-e2e-tests:
-      strategy: 
-        fail-fast: false
-        matrix:
-          os: [ubuntu-latest, macos-latest, windows-latest]
-          python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+  # Stage 1: sign the test files on every OS and Python version.
+  # c2patool is not needed here, the signed files are passed to the next stage as artifacts.
+  sign:
+    name: Sign (${{ matrix.os }}, Python ${{ matrix.python-version }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
 
-      # poetry shell doesn't work properly without this setting
-      defaults:
-        run:
-          shell: bash
+    # poetry shell doesn't work properly without this setting
+    defaults:
+      run:
+        shell: bash
 
-      runs-on: ${{ matrix.os }}
-      timeout-minutes: 30
-      
-      steps:
-        - name: Checkout repository
-          uses: actions/checkout@v5
-        
-        - name: Set up Python
-          uses: actions/setup-python@v5
-          with:
-            python-version: ${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
 
-        - name: Install Poetry
-          uses: snok/install-poetry@v1
-          with:
-            version: '2.4.1'
-            virtualenvs-create: true
-            virtualenvs-in-project: true
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
 
-        - name: Load cached venv
-          id: cached-poetry-dependencies
-          uses: actions/cache@v4
-          with:
-            path: .venv
-            key: venv-tests-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
 
-        - name: Install dependencies
-          run: poetry install --no-interaction
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: '2.4.1'
+          virtualenvs-create: true
+          virtualenvs-in-project: true
 
-        - name: Install Rust toolchain and c2patool
-          uses: baptiste0928/cargo-install@v3
-          with:
-            crate: c2patool
- 
-        - name: Verify if c2patool is installed 
-          run: |
-            c2patool -V
+      - name: Install dependencies
+        run: poetry install --no-interaction
 
-        - name: Run e2e tests with coverage
-          run: |
-            poetry run pytest tests/c2pa/e2e_test.py -v
-          env:
-            C2PIE_PRIVATE_KEY_FILE: ${{ vars.C2PIE_PRIVATE_KEY_FILE }}
-            C2PIE_CERTIFICATE_CHAIN_FILE: ${{ vars.C2PIE_CERTIFICATE_CHAIN_FILE }}
+      - name: Sign test files
+        run: poetry run pytest tests/c2pa/e2e_test.py -m e2e_sign -v
+        env:
+          C2PIE_PRIVATE_KEY_FILE: ${{ vars.C2PIE_PRIVATE_KEY_FILE }}
+          C2PIE_CERTIFICATE_CHAIN_FILE: ${{ vars.C2PIE_CERTIFICATE_CHAIN_FILE }}
+          C2PIE_E2E_SIGNED_DIR: ${{ runner.temp }}/signed
+          # Signing randomness does not depend on OS or Python, so the heavy stability
+          # scenario runs only once to keep the artifacts small.
+          C2PIE_E2E_STABILITY_ITERATIONS: ${{ (matrix.os == 'ubuntu-latest' && matrix.python-version == '3.14') && '30' || '0' }}
+
+      - name: Upload signed files
+        uses: actions/upload-artifact@v7
+        with:
+          name: signed-${{ matrix.os }}-py${{ matrix.python-version }}
+          path: ${{ runner.temp }}/signed
+          if-no-files-found: error
+          retention-days: 1
+
+  # Stage 2: validate all signed files with the old and the latest c2patool.
+  validate:
+    name: Validate with c2patool
+    needs: sign
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    defaults:
+      run:
+        shell: bash
+
+    env:
+      C2PIE_E2E_SIGNED_DIR: ${{ github.workspace }}/signed
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: '2.4.1'
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: Install dependencies
+        run: poetry install --no-interaction
+
+      - name: Download signed files
+        uses: actions/download-artifact@v8
+        with:
+          pattern: signed-*
+          path: signed
+
+      - name: Install old c2patool (prebuilt release)
+        run: |
+          version="${C2PATOOL_OLD_VERSION}"
+          mkdir -p "${RUNNER_TEMP}/c2patool-old"
+          curl -sSfL "https://github.com/contentauth/c2pa-rs/releases/download/c2patool-v${version}/c2patool-v${version}-x86_64-unknown-linux-gnu.tar.gz" \
+            | tar xz -C "${RUNNER_TEMP}/c2patool-old" --strip-components=1 c2patool/c2patool
+          echo "C2PATOOL_OLD=${RUNNER_TEMP}/c2patool-old/c2patool" >> "$GITHUB_ENV"
+
+      # The latest c2patool may require a newer Rust than the runner has,
+      # otherwise cargo silently installs an older compatible version.
+      - name: Install latest stable Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      # The action caches the built binary by version, so it is rebuilt only when a new version is released.
+      - name: Install latest c2patool
+        uses: baptiste0928/cargo-install@v3
+        with:
+          crate: c2patool
+
+      - name: Validate with old c2patool
+        if: ${{ !cancelled() }}
+        run: |
+          "${C2PATOOL_OLD}" -V
+          C2PATOOL="${C2PATOOL_OLD}" poetry run pytest tests/c2pa/e2e_test.py -m e2e_validate -v
+
+      - name: Validate with latest c2patool
+        if: ${{ !cancelled() }}
+        run: |
+          c2patool -V
+          poetry run pytest tests/c2pa/e2e_test.py -m e2e_validate -v

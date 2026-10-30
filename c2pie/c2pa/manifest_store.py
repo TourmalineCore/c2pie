@@ -26,6 +26,7 @@ class ManifestStore(SuperBox):
         self,
         offset: int,
         length: int,
+        asset_bytes: bytes | None = None,
     ) -> None:
         if not self.manifests:
             raise ValueError(
@@ -35,6 +36,7 @@ class ManifestStore(SuperBox):
         self.manifests[-1].add_full_c2pa_structure_exclusion(
             offset,
             length,
+            asset_bytes,
         )
 
         self.sync_payload()

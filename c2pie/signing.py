@@ -254,9 +254,8 @@ def sign_file(
             segment_ranges,
         )
 
-    hash_data_assertion = c2pie_GenerateHashDataAssertion(
-        hashed_data=hashlib.sha256(raw_bytes).digest(),
-    )
+    # The hash is computed when the manifest is placed into the file.
+    hash_data_assertion = c2pie_GenerateHashDataAssertion()
 
     assertions.append(hash_data_assertion)
 
