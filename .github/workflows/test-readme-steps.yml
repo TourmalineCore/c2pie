@@ -52,7 +52,7 @@ jobs:
           VERSION="${CURRENT_VERSION}.dev${DEV_NUM}"
           
           INSTALLED=0
-          for i in $(seq 1 20); do
+          for i in $(seq 1 10); do
             # The build is published in parallel with this workflow, so wait until it appears on PyPI
             if pip install "c2pie==${VERSION}"; then INSTALLED=1; break; fi
             sleep 30
