@@ -1,6 +1,10 @@
 name: Create and publish release 
 
 on:
+  # If this event is removed, the workflow will not be triggered 
+  # when a PR is opened (reopened), and the merge will be blocked.
+  pull_request:
+    types: [opened, reopened]
   push:
     branches:
       # Main branches group
