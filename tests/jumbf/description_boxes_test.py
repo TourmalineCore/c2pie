@@ -1,3 +1,4 @@
+from c2pie.jumbf_boxes.box import Box
 from c2pie.jumbf_boxes.description_box import DescriptionBox
 from c2pie.utils.content_types import jumbf_content_types
 
@@ -45,3 +46,55 @@ def test_description_box_serialize():
     )
 
     assert test_description_box.serialize() == test_serialized_data
+
+
+def test_description_box_from_box():
+    original = DescriptionBox(
+        content_type=jumbf_content_types["json"],
+        label="test-label",
+    )
+    raw = original.serialize()
+
+    parsed_box, _ = Box.parse_from_bytes(raw)
+    restored = DescriptionBox.from_box(parsed_box)
+
+    assert restored.get_label() == "test-label"
+    assert restored.get_content_type() == jumbf_content_types["json"]
+    assert restored.get_length() == original.get_length()
+
+
+def test_description_box_from_box_empty_label():
+    original = DescriptionBox(
+        content_type=jumbf_content_types["json"],
+        label="",
+    )
+    raw = original.serialize()
+
+    parsed_box, _ = Box.parse_from_bytes(raw)
+    restored = DescriptionBox.from_box(parsed_box)
+
+    assert restored.get_label() == ""
+
+
+def test_description_box_from_box_short_payload():
+    bad_box = Box(
+        b"jumd".hex(),
+        payload=b"\x00" * 17,
+    )
+
+    try:
+        DescriptionBox.from_box(bad_box)
+        raise AssertionError("Should have raised")
+    except ValueError as e:
+        assert "too short" in str(e) or "null-terminated" in str(e)
+
+
+def test_description_box_from_box_no_terminator():
+    payload = jumbf_content_types["json"] + b"\x03" + b"no-null-byte"
+    bad_box = Box(b"jumd".hex(), payload=payload)
+
+    try:
+        DescriptionBox.from_box(bad_box)
+        raise AssertionError("Should have raised")
+    except ValueError as e:
+        assert "null-terminated" in str(e)

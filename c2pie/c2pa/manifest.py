@@ -7,19 +7,23 @@ from c2pie.utils.content_types import c2pa_content_types
 class Manifest(SuperBox):
     """
     C2PA Manifest: Assertion Store + Claim + Claim Signature.
-    The manifest label is compatible with c2patool: urn:uuid:<uuid-hex>
+    The manifest label is compatible with c2patool: urn:c2pa:<uuid-hex>
     """
 
     def __init__(
         self,
-        manifest_label: str = f"urn:uuid:{uuid.uuid4().hex}",
+        manifest_label: str | None = None,
     ):
-        self.manifest_label = manifest_label
+        self.manifest_label = manifest_label or f"urn:c2pa:{uuid.uuid4().hex}"
         self.claim = None
         self.claim_signature = None
         self.assertion_store = None
 
-        super().__init__(content_type=c2pa_content_types["default_manifest"], label=self.manifest_label)
+        super().__init__(
+            content_type=c2pa_content_types["default_manifest"],
+            content_boxes=[],
+            label=self.manifest_label,
+        )
 
     def set_claim(self, claim):
         self.claim = claim
@@ -39,18 +43,30 @@ class Manifest(SuperBox):
     def get_assertions(self):
         if self.assertion_store:
             return self.assertion_store.get_assertions()
-        return
+        return []
 
-    def set_hash_data_length(self, length: int):
+    def add_full_c2pa_structure_exclusion(
+        self,
+        offset: int,
+        length: int,
+        asset_bytes: bytes | None = None,
+    ):
         """
         Updates the length of exceptions in HashData, reassembles Claim (assertion hashes)
         and ClaimSignature (COSE Sign1 detached over Claim CBOR).
         """
-        if self.assertion_store and self.claim and self.claim_signature:
-            self.assertion_store.set_hash_data_length(length)
+        if not (self.assertion_store and self.claim and self.claim_signature):
+            raise ValueError(
+                "Manifest is not fully initialized: assertion_store/claim/claim_signature "
+                "required before adding exclusions."
+            )
 
-            self.claim.set_assertion_store(self.assertion_store)
-
-            self.claim_signature.set_claim(self.claim)
+        self.assertion_store.add_full_c2pa_structure_exclusion(
+            offset,
+            length,
+            asset_bytes,
+        )
+        self.claim.set_assertion_store(self.assertion_store)
+        self.claim_signature.set_claim(self.claim)
 
         self.sync_payload()
