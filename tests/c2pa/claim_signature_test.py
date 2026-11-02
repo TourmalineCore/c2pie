@@ -1,5 +1,8 @@
-from c2pie.c2pa.assertion import Assertion
+import cbor2
+import pytest
+
 from c2pie.c2pa.assertion_store import AssertionStore
+from c2pie.c2pa.assertions.base_assertion import Assertion
 from c2pie.c2pa.claim import Claim
 from c2pie.c2pa.claim_signature import ClaimSignature
 from c2pie.utils.assertion_schemas import C2PA_AssertionTypes
@@ -8,13 +11,23 @@ from c2pie.utils.content_types import c2pa_content_types
 
 def test_create_claim_signature_with_empty_claim():
     assertion_store = AssertionStore(assertions=[])
-    test_claim_signature = ClaimSignature(
-        claim=Claim(assertion_store=assertion_store), private_key=b"", certificate_pem_bundle=b"", certificate=None
+    claim_signature = ClaimSignature(
+        claim=Claim(
+            assertion_store=assertion_store,
+            manifest_label="urn:c2pa:test-uuid",
+            dc_title="test.jpg",
+        ),
+        private_key=b"",
+        certificate_pem_bundle=b"",
+        certificate=None,
+        tsa_url=None,
+        require_tsa=False,
+        tsa_log_dir=None,
     )
 
-    assert test_claim_signature is not None
-    assert test_claim_signature.get_label() == "c2pa.signature"
-    assert test_claim_signature.get_content_type() == c2pa_content_types["claim_signature"]
+    assert claim_signature is not None
+    assert claim_signature.get_label() == "c2pa.signature"
+    assert claim_signature.get_content_type() == c2pa_content_types["claim_signature"]
 
 
 def test_create_claim_signature_with_non_empty_claim():
@@ -27,21 +40,199 @@ def test_create_claim_signature_with_non_empty_claim():
     with open(cert_filepath, "rb") as f:
         certificate = f.read()
 
-    creative_work_schema = {
-        "@context": "https://schema.org",
-        "@type": "CreativeWork",
-        "author": [{"@type": "Person", "name": "Tourmaline Core"}],
-        "copyrightYear": "2024",
-        "copyrightHolder": "c2pie",
-    }
-    test_assertion = Assertion(assertion_type=C2PA_AssertionTypes.creative_work, schema=creative_work_schema)
-    test_assertions = [test_assertion, test_assertion]
-    test_assertion_store = AssertionStore(assertions=test_assertions)
-    test_claim = Claim(
-        claim_generator="c2pie", manifest_label="valid_manifest_label", assertion_store=test_assertion_store
+    actions_assertion = Assertion(assertion_type=C2PA_AssertionTypes.actions, content_boxes=[])
+    assertions = [actions_assertion, actions_assertion]
+    assertion_store = AssertionStore(assertions=assertions)
+    claim = Claim(
+        manifest_label="urn:c2pa:test-uuid",
+        assertion_store=assertion_store,
+        dc_title="test.jpg",
     )
 
-    test_claim_signature = ClaimSignature(claim=test_claim, private_key=key, certificate=certificate)
+    claim_signature = ClaimSignature(
+        claim=claim,
+        private_key=key,
+        certificate=certificate,
+        tsa_url=None,
+        require_tsa=False,
+        tsa_log_dir=None,
+    )
 
-    assert test_claim_signature.claim is not None  # noqa: B015
-    assert test_claim_signature.content_boxes[0].get_type() == b"cbor".hex()  # noqa: B015
+    assert claim_signature.claim is not None  # noqa: B015
+    assert claim_signature.content_boxes[0].get_type() == b"cbor".hex()  # noqa: B015
+
+
+def test_serialize_cose_sign1_sets_initial_length_on_first_call():
+    claim_signature = ClaimSignature.__new__(ClaimSignature)
+    claim_signature.serialized_cose_sign1_length = 0
+
+    cose_sign1 = [
+        "protected_header",
+        {
+            "pad": b"\x00\x00\x00\x00",
+        },
+        "payload",
+        "signature",
+    ]
+
+    serialized_cose_sign1_cbor = claim_signature.serialize_cose_sign1_tagged_with_alignment(cose_sign1)
+
+    assert claim_signature.serialized_cose_sign1_length != 0
+    assert cbor2.loads(serialized_cose_sign1_cbor).value[1]["pad"] == cose_sign1[1]["pad"]
+
+
+def test_serialize_cose_sign1_aligns_larger_subsequent_output():
+    claim_signature = ClaimSignature.__new__(ClaimSignature)
+    claim_signature.serialized_cose_sign1_length = 0
+
+    first = claim_signature.serialize_cose_sign1_tagged_with_alignment(
+        [
+            "protected_header",
+            {
+                "pad": b"\x00\x00\x00\x00",
+            },
+            "payload",
+            "signature",
+        ]
+    )
+    second = claim_signature.serialize_cose_sign1_tagged_with_alignment(
+        [
+            "protected_header",
+            {
+                "pad": b"\x00\x00\x00\x00",
+            },
+            "payload",
+            "signature2",
+        ]
+    )
+
+    assert len(first) == len(second)
+
+
+def test_serialize_cose_sign1_aligns_shorter_subsequent_output():
+    claim_signature = ClaimSignature.__new__(ClaimSignature)
+    claim_signature.serialized_cose_sign1_length = 0
+
+    first = claim_signature.serialize_cose_sign1_tagged_with_alignment(
+        [
+            "protected_header",
+            {
+                "pad": b"\x00\x00\x00\x00",
+            },
+            "payload",
+            "signature",
+        ]
+    )
+    second = claim_signature.serialize_cose_sign1_tagged_with_alignment(
+        [
+            "protected_header",
+            {
+                "pad": b"\x00\x00\x00\x00",
+            },
+            "",
+            "signature",
+        ]
+    )
+
+    assert len(first) == len(second)
+
+
+def test_align_cose_sign1_with_large_difference_causes_error():
+    claim_signature = ClaimSignature.__new__(ClaimSignature)
+    claim_signature.serialized_cose_sign1_length = 1
+
+    cose_sign1 = [
+        "protected_header",
+        {
+            "pad": b"\x00\x00\x00\x00",
+        },
+        "payload",
+        "signature",
+    ]
+
+    with pytest.raises(ValueError, match="Difference in length exceeds the predefined pad"):
+        claim_signature.serialize_cose_sign1_tagged_with_alignment(cose_sign1)
+
+
+def test_cose_sign1_tagged_tag_value_is_18():
+    claim_signature = ClaimSignature.__new__(ClaimSignature)
+    claim_signature.serialized_cose_sign1_length = 0
+
+    cose_sign1 = [
+        "protected_header",
+        {
+            "pad": b"\x00\x00\x00\x00",
+        },
+        "payload",
+        "signature",
+    ]
+
+    serialized_cose_sign1_cbor = claim_signature.serialize_cose_sign1_tagged_with_alignment(cose_sign1)
+
+    assert cbor2.loads(serialized_cose_sign1_cbor).tag == 18
+
+
+def test_exceed_cbor_limit_add_1_bytes_to_length():
+    claim_signature = ClaimSignature.__new__(ClaimSignature)
+
+    # We must ensure that the difference is such
+    # that the pad size reaches exactly the CBOR header boundary (24 bytes),
+    # without triggering the +1 compensation byte, since previous_pad_length (8)
+    # never crossed the >=24 threshold before the update.
+
+    # Current length of cose_sign1 serialized in CBOR with pad=8 is 51 bytes.
+    cose_sign1 = [
+        "protected_header",
+        {
+            "pad": b"\x00" * 8,
+        },
+        "payload",
+        "signature",
+    ]
+
+    # previous_serialized_length is set higher than current serialized length
+    # by exactly the amount pad should grow to compensate (67 - 51 = 16 -> pad 8+16=24).
+    claim_signature.serialized_cose_sign1_length = 67
+
+    serialized_cose_sign1_cbor = claim_signature.serialize_cose_sign1_tagged_with_alignment(cose_sign1)
+
+    assert len(cbor2.loads(serialized_cose_sign1_cbor).value[1]["pad"]) == 24
+
+
+def test_cose_sign1_pad_exact_exhaustion_to_zero_is_valid():
+    claim_signature = ClaimSignature.__new__(ClaimSignature)
+    claim_signature.serialized_cose_sign1_length = 0
+
+    cose_sign1 = [
+        "protected_header",
+        {"pad": b"\x00" * 8},
+        "payload",
+        "signature",
+    ]
+    claim_signature.serialize_cose_sign1_tagged_with_alignment(cose_sign1)
+
+    # Grow payload by exactly 8 bytes (equal to reserved pad)
+    cose_sign1[2] = "payload" + "0" * 8
+    serialized = claim_signature.serialize_cose_sign1_tagged_with_alignment(cose_sign1)
+
+    assert len(cbor2.loads(serialized).value[1]["pad"]) == 0
+
+
+def test_cose_sign1_pad_boundary_crossing_from_24_triggers_compensation_byte():
+    claim_signature = ClaimSignature.__new__(ClaimSignature)
+    claim_signature.serialized_cose_sign1_length = 0
+
+    cose_sign1 = [
+        "protected_header",
+        {"pad": b"\x00" * 24},
+        "payload",
+        "signature",
+    ]
+    claim_signature.serialize_cose_sign1_tagged_with_alignment(cose_sign1)
+
+    cose_sign1[0] = "p"
+    cose_sign1[2] = "pl"
+    cose_sign1[3] = "sig"
+    serialized = claim_signature.serialize_cose_sign1_tagged_with_alignment(cose_sign1)
+
+    assert len(cbor2.loads(serialized).value[1]["pad"]) == 50

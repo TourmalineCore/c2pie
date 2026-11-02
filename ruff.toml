@@ -1,5 +1,7 @@
 line-length = 120
-target-version = "py38"  
+# don’t allow syntax/features newer than Python 3.10 for compatibility purposes
+target-version = "py310"
+exclude = [".env-example"]
 
 [lint]
 select = ["E", "F", "I", "B", "UP"]
