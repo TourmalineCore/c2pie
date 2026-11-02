@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.0-rc.3](https://github.com/TourmalineCore/c2pie/compare/1.0.0-rc.2...1.0.0-rc.3) (2026-11-02)
+
+### Documentation
+
+* **readme:** bring test coverage score up to date ([861dd21](https://github.com/TourmalineCore/c2pie/commit/861dd21648991863f89bfd80fdda31a26b902c95))
+* **readme:** bring test coverage score up to date ([c0b4778](https://github.com/TourmalineCore/c2pie/commit/c0b4778b56d054cb821e3be32377ac7c245a445f))
+
 ## [1.0.0-rc.2](https://github.com/TourmalineCore/c2pie/compare/1.0.0-rc.1...1.0.0-rc.2) (2026-10-30)
 
 ### Bug Fixes
